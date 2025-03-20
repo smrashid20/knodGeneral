@@ -33,52 +33,6 @@ def copy_folder(source_folder, destination_dir):
         print(f"Error while copying: {e}")
 
 
-def build_and_run_docker(working_repo_dir, project_name, project_id, task):
-    # Ensure the directory exists
-    if not os.path.exists(working_repo_dir):
-        raise FileNotFoundError(f"Directory '{working_repo_dir}' does not exist.")
-
-    dockerfile_path = os.path.join(working_repo_dir, "Dockerfile")
-
-    # Ensure the Dockerfile exists
-    if not os.path.exists(dockerfile_path):
-        raise FileNotFoundError(f"Dockerfile not found in '{working_repo_dir}'.")
-
-    # Read and modify the Dockerfile
-    dockerfile_content = ""
-    with open(dockerfile_path, "r") as file:
-        dockerfile_content = file.read()
-
-    # Replace placeholders with the task string
-    dockerfile_content = dockerfile_content.replace("autoCompile", task)
-    dockerfile_content = dockerfile_content.replace("autoTestRunAll", task)
-    dockerfile_content = dockerfile_content.replace("autoTestRunSingle", task)
-
-    # Write the modified Dockerfile back
-    with open(dockerfile_path, "w") as file:
-        file.write(dockerfile_content)
-
-    # Define the Docker image name
-    image_name = f"{project_name}_{project_id}".lower()
-
-    # Step 1: Build the Docker image
-    build_cmd = ["docker", "build", "-t", image_name, "."]
-    print(f"Building Docker image: {image_name}")
-    build_process = subprocess.run(build_cmd, cwd=working_repo_dir, capture_output=True, text=True)
-    if build_process.returncode != 0:
-        raise RuntimeError(f"Docker build failed: {build_process.stderr}")
-    print("Docker image built successfully.")
-    # Step 2: Run the Docker container
-    run_cmd = ["docker", "run", "--rm", image_name]
-    print("Running Docker container...")
-    run_process = subprocess.run(run_cmd, cwd=working_repo_dir, capture_output=True, text=True)
-
-    if run_process.returncode != 0:
-        raise RuntimeError(f"Docker container execution failed: {run_process.stderr}")
-    print("Docker container executed successfully.")
-    return run_process.stdout
-
-
 def clean_tmp_folder(tmp_dir):
     if os.path.isdir(tmp_dir):
         for files in os.listdir(tmp_dir):
@@ -100,11 +54,14 @@ def checkout_general_project(project, bug_id, tmp_dir):
 
 
 def compile_fix(project_dir):
+    if not os.path.exists(os.path.join(project_dir, "autoCompile.sh")):
+        print(f"Error: 'autoCompile.sh' not found in {project_dir}.")
+        return False
+
     if_success = False
-    project_name, project_id = extract_project_info(project_dir)
     working_dir = os.getcwd()
     os.chdir(project_dir)
-    build_log = build_and_run_docker(project_dir, project_name, project_id, "autoCompile")
+    build_log = subprocess.run(["bash" , "autoCompile.sh"], text=True, capture_output=True, check=True).stdout
     if " error:" not in build_log:
         if_success = True
     os.chdir(working_dir)
@@ -130,11 +87,13 @@ def general_test_suite(project_dir, timeout=300):
     num_passed = 0
     num_failed = 0
 
+    if not os.path.exists(os.path.join(project_dir, "autoTestRunAll.sh")):
+        print(f"Error: 'autoTestRunAll.sh' not found in {project_dir}.")
+        return False
+
     working_dir = os.getcwd()
     os.chdir(project_dir)
-    project_name, project_id = extract_project_info(project_dir)
-
-    build_log = build_and_run_docker(project_dir, project_name, project_id, "autoTestRunAll")
+    build_log = subprocess.run(["bash", "autoTestRunAll.sh"], text=True, capture_output=True, check=True).stdout
 
     num_fail_lines = 0
     num_pass_lines = 0
