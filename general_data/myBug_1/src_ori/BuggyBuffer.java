@@ -1,0 +1,25 @@
+import java.util.Scanner;
+
+public class BuggyBuffer {
+    private char[] buffer = new char[5]; // Small fixed-size buffer
+
+    public void writeToBuffer(String input) {
+        for (int i = 0; i < input.length(); i++) {
+            buffer[i] = input.charAt(i); // No bounds checking -> Buffer Overflow!
+        }
+    }
+
+    public char[] getBuffer() {
+        return buffer;
+    }
+
+    public static void main(String[] args) {
+        BuggyBuffer bb = new BuggyBuffer();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter input: ");
+        String userInput = scanner.nextLine();
+        bb.writeToBuffer(userInput);
+        System.out.println("Buffer stored: " + new String(bb.getBuffer()));
+        scanner.close();
+    }
+}
