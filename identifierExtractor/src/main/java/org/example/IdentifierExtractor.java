@@ -83,6 +83,9 @@ public class IdentifierExtractor {
         // 🔹 Handle duplicates before writing to JSON
         extractedData.put(String.valueOf(nextFileId), mergeDuplicateEntries(extractedData.get(String.valueOf(nextFileId))));
 
+        //Length of extractedData
+        System.out.println("Extracted data length: " + extractedData.get(String.valueOf(nextFileId)).size());
+
         // Save the extracted data to identifiers.json
         try (FileWriter writer = new FileWriter(jsonFile)) {
             gson.toJson(extractedData, writer);
@@ -241,7 +244,7 @@ public class IdentifierExtractor {
             } else {
                 // Otherwise, add a new entry
                 Map<String, Object> details = new LinkedHashMap<>();
-                details.put("scope", qualifier);
+                details.put("qualifier", qualifier);
                 details.put("modifier", modifier + " ");
                 details.put("cnt", count);
                 details.put("dtype", method.getType().toString());
@@ -306,7 +309,7 @@ public class IdentifierExtractor {
                 int count = methodUsageCount.getOrDefault(methodName, 1); // Get usage count
 
                 Map<String, Object> methodDetails = new LinkedHashMap<>();
-                methodDetails.put("scope", currentClass);
+                methodDetails.put("qualifier", currentClass);
                 methodDetails.put("modifier", modifier + " ");
                 methodDetails.put("cnt", count); // Now correctly represents usage count
                 methodDetails.put("dtype", method.getType().toString());
@@ -380,7 +383,7 @@ public class IdentifierExtractor {
                 existingDetails.put("cnt", (int) existingDetails.get("cnt") + count);
             } else {
                 Map<String, Object> details = new LinkedHashMap<>();
-                details.put("scope", scope);
+                details.put("qualifier", scope);
                 details.put("cnt", count);
                 details.put("dtype", dtype);
                 details.put("itype", "VAR");
@@ -522,7 +525,7 @@ public class IdentifierExtractor {
                         .collect(Collectors.joining(" "));
 
                 Map<String, Object> fieldDetails = new LinkedHashMap<>();
-                fieldDetails.put("scope", currentClass);
+                fieldDetails.put("qualifier", currentClass);
                 fieldDetails.put("modifier", modifier + " ");
                 fieldDetails.put("cnt", 1);
                 fieldDetails.put("dtype", dtype);

@@ -49,8 +49,6 @@
       <groupId>edu.wm.cs</groupId>
       <artifactId>src2abs</artifactId>
       <version>0.1</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/lib/src2abs-0.1-jar-with-dependencies.jar</systemPath>
     </dependency>
   </dependencies>
 

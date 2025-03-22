@@ -54,17 +54,36 @@ def checkout_general_project(project, bug_id, tmp_dir):
 
 
 def compile_fix(project_dir):
-    if not os.path.exists(os.path.join(project_dir, "autoCompile.sh")):
+    script_path = os.path.join(project_dir, "autoCompile.sh")
+    if not os.path.exists(script_path):
         print(f"Error: 'autoCompile.sh' not found in {project_dir}.")
         return False
 
-    if_success = False
+    if_success = True
     working_dir = os.getcwd()
     os.chdir(project_dir)
-    build_log = subprocess.run(["bash" , "autoCompile.sh"], text=True, capture_output=True, check=True).stdout
-    if " error:" not in build_log:
-        if_success = True
-    os.chdir(working_dir)
+
+    try:
+        process = subprocess.Popen(["bash", "autoCompile.sh"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        output_lines = []
+        for line in process.stdout:
+            print(line, end="")  # Real-time output
+            output_lines.append(line)
+
+        process.wait()
+        full_output = ''.join(output_lines)
+
+        if process.returncode != 0 or " error:" in full_output:
+            if_success = False
+
+    except Exception as e:
+        print(f"Exception occurred during compilation: {e}")
+        if_success = False
+
+    finally:
+        os.chdir(working_dir)
+
     return if_success
 
 
@@ -83,44 +102,66 @@ def command_with_timeout(cmd, timeout=300):
     return out, err
 
 
-def general_test_suite(project_dir, timeout=300):
+def general_test_suite(project_dir, timeout=30):
     num_passed = 0
     num_failed = 0
 
     if not os.path.exists(os.path.join(project_dir, "autoTestRunAll.sh")):
         print(f"Error: 'autoTestRunAll.sh' not found in {project_dir}.")
-        return False
+        return 'wrong', 1
 
     working_dir = os.getcwd()
     os.chdir(project_dir)
-    build_log = subprocess.run(["bash", "autoTestRunAll.sh"], text=True, capture_output=True, check=True).stdout
 
-    num_fail_lines = 0
-    num_pass_lines = 0
+    try:
+        result = subprocess.run(
+            ["bash", "autoTestRunAll.sh"],
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+            check=True
+        )
+        build_log = result.stdout
 
-    for line in (build_log.split('\n')):
+        num_fail_lines = 0
+        num_pass_lines = 0
 
-        if " FAIL " in line or ":FAIL " in line:
-            num_fail_lines += 1
-        if " PASS " in line or ":PASS " in line:
-            num_pass_lines += 1
+        for line in build_log.splitlines():
+            if " FAIL " in line or ":FAIL " in line:
+                num_fail_lines += 1
+            if " PASS " in line or ":PASS " in line:
+                num_pass_lines += 1
 
-        if "Failing tests:" in line:
-            num_failed = int(line.split(":")[-1].strip())
-        if "Passing tests:" in line:
-            num_passed = int(line.split(":")[-1].strip())
+            if "Failing tests:" in line:
+                try:
+                    num_failed = int(line.split(":")[-1].strip())
+                except:
+                    num_failed = 1
+            if "Passing tests:" in line:
+                try:
+                    num_passed = int(line.split(":")[-1].strip())
+                except:
+                    num_passed = 0
 
-    if num_failed == 0 and num_passed == 0:
-        num_failed = num_fail_lines
+        if num_failed == 0 and num_passed == 0:
+            num_failed = num_fail_lines
 
-    if_passed = False
-    if num_failed == 0:
-        if_passed = True
-    os.chdir(working_dir)
+        if_passed = (num_failed == 0)
 
-    if if_passed:
-        return 'plausible', num_failed
-    else:
-        return 'wrong', num_failed
+    except subprocess.TimeoutExpired:
+        print(f"Test execution timed out after {timeout} seconds.")
+        if_passed = False
+        num_failed = 1
+
+    except subprocess.CalledProcessError as e:
+        print(f"Test execution failed with return code {e.returncode}.")
+        print(e.output)
+        if_passed = False
+        num_failed = 1
+
+    finally:
+        os.chdir(working_dir)
+
+    return 'plausible' if if_passed else 'wrong', num_failed
 
 

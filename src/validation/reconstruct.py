@@ -11,8 +11,8 @@ VALIDATION_DIR = VALIDATION_DIR[: VALIDATION_DIR.rfind('/') + 1]
 sys.path.append(VALIDATION_DIR + '../parser/')
 sys.path.append(VALIDATION_DIR + '../../')
 
-IDENTIFIER_DIR = '/home/KNOD/identifierExtractor'
-DATA_DIR = "/home/KNOD/data/general_input"
+IDENTIFIER_DIR = '/home/KNOD/identifierExtractor/'
+DATA_DIR = "/home/KNOD/data/general_input/"
 
 from ast_to_code import nonterminal_nodes
 from javalang.ast import Node
@@ -25,18 +25,23 @@ def command(cmd):
     return output, err
 
 
-def extract_identifiers(proj, path, start, end, jdk_path, tmp_dir="/tmp", bug_id="1"):
+def extract_identifiers(proj, path, start, end, jdk_path, tmp_dir="/tmp/", bug_id="1"):
     # Save the original directory
     original_dir = os.getcwd()
 
     # Construct the project directory
     proj_dir = os.path.join(tmp_dir, f"{proj}_{bug_id}")
+    print("34 Project directory:", proj_dir)
 
     try:
         # Change to the IDENTIFIER_DIR directory
         os.chdir(IDENTIFIER_DIR)
 
         # Run the Maven command
+        mvn_compile_command = ["mvn", "clean", "compile"]
+        print("Running Maven compile command:", " ".join(mvn_compile_command))
+        subprocess.run(mvn_compile_command, check=True)
+
         maven_command = [
             "mvn", "exec:java",
             "-Dexec.mainClass=org.example.IdentifierExtractor",

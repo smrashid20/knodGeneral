@@ -200,6 +200,11 @@ public class BuggyASTExtractor {
 				String remFilePath = args[2];
 				int remStart = Integer.parseInt(args[3]);
 				int remEnd = Integer.parseInt(args[4]);
+
+				System.out.println("outputDir: " + outputDir);
+				System.out.println("remFilePath: " + remFilePath);
+				System.out.println("remStart: " + remStart);
+				System.out.println("remEnd: " + remEnd);
 				
 				BuggyASTExtractor analyzer = new BuggyASTExtractor(outputDir);
 				analyzer.prepareRem(remFilePath, remStart, remEnd);

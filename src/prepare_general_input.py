@@ -22,15 +22,39 @@ from javalang.ast import Node
 from javalang.tree import BlockStatement, SwitchStatementCase
 
 
+import subprocess
+
+import subprocess
+
 def command(cmd):
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, err = process.communicate()
-    if err != b'':
-        print(err)
-    print(' '.join(cmd))
-    if output != b'':
-        print(output)
-    return output, err
+    print("Executing command:", ' '.join(cmd))
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+
+    output_log = ""
+    error_log = ""
+
+    while True:
+        stdout_line = process.stdout.readline()
+        stderr_line = process.stderr.readline()
+
+        if stdout_line:
+            print(stdout_line, end='')
+            output_log += stdout_line
+
+        if stderr_line:
+            print(f"[stderr] {stderr_line}", end='')
+            error_log += stderr_line
+
+        if stdout_line == '' and stderr_line == '' and process.poll() is not None:
+            break
+
+    return output_log, error_log
+
 
 
 def prepare_localize_data(data_dir):
@@ -65,10 +89,13 @@ def prepare_localize_data(data_dir):
             if os.path.exists(tmp_dir + proj + "_" + bug_id):
                 command(['rm', '-rf', tmp_dir + proj + "_" + bug_id])
             general_command.checkout_general_project(proj, bug_id, tmp_dir)
+            print("TMP DIR: ", tmp_dir)
+            print("PATH: ", os.path.join(tmp_dir, proj + "_" + bug_id, path))
             assert os.path.exists(os.path.join(tmp_dir, proj + "_" + bug_id, path))
             bugs = [{'rem_loc': (int(rem_start), int(rem_end)), 'add_loc': (int(add_start), int(add_end))}]
             print(bugs)
         except Exception as e:
+            print("Failed at line 72")
             discard_cnt += 1
             print(e)
             continue
@@ -84,10 +111,23 @@ def prepare_localize_data(data_dir):
             # bug['rem_loc'] = (bug['rem_loc'][0] + 1, bug['rem_loc'][0] + 1)
             print(len(codecs.open(os.path.join(tmp_dir, proj + "_" + bug_id, path), 'r', 'utf-8').readlines()))
             if codecs.open(os.path.join(tmp_dir, proj + "_" + bug_id, path), 'r', 'utf-8').readlines()[bug['rem_loc'][0] - 1].strip():
-                out, err = command(['java', '-cp', JAVA_DIR + ':' + JAVA_DIR + '/target:' + JAVA_DIR + '/lib/*',
-                                    'jiang719.BuggyASTExtractor', 'general', tmp_dir,
-                                    os.path.join(tmp_dir, proj + "_" + bug_id, path),
-                                    str(bug['rem_loc'][0]), str(bug['rem_loc'][1] + 1)])
+                curr_path = os.getcwd()
+                os.chdir(JAVA_DIR)
+
+                command(['mvn', 'clean', 'compile'])
+                print("executing 109")
+                args = f"defects4j {tmp_dir} {os.path.join(tmp_dir, f'{proj}_{bug_id}', path)} {bug['rem_loc'][0]} {bug['rem_loc'][1] + 1}"
+
+                cmd = [
+                    'mvn',
+                    'exec:java',
+                    '-Dexec.mainClass=jiang719.BuggyASTExtractor',
+                    f'-Dexec.args={args}'
+                ]
+
+                out, err = command(cmd)
+
+                os.chdir(curr_path)
                 try:
                     result = json.load(open(tmp_dir + 'tmp.json', 'r'))
                     rem_range = result['rem_range']
@@ -102,19 +142,36 @@ def prepare_localize_data(data_dir):
                                  tmp_dir + 'tmp_rem_.java', tmp_dir + 'tmp_add_.java'])
                         other = 'success'
                 except Exception as e:
+                    print("Failed at line 129")
+                    print(out, err)
                     pass
 
             insert_pad_statement(
                 os.path.join(tmp_dir, proj + "_" + bug_id, path), bug['rem_loc'][0] - 1
             )
-            out, err = command(['java', '-cp', JAVA_DIR + ':' + JAVA_DIR + '/target:' + JAVA_DIR + '/lib/*',
-                                'jiang719.BuggyASTExtractor', 'training', tmp_dir,
-                                os.path.join(tmp_dir, proj + "_" + bug_id, path),  # tmp_dir + proj + '_f/' + path,
-                                str(bug['rem_loc'][0]), str(bug['rem_loc'][1] + 1)])
+            curr_path = os.getcwd()
+            os.chdir(JAVA_DIR)
+
+            command(['mvn', 'clean', 'compile'])
+            print("executing 139")
+            args = f"training {tmp_dir} {os.path.join(tmp_dir, f'{proj}_{bug_id}', path)} {bug['rem_loc'][0]} {bug['rem_loc'][1] + 1}"
+
+            cmd = [
+                'mvn',
+                'exec:java',
+                '-Dexec.mainClass=jiang719.BuggyASTExtractor',
+                f'-Dexec.args={args}'
+            ]
+
+            out, err = command(cmd)
+
+            os.chdir(curr_path)
             try:
                 result = json.load(open(tmp_dir + 'tmp.json', 'r'))
             except Exception as e:
+                print("Failed at line 148")
                 discard_cnt += 1
+                print(out, err)
                 print('no tmp.json')
                 continue
             rem_range = result['rem_range']
@@ -146,14 +203,28 @@ def prepare_localize_data(data_dir):
 
         else:
             tag = 'general'
-            out, err = command(['java', '-cp', JAVA_DIR + ':' + JAVA_DIR + '/target:' + JAVA_DIR + '/lib/*',
-                                'jiang719.BuggyASTExtractor', 'general', tmp_dir,
-                                os.path.join(tmp_dir, proj + "_" + bug_id, path),  # tmp_dir + proj + '_f/' + path,
-                                str(bug['rem_loc'][0]), str(bug['rem_loc'][1])])
+            curr_path = os.getcwd()
+            os.chdir(JAVA_DIR)
+
+            command(['mvn', 'clean', 'compile'])
+            print("executing 185")
+            args = f"defects4j {tmp_dir} {os.path.join(tmp_dir, proj + '_' + str(bug_id), path)} {bug['rem_loc'][0]} {bug['rem_loc'][1]}"
+            cmd = [
+                "mvn",
+                "exec:java",
+                "-Dexec.mainClass=jiang719.BuggyASTExtractor",
+                f"-Dexec.args={args}"
+            ]
+            out, err = command(cmd)
+
+            os.chdir(curr_path)
             try:
                 result = json.load(open(tmp_dir + 'tmp.json', 'r'))
             except Exception as e:
+                print("Failed at line 192")
+                print(out, err)
                 discard_cnt += 1
+                print(e)
                 continue
             rem_range = result['rem_range']
             rem_index = result['rem_index']
@@ -183,12 +254,25 @@ def prepare_localize_data(data_dir):
 
             if bugs[0]['rem_loc'][1] - bugs[0]['rem_loc'][0] == 1:
                 insert_pad_statement(
-                    tmp_dir + proj + '_b/' + path, bug['rem_loc'][0] - 1
+                    os.path.join(tmp_dir, proj + "_" + bug_id, path), bug['rem_loc'][0] - 1
                 )
-                out, err = command(['java', '-cp', JAVA_DIR + ':' + JAVA_DIR + '/target:' + JAVA_DIR + '/lib/*',
-                                    'jiang719.BuggyASTExtractor', 'general', tmp_dir,
-                                    os.path.join(tmp_dir, proj + "_" + bug_id, path),
-                                    str(bug['rem_loc'][0]), str(bug['rem_loc'][1])])
+                curr_path = os.getcwd()
+                os.chdir(JAVA_DIR)
+
+                command(['mvn', 'clean', 'compile'])
+                print("executing 231")
+                args = f"defects4j {tmp_dir} {os.path.join(tmp_dir, f'{proj}_{bug_id}', path)} {bug['rem_loc'][0]} {bug['rem_loc'][1]}"
+
+                cmd = [
+                    'mvn',
+                    'exec:java',
+                    '-Dexec.mainClass=jiang719.BuggyASTExtractor',
+                    f'-Dexec.args={args}'
+                ]
+
+                out, err = command(cmd)
+
+                os.chdir(curr_path)
                 try:
                     result = json.load(open(tmp_dir + 'tmp.json', 'r'))
                     rem_range = result['rem_range']
@@ -203,6 +287,8 @@ def prepare_localize_data(data_dir):
                                  tmp_dir + 'tmp_rem_.java', tmp_dir + 'tmp_add_.java'])
                         other = 'success'
                 except Exception as e:
+                    print("Failed at line 250")
+                    print(out, err)
                     pass
 
         rem_general_wp.write(general_rem + '\n')
@@ -217,12 +303,32 @@ def prepare_localize_data(data_dir):
 
 
 def prepare_mapping_data(data_dir):
-    out, err = command(['java', '-cp', JAVA_DIR + ':' + JAVA_DIR + '/target:' + JAVA_DIR + '/lib/*',
-                        'jiang719.Abstractor', data_dir + 'ctx_general_localize.txt',
-                        data_dir + 'mapping_general_localize.txt'])
-    out, err = command(['java', '-cp', JAVA_DIR + ':' + JAVA_DIR + '/target:' + JAVA_DIR + '/lib/*',
-                        'jiang719.Abstractor', data_dir + 'ctx_insert_localize.txt',
-                        data_dir + 'mapping_insert_localize.txt'])
+    curr_path = os.getcwd()
+    os.chdir(JAVA_DIR)
+    command(['mvn', 'clean', 'compile'])
+    ctx_file = os.path.join(data_dir, "ctx_general_localize.txt")
+    mapping_file = os.path.join(data_dir, "mapping_general_localize.txt")
+    args = f"{ctx_file} {mapping_file}"
+
+    command([
+        'mvn',
+        'exec:java',
+        '-Dexec.mainClass=jiang719.Abstractor',
+        f'-Dexec.args={args}'
+    ])
+
+    ctx_file = os.path.join(data_dir, "ctx_insert_localize.txt")
+    mapping_file = os.path.join(data_dir, "mapping_insert_localize.txt")
+    args = f"{ctx_file} {mapping_file}"
+
+    command([
+        'mvn',
+        'exec:java',
+        '-Dexec.mainClass=jiang719.Abstractor',
+        f'-Dexec.args={args}'
+    ])
+
+    os.chdir(curr_path)
 
 
 def get_ast_size(node):
@@ -297,6 +403,7 @@ def prepare_ast_data(data_dir, target_tag='general'):
                 parser = javalang.parser.Parser(tokens)
                 rem_ast = parser.parse_member_declaration()
             except Exception as e:
+                print("Failed at line 326")
                 print(cnt, "parse failed")
                 continue
             traverse, rem_edges = dfs(rem_ast)
@@ -382,6 +489,7 @@ def prepare_ast_data(data_dir, target_tag='general'):
                 parser = javalang.parser.Parser(tokens)
                 rem_ast = parser.parse_member_declaration()
             except Exception as e:
+                print("Failed at line 411")
                 print(cnt, "parse failed")
                 continue
             traverse, rem_edges = dfs(rem_ast)
@@ -467,10 +575,10 @@ def prepare_identifier_data(meta_file, output_file, tmp_dir):
             print(proj, bug_id)
             general_command.clean_tmp_folder(tmp_dir)
             general_command.checkout_general_project(proj, bug_id, tmp_dir)
-        extract_identifiers(tmp_dir, file_path, rem_start, rem_end,
+        extract_identifiers(proj, file_path, rem_start, rem_end,
                             SRC_DIR + '../data/jdk.json')
-        if os.path.exists(tmp_dir + 'identifiers.json'):
-            identifiers = json.load(open(tmp_dir + 'identifiers.json', 'r'))
+        if os.path.exists(output_file):
+            identifiers = json.load(open(output_file, 'r'))
         else:
             identifiers = {}
         identifiers = combine_super_methods(identifiers)

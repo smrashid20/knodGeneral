@@ -1,6 +1,7 @@
 import codecs
 import json
 import os
+import pprint
 import shutil
 import sys
 import time
@@ -61,7 +62,7 @@ def read_meta(meta_path):
 
 def insert_fix_general(file_path, start_row, start_col, end_row, end_col, patch, project_dir, fix_type='general',
                          key=None):
-    file_path = project_dir + file_path
+    file_path = os.path.join(project_dir, file_path)
     shutil.copyfile(file_path, file_path + '.bak')
 
     with open(file_path, 'r') as file:
@@ -121,7 +122,7 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
         cnt += 1
         proj, bug_id, file_path, rem_start, rem_end, fix_type = meta[int(line_num) - 1]
 
-        if proj + '_' + bug_id + '_' + file_path in validated_result:
+        if proj + '_' + bug_id + '_/' + file_path in validated_result:
             continue
 
         start_row_g, start_col_g, end_row_g, end_col_g, rem_line_g = rem_general[int(line_num) - 1]
@@ -172,7 +173,7 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
             identifiers = identifiers_dict[str(line_num)]
         print('identifiers num:', len(identifiers))
 
-        key = proj + '_' + bug_id + '_' + file_path
+        key = proj + '_' + bug_id + '_/' + file_path
         validated_result[key] = {'id': int(line_num), 'patches': []}
 
         current_is_plausible = False
@@ -189,6 +190,7 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
                 break
 
             patched_file = os.path.join(tmp_dir, proj + '_' + bug_id, file_path)
+            print("[DEBUG]: Line 192 patched_file:", patched_file)
 
             try:
                 patch_fix_type = patch_ast['fix_type']
@@ -249,6 +251,8 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
                     patch = patch.strip()
                     patched_file = insert_fix_general(file_path, start_row, start_col, end_row, end_col,
                                                        patch, project_dir, fix_type=patch_fix_type, key= proj + '_' + bug_id)
+                    print("[DEBUG]: Line 254 patched_file:", patched_file)
+                    print("[DEBUG]: Line 255 patch:", patch)
                     compile = general_command.compile_fix(project_dir)
                     correctness = 'uncompilable'
                     if compile:
@@ -263,21 +267,20 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
                     else:
                         print(right, cnt, rank, 'Uncompilable patch:', patch, str(int(time.time() - s_time)) + 's')
 
-                    if correctness == 'plausible':
-                        validated_result[proj]['patches'].append({
-                            'patch': patch, 'score': score, 'correctness': correctness, 'fix_type': patch_fix_type
-                        })
-                    else:
-                        validated_result[proj]['patches'].append({
-                            'patch': patch, 'score': score, 'correctness': correctness, 'fix_type': patch_fix_type
-                        })
+                    print("[DEBUG]: Line 270 Adding:", patch, score, correctness, patch_fix_type)
+                    validated_result[key]['patches'].append({
+                        'patch': patch, 'score': score, 'correctness': correctness, 'fix_type': patch_fix_type
+                    })
+                    print("DONE!!!!! LINE 274")
+                    pprint.pprint(validated_result)
 
                     if os.path.exists(patched_file):
                         shutil.copyfile(patched_file, patched_file.replace('.bak', ''))
             except Exception as e:
+                print("###############ERR###############")
                 print(e)
-                if os.path.exists(patched_file.replace('.bak', '')):
-                    shutil.copyfile(patched_file.replace('.bak', ''), patched_file)
+                if os.path.exists(patched_file + '.bak'):
+                    shutil.copyfile(patched_file + '.bak', patched_file)
 
                 if int(line_num) in general_general:
                     data = general_general[int(line_num)]
@@ -300,6 +303,8 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
                     src2abs_i, abs2src_i = None, None
                     ctx_ast_nodes_i, node_num_before_i, sibling_num_before_i = None, None, None
                 # write after finish validating every bug, to avoid wasting time
+
+
             json.dump(validated_result, open(output_path, 'w'), indent=2)
             # write the last time after validating all
             json.dump(validated_result, open(output_path, 'w'), indent=2)

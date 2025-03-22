@@ -1,6 +1,8 @@
 import codecs
 import json
 
+# from javalang.tree import Primary
+
 
 class IdentifierDataset:
     def __init__(self, identifier_file, idioms_file, ast_file, ochiai=False):
@@ -38,8 +40,14 @@ class IdentifierDataset:
         return name
 
     def prepare(self, id, class_name):
+        print(f"[DEBUG] Preparing ID: {id}, Class: {class_name}")
         identifier = self.identifiers[str(id)]
+        print("######### Identifiers: {} #########".format(self.identifiers))
+        print("\n\n\n")
+        print(f"[DEBUG] Identifier: {identifier}")
+        print("\n\n\n")
         if identifier == {}:
+            print("[DEBUG] Empty identifier.")
             return None
         data = self.ast[id]
 
@@ -47,16 +55,20 @@ class IdentifierDataset:
         type_var, type_method = {}, {}
         qualifier_var, qualifier_method = {}, {}
         super_arg = {}
+
         for token in list(self.idioms) + list(data['mappings'].keys()) + ['int', 'float']:
             is_class = True if token == class_name else False
 
             identifier.update({
-                'int': [{'itype': 'TYPE', 'fields': ['length'], 'methods': ['length'], 'supers': [], 'constructors': []}],
-                'float': [{'itype': 'TYPE', 'fields': ['length'], 'methods': ['length'], 'supers': [], 'constructors': []}],
+                'int': [
+                    {'itype': 'TYPE', 'fields': ['length'], 'methods': ['length'], 'supers': [], 'constructors': []}],
+                'float': [
+                    {'itype': 'TYPE', 'fields': ['length'], 'methods': ['length'], 'supers': [], 'constructors': []}],
                 'String': [{'itype': 'TYPE', 'fields': ['length'],
                             'methods': ['length', 'charAt', 'substring', 'valueOf', 'equals'],
                             'supers': [], 'constructors': []}],
             })
+
             if 'Deque' in identifier:
                 identifier['Deque'][0]['methods'].append('isEmpty')
             if 'ArrayList' in identifier:
@@ -64,11 +76,15 @@ class IdentifierDataset:
 
             if token not in identifier:
                 continue
+
             semantics = identifier[token]
-            # print(token, semantics)
+            print(f"[DEBUG] Token: {token}, Semantics: {semantics}")
+
             if token in data['mappings']:
                 token = data['mappings'][token]
+
             for semantic in semantics:
+                print(f"[DEBUG] Semantic: {semantic}")
                 if semantic['itype'] == 'TYPE':
                     if token not in qualifier_var:
                         qualifier_var[token] = set()
@@ -142,4 +158,6 @@ class IdentifierDataset:
         vars = list(var_type.keys())
         # vars = list(self.idioms) + [abstract for abstract in data['mappings'].values() if abstract[:4] == 'VAR_']
         methods = list(self.idioms) + [abstract for abstract in data['mappings'].values() if abstract[:7] == 'METHOD_']
+        print(f"[DEBUG] Vars: {vars}")
+        print(f"[DEBUG] Methods: {methods}")
         return vars, methods, var_type, type_var, type_method, qualifier_var, qualifier_method, super_arg

@@ -1,5 +1,6 @@
 import json
 import hashlib
+from pprint import pprint
 
 
 def hash_entry(entry):
@@ -35,20 +36,26 @@ def merge_duplicate_entries(data):
 
 def process_json_file(json_path):
     """
-    Loads the JSON file, processes it to remove duplicates, and saves the cleaned file.
+    Loads the JSON file, extracts key '1', removes duplicates, and saves only the cleaned key '1' block.
     """
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # Process each file's identifier data
-        cleaned_data = {file_id: merge_duplicate_entries(entries) for file_id, entries in data.items()}
+        if "1" not in data:
+            print("Key '1' not found in JSON.")
+            return
 
-        # Save the cleaned JSON file
+        print("[DEBUG] Original data under key '1':")
+        pprint(data["1"])
+
+        cleaned_inner = merge_duplicate_entries(data["1"])
+
+        # Save only the cleaned '1' key content
         with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(cleaned_data, f, indent=4, ensure_ascii=False)
+            json.dump(cleaned_inner, f, indent=4, ensure_ascii=False)
 
-        print(f"Successfully cleaned duplicates in '{json_path}'")
+        print(f"Successfully cleaned duplicates under key '1' in '{json_path}'")
 
     except Exception as e:
         print(f"Error processing JSON file: {e}")
