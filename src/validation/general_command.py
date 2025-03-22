@@ -64,11 +64,16 @@ def compile_fix(project_dir):
     os.chdir(project_dir)
 
     try:
-        process = subprocess.Popen(["bash", "autoCompile.sh"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        process = subprocess.Popen(
+            ["bash", "autoCompile.sh"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        )
 
         output_lines = []
         for line in process.stdout:
-            print(line, end="")  # Real-time output
+            # Suppressed: print(line, end="")
             output_lines.append(line)
 
         process.wait()

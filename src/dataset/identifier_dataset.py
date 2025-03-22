@@ -40,12 +40,7 @@ class IdentifierDataset:
         return name
 
     def prepare(self, id, class_name):
-        print(f"[DEBUG] Preparing ID: {id}, Class: {class_name}")
         identifier = self.identifiers[str(id)]
-        print("######### Identifiers: {} #########".format(self.identifiers))
-        print("\n\n\n")
-        print(f"[DEBUG] Identifier: {identifier}")
-        print("\n\n\n")
         if identifier == {}:
             print("[DEBUG] Empty identifier.")
             return None
@@ -78,13 +73,11 @@ class IdentifierDataset:
                 continue
 
             semantics = identifier[token]
-            print(f"[DEBUG] Token: {token}, Semantics: {semantics}")
 
             if token in data['mappings']:
                 token = data['mappings'][token]
 
             for semantic in semantics:
-                print(f"[DEBUG] Semantic: {semantic}")
                 if semantic['itype'] == 'TYPE':
                     if token not in qualifier_var:
                         qualifier_var[token] = set()
@@ -158,6 +151,4 @@ class IdentifierDataset:
         vars = list(var_type.keys())
         # vars = list(self.idioms) + [abstract for abstract in data['mappings'].values() if abstract[:4] == 'VAR_']
         methods = list(self.idioms) + [abstract for abstract in data['mappings'].values() if abstract[:7] == 'METHOD_']
-        print(f"[DEBUG] Vars: {vars}")
-        print(f"[DEBUG] Methods: {methods}")
         return vars, methods, var_type, type_var, type_method, qualifier_var, qualifier_method, super_arg

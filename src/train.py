@@ -209,8 +209,8 @@ def trainer_main(training_data_path, validating_data_path, save_dir, epochs=2):
 
 if __name__ == "__main__":
     if torch.cuda.is_available():
-        os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
-        devices_id = [0, 1, 2, 3]
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
+        devices_id = [1, 5, 6, 7]
 
     training_data_path = SRC_DIR + '../data/general_training_ast.json'
     validating_data_path = SRC_DIR + '../data/general_validation_ast.json'

@@ -46,16 +46,11 @@ def process_json_file(json_path):
             print("Key '1' not found in JSON.")
             return
 
-        print("[DEBUG] Original data under key '1':")
-        pprint(data["1"])
-
         cleaned_inner = merge_duplicate_entries(data["1"])
 
         # Save only the cleaned '1' key content
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(cleaned_inner, f, indent=4, ensure_ascii=False)
-
-        print(f"Successfully cleaned duplicates under key '1' in '{json_path}'")
 
     except Exception as e:
         print(f"Error processing JSON file: {e}")

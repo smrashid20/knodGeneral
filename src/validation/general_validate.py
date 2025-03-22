@@ -267,12 +267,9 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
                     else:
                         print(right, cnt, rank, 'Uncompilable patch:', patch, str(int(time.time() - s_time)) + 's')
 
-                    print("[DEBUG]: Line 270 Adding:", patch, score, correctness, patch_fix_type)
                     validated_result[key]['patches'].append({
                         'patch': patch, 'score': score, 'correctness': correctness, 'fix_type': patch_fix_type
                     })
-                    print("DONE!!!!! LINE 274")
-                    pprint.pprint(validated_result)
 
                     if os.path.exists(patched_file):
                         shutil.copyfile(patched_file, patched_file.replace('.bak', ''))
