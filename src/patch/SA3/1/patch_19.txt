@@ -1,0 +1,267 @@
+public class CipherInitializer {
+
+    public static int evpCipherInitInternal(EvpCipherCtx ctx, EvpCipher cipher,
+                                            Engine impl, byte[] key, byte[] iv,
+                                            int enc, OsslParam[] params) {
+        int n = 0;
+        Engine tmpImpl = null;
+
+        if (!OPENSSL_NO_ENGINE && !FIPS_MODULE) {
+            tmpImpl = null;
+        }
+
+        ctx.setIvLen(-1);
+
+        if (enc == -1) {
+            enc = ctx.getEncrypt();
+        } else {
+            enc = (enc == 1) ? 1 : 0;
+            ctx.setEncrypt(enc);
+        }
+
+        if (cipher == null && ctx.getCipher() == null) {
+            Err.raise("EVP", "No cipher set");
+            return 0;
+        }
+
+        if (!OPENSSL_NO_ENGINE && !FIPS_MODULE) {
+            if (ctx.getEngine() != null && ctx.getCipher() != null &&
+                    (cipher == null || cipher.getNid() == ctx.getCipher().getNid())) {
+                return skipToInit(ctx);
+            }
+
+            if (cipher != null && impl == null) {
+                tmpImpl = Engine.getCipherEngine(cipher.getNid());
+            }
+        }
+
+
+//start of generated patch
+ctx.setEngine(cipher);
+//end of generated patch
+        if (ctx.getEngine() != null || (!OPENSSL_NO_ENGINE && !FIPS_MODULE && tmpImpl != null)
+                || impl != null) {
+
+            if (ctx.getCipher() == ctx.getFetchedCipher()) {
+                ctx.setCipher(null);
+            }
+            EvpCipher.free(ctx.getFetchedCipher());
+            ctx.setFetchedCipher(null);
+            return legacyHandling(ctx, cipher, impl, tmpImpl, enc);
+        }
+
+
+
+        if (cipher != null && ctx.getCipher() != null) {
+            clearFree(ctx.getCipherData(), ctx.getCipher().getCtxSize());
+            ctx.setCipherData(null);
+        }
+
+        if (cipher != null && ctx.getCipher() != null) {
+            long flags = ctx.getFlags();
+            EvpCipherCtx.reset(ctx);
+            ctx.setEncrypt(enc);
+            ctx.setFlags(flags);
+        }
+
+        if (cipher == null) {
+            cipher = ctx.getCipher();
+        }
+
+
+
+        if (cipher.getProv() == null) {
+            if (FIPS_MODULE) {
+                Err.raise("EVP", "Initialization error");
+                return 0;
+            } else {
+                EvpCipher provCipher = EvpCipher.fetch(null,
+                        (cipher.getNid() == EvpCipher.NID_UNDEF) ? "NULL" : Obj.nidToSn(cipher.getNid()), "");
+
+                if (provCipher == null) {
+                    return 0;
+                }
+                cipher = provCipher;
+                EvpCipher.free(ctx.getFetchedCipher());
+                ctx.setFetchedCipher(provCipher);
+            }
+        }
+
+        if (cipher.getProv() != null) {
+            if (!EvpCipher.upRef(cipher)) {
+                Err.raise("EVP", "Initialization error");
+                return 0;
+            }
+            EvpCipher.free(ctx.getFetchedCipher());
+            ctx.setFetchedCipher(cipher);
+        }
+
+        ctx.setCipher(cipher);
+
+        if (ctx.getAlgCtx() == null) {
+            ctx.setAlgCtx(ctx.getCipher().newCtx(OsslProviderCtx.getContext(cipher.getProv())));
+            if (ctx.getAlgCtx() == null) {
+                Err.raise("EVP", "Initialization error");
+                return 0;
+            }
+        }
+
+        if ((ctx.getFlags() & EvpCipher.CTX_NO_PADDING) != 0) {
+            if (!EvpCipherCtx.setPadding(ctx, 0)) {
+                return 0;
+            }
+        }
+
+        if (enc == 1) {
+            if (ctx.getCipher().getEncryptInit() == null) {
+                Err.raise("EVP", "Initialization error");
+                return 0;
+            }
+
+            return ctx.getCipher().getEncryptInit().init(ctx.getAlgCtx(), key,
+                    (key == null ? 0 : EvpCipherCtx.getKeyLength(ctx)), iv,
+                    (iv == null ? 0 : EvpCipherCtx.getIvLength(ctx)), params);
+        }
+
+        if (ctx.getCipher().getDecryptInit() == null) {
+            Err.raise("EVP", "Initialization error");
+            return 0;
+        }
+
+        return ctx.getCipher().getDecryptInit().init(ctx.getAlgCtx(), key,
+                (key == null ? 0 : EvpCipherCtx.getKeyLength(ctx)), iv,
+                (iv == null ? 0 : EvpCipherCtx.getIvLength(ctx)), params);
+    }
+
+    private static int legacyHandling(EvpCipherCtx ctx, EvpCipher cipher, Engine impl, Engine tmpImpl, int enc) {
+        if (cipher != null) {
+
+            if (ctx.getCipher() != null) {
+                long flags = ctx.getFlags();
+                EvpCipherCtx.reset(ctx);
+                ctx.setEncrypt(enc);
+                ctx.setFlags(flags);
+            }
+
+            if (!CipherInitializer.OPENSSL_NO_ENGINE && !CipherInitializer.FIPS_MODULE) {
+                if (impl != null) {
+                    if (!Engine.init(impl)) {
+                        Err.raise("EVP", "Initialization error");
+                        return 0;
+                    }
+                } else {
+                    impl = tmpImpl;
+                }
+
+                if (impl != null) {
+                    EvpCipher c = Engine.getCipher(impl, cipher.getNid());
+                    if (c == null) {
+                        Err.raise("EVP", "Initialization error");
+                        return 0;
+                    }
+                    cipher = c;
+                    ctx.setEngine(impl);
+                } else {
+                    ctx.setEngine(null);
+                }
+            }
+
+            ctx.setCipher(cipher);
+            if (ctx.getCipher().getCtxSize() > 0) {
+                ctx.setCipherData(new byte[ctx.getCipher().getCtxSize()]);
+                if (ctx.getCipherData() == null) {
+                    ctx.setCipher(null);
+                    Err.raise("EVP", "Memory allocation failure");
+                    return 0;
+                }
+            } else {
+                ctx.setCipherData(null);
+            }
+
+            ctx.setKeyLen(cipher.getKeyLen());
+            ctx.setFlags(ctx.getFlags() & EvpCipher.CTX_FLAG_WRAP_ALLOW);
+
+            if ((ctx.getCipher().getFlags() & EvpCipher.CTRL_INIT) != 0) {
+                if (!EvpCipherCtx.ctrl(ctx, EvpCipher.CTRL_INIT, 0, null)) {
+                    ctx.setCipher(null);
+                    Err.raise("EVP", "Initialization error");
+                    return 0;
+                }
+            }
+        }
+
+        return skipToInit(ctx);
+    }
+
+    private static int skipToInit(EvpCipherCtx ctx) {
+        if (ctx.getCipher() == null) {
+            return 0;
+        }
+
+        assert ctx.getCipher().getBlockSize() == 1
+                || ctx.getCipher().getBlockSize() == 8
+                || ctx.getCipher().getBlockSize() == 16;
+
+        if ((ctx.getFlags() & EvpCipher.CTX_FLAG_WRAP_ALLOW) == 0
+                && EvpCipherCtx.getMode(ctx) == EvpCipher.CTX_FLAG_WRAP_ALLOW) {
+            Err.raise("EVP", "Wrap mode not allowed");
+            return 0;
+        }
+
+        if ((ctx.getCipher().getFlags() & EvpCipher.CTX_CUSTOM_IV) == 0) {
+            switch (EvpCipherCtx.getMode(ctx)) {
+                case EvpCipher.MODE_STREAM_CIPHER:
+                case EvpCipher.MODE_ECB:
+                    break;
+
+                case EvpCipher.MODE_CFB:
+                case EvpCipher.MODE_OFB:
+                    ctx.setNum(0);
+
+                case EvpCipher.MODE_CBC:
+                    int n = EvpCipherCtx.getIvLength(ctx);
+                    if (n < 0 || n > ctx.getIv().length) {
+                        Err.raise("EVP", "Invalid IV length");
+                        return 0;
+                    }
+                    if (ctx.getIv() != null) {
+                        System.arraycopy(ctx.getOiv(), 0, ctx.getIv(), 0, n);
+                    }
+                    break;
+
+                case EvpCipher.MODE_CTR:
+                    ctx.setNum(0);
+                    if (ctx.getIv() != null) {
+                        int ivLen = EvpCipherCtx.getIvLength(ctx);
+                        if (ivLen <= 0 || ivLen > ctx.getIv().length) {
+                            Err.raise("EVP", "Invalid IV length");
+                            return 0;
+                        }
+                        System.arraycopy(ctx.getIv(), 0, ctx.getIv(), 0, ivLen);
+                    }
+                    break;
+
+                default:
+                    return 0;
+            }
+        }
+
+        if (ctx.getCipher().getEncryptInit() != null) {
+            return ctx.getCipher().getEncryptInit().init(ctx.getAlgCtx(),
+                    null, 0, null, 0, new OsslParam[]{});
+        }
+
+        return 1;
+    }
+
+    private static void clearFree(byte[] data, int size) {
+        if (data != null) {
+            java.util.Arrays.fill(data, (byte) 0);
+        }
+    }
+
+
+    public static boolean OPENSSL_NO_ENGINE = false;
+    public static boolean FIPS_MODULE = false;
+
+}
