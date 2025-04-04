@@ -54,9 +54,9 @@ def checkout_general_project(project, bug_id, tmp_dir):
 
 
 def compile_fix(project_dir):
-    script_path = os.path.join(project_dir, "autoCompile.sh")
+    script_path = os.path.join(project_dir, "compile.sh")
     if not os.path.exists(script_path):
-        print(f"Error: 'autoCompile.sh' not found in {project_dir}.")
+        print(f"Error: 'compile.sh' not found in {project_dir}.")
         return False
 
     if_success = True
@@ -65,7 +65,7 @@ def compile_fix(project_dir):
 
     try:
         process = subprocess.Popen(
-            ["bash", "autoCompile.sh"],
+            ["bash", "compile.sh"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True
@@ -111,8 +111,8 @@ def general_test_suite(project_dir, timeout=30):
     num_passed = 0
     num_failed = 0
 
-    if not os.path.exists(os.path.join(project_dir, "autoTestRunAll.sh")):
-        print(f"Error: 'autoTestRunAll.sh' not found in {project_dir}.")
+    if not os.path.exists(os.path.join(project_dir, "testRunAll.sh")):
+        print(f"Error: 'testRunAll.sh' not found in {project_dir}.")
         return 'wrong', 1
 
     working_dir = os.getcwd()
@@ -120,7 +120,7 @@ def general_test_suite(project_dir, timeout=30):
 
     try:
         result = subprocess.run(
-            ["bash", "autoTestRunAll.sh"],
+            ["bash", "testRunAll.sh"],
             text=True,
             capture_output=True,
             timeout=timeout,

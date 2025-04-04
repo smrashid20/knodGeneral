@@ -1,4 +1,4 @@
-Chart	1	/source/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java	1797	1798	1797	1798
+Chart	1	/source/org/jfree/chart/renderer/category/AbstractCategoryItemRenderer.java	1797	1798	1797	1798 # rem_start rem_end - 1 add_start add_end - 1
 Chart	10	/source/org/jfree/chart/imagemap/StandardToolTipTagFragmentGenerator.java	65	66	65	66
 Chart	11	/source/org/jfree/chart/util/ShapeUtilities.java	275	276	275	276
 Chart	12	/source/org/jfree/chart/plot/MultiplePiePlot.java	145	146	145	146

@@ -90,8 +90,15 @@ def prepare_localize_data(data_dir):
                 command(['rm', '-rf', tmp_dir + proj + "_" + bug_id])
             general_command.checkout_general_project(proj, bug_id, tmp_dir)
             print("TMP DIR: ", tmp_dir)
-            print("PATH: ", os.path.join(tmp_dir, proj + "_" + bug_id, path))
-            assert os.path.exists(os.path.join(tmp_dir, proj + "_" + bug_id, path))
+            # Strip leading slashes from path to avoid os.path.join resets
+            clean_path = path.lstrip('/')
+
+            # Join paths safely
+            full_path = os.path.join(tmp_dir, f"{proj}_{bug_id}", clean_path)
+
+            print("PATH:", full_path)
+            assert os.path.exists(full_path), f"File does not exist: {full_path}"
+
             bugs = [{'rem_loc': (int(rem_start), int(rem_end)), 'add_loc': (int(add_start), int(add_end))}]
             print(bugs)
         except Exception as e:

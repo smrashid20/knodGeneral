@@ -27,8 +27,9 @@ class GraphTransformerDataset(torch.utils.data.Dataset):
                 if len(data['rem_roots']) != 1:
                     discard[0] += 1
                     continue
-                if len(data['nodes']) >= 1024 or (
+                if len(data['nodes']) >= 8192 or (
                         len(data['add_roots']) > 0 and len(data['add_roots'][0]['nodes']) >= 256):
+                    print(len(data['nodes']), len(data['add_roots']))
                     discard[1] += 1
                     continue
                 if 0 in data['rem_roots']:
@@ -45,7 +46,7 @@ class GraphTransformerDataset(torch.utils.data.Dataset):
             self.shuffle()
 
         self.total_size = len(self.data)
-        self.max_target_len = 1024
+        self.max_target_len = 8192
         self.batch_size = batch_size
 
     def __len__(self):

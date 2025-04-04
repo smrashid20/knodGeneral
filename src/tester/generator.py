@@ -90,7 +90,7 @@ class Generator:
                 with torch.no_grad():
                     hypothesis = self.beamsearch.generate(
                         {k: v.to(self.model.gpu1) for k, v in inputs.items()},
-                        max_step=128,
+                        max_step=96,
                         father_beam_size=father_beam_size, edge_beam_size=edge_beam_size,
                         identifier_semantics=identifier_semantics
                     )

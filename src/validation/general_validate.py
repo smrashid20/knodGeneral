@@ -73,9 +73,11 @@ def insert_fix_general(file_path, start_row, start_col, end_row, end_col, patch,
             for i in range(start_row - 1):
                 file.write(data[i])
             file.write(data[start_row - 1][: start_col - 1] + '\n')
-            # if key in ['Closure_114', 'Mockito_8']:
-            #    patch = '} else if (' + patch + ') {\n'
+            file.write("//start of generated patch\n")
             file.write(patch)
+            if not patch.endswith('\n'):
+                file.write('\n')
+            file.write("//end of generated patch\n")
             file.write(data[end_row - 1][end_col:])
             for i in range(end_row, len(data)):
                 file.write(data[i])
@@ -83,12 +85,17 @@ def insert_fix_general(file_path, start_row, start_col, end_row, end_col, patch,
         with open(file_path, 'w') as file:
             for i in range(start_row - 1):
                 file.write(data[i])
+            file.write("//start of generated patch\n")
             file.write(patch)
+            if not patch.endswith('\n'):
+                file.write('\n')
+            file.write("//end of generated patch\n")
             file.write(data[end_row - 1])
             for i in range(end_row, len(data)):
                 file.write(data[i])
 
     return file_path + '.bak'
+
 
 
 # cnt, right = 0, 0
@@ -181,6 +188,13 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
         failed_num = None
         start_this_bug = time.time()
 
+        idx = 1
+
+        patch_output_dir = os.path.join('./patch', proj, bug_id)
+        if os.path.exists(patch_output_dir):
+            shutil.rmtree(patch_output_dir)
+        os.makedirs(patch_output_dir, exist_ok=True)
+
         for rank, patch_ast in enumerate(hypo[line_num]['patches']):
             if time.time() - start_this_bug > 3600 * 5:
                 break
@@ -194,85 +208,125 @@ def validate_general(hypo_path, meta_path, identifiers_path, output_path, tmp_di
 
             try:
                 patch_fix_type = patch_ast['fix_type']
+                print(f"[DEBUG] Patch fix type detected: {patch_fix_type}")
+
                 if patch_fix_type == 'general':
+                    print("[DEBUG] Using general fix context")
                     abs2src, src2abs = abs2src_g, src2abs_g
-                    ctx_ast_nodes, node_num_before, sibling_num_before = \
-                        ctx_ast_nodes_g, node_num_before_g, sibling_num_before_g
+                    ctx_ast_nodes, node_num_before, sibling_num_before = ctx_ast_nodes_g, node_num_before_g, sibling_num_before_g
                     start_row, start_col, end_row, end_col = start_row_g, start_col_g, end_row_g, end_col_g
                 else:
+                    print("[DEBUG] Using insert fix context")
                     abs2src, src2abs = abs2src_i, src2abs_i
-                    ctx_ast_nodes, node_num_before, sibling_num_before = \
-                        ctx_ast_nodes_i, node_num_before_i, sibling_num_before_i
+                    ctx_ast_nodes, node_num_before, sibling_num_before = ctx_ast_nodes_i, node_num_before_i, sibling_num_before_i
                     start_row, start_col, end_row, end_col = start_row_i, start_col_i, end_row_i, end_col_i
 
                 if abs2src is None or ctx_ast_nodes is None:
+                    print("[DEBUG] Skipping patch — missing AST or mappings")
                     continue
 
                 if patch_ast['n'].strip() == '<EOS>':
+                    print("[DEBUG] Patch is <EOS> — interpreted as empty patch")
                     code_patches = ['']
                 elif '_<UNK>' in patch_ast['n']:
+                    print("[DEBUG] Patch contains <UNK> — entering semantic reconstruction")
                     if identifiers is None:
+                        print("[DEBUG] Skipping due to missing identifiers")
                         continue
                     fathers, edges, nodes = patch_ast['f'].split(), patch_ast['e'].split(), patch_ast['n'].split()
                     patch_ast_roots, patch_ast_nodes = reconstruct_wrap_ast(fathers, edges, nodes, abs2src)
                     ast_nodes = reconstruct_patched_ctx_wrap_ast(ctx_ast_nodes, node_num_before, sibling_num_before,
-                                                                 patch_ast_roots, patch_ast_nodes)
-                    reconstructed_nodes = semantic_reconstruct(patch_ast_nodes, ast_nodes, file_path, src2abs, abs2src,
-                                                               identifiers)
+                                                                patch_ast_roots, patch_ast_nodes)
+                    reconstructed_nodes = semantic_reconstruct(patch_ast_nodes, ast_nodes, file_path, src2abs, abs2src, identifiers)
+                    print(f"[DEBUG] Semantic reconstruction returned {len(reconstructed_nodes) if reconstructed_nodes else 0} candidates")
                     if patch_fix_type == 'general':
                         ctx_ast_nodes_g = remove_patch_wrap_ast(ast_nodes, node_num_before, sibling_num_before,
                                                                 patch_ast_roots, patch_ast_nodes)
                     else:
                         ctx_ast_nodes_i = remove_patch_wrap_ast(ast_nodes, node_num_before, sibling_num_before,
                                                                 patch_ast_roots, patch_ast_nodes)
-                    if reconstructed_nodes is None or reconstructed_nodes == []:
+                    if not reconstructed_nodes:
+                        print("[DEBUG] Reconstruction failed or returned empty list, skipping patch")
                         continue
                     reconstruct_max = 10
                     code_patches = [
-                        reconstruct_ast(
-                            patch_ast['f'].split(),
-                            patch_ast['e'].split(),
-                            reconstructed_node,
-                            abs2src)
-                        for reconstructed_node in reconstructed_nodes[: reconstruct_max]
+                        reconstruct_ast(fathers, edges, node, abs2src)
+                        for node in reconstructed_nodes[:reconstruct_max]
                     ]
+                    print(f"[DEBUG] Generated {len(code_patches)} patch candidates after reconstruction")
                 else:
+                    print("[DEBUG] No <UNK> — reconstructing AST directly")
                     code_patches = [reconstruct_ast(
                         patch_ast['f'].split(),
                         patch_ast['e'].split(),
                         patch_ast['n'].split(),
                         abs2src
                     )]
+
                 score = patch_ast['score']
                 for patch in code_patches:
                     if current_is_correct:
+                        print("[DEBUG] Correct patch already found — skipping remaining patches")
                         break
+
                     s_time = time.time()
                     patch = patch.strip()
+                    print(f"[DEBUG] Applying patch idx {idx}, score: {score}")
+
                     patched_file = insert_fix_general(file_path, start_row, start_col, end_row, end_col,
-                                                       patch, project_dir, fix_type=patch_fix_type, key= proj + '_' + bug_id)
-                    print("[DEBUG]: Line 254 patched_file:", patched_file)
-                    print("[DEBUG]: Line 255 patch:", patch)
+                                                    patch, project_dir, fix_type=patch_fix_type, key=f"{proj}_{bug_id}")
+                    print(f"[DEBUG] Patch inserted into file: {patched_file}")
+
                     compile = general_command.compile_fix(project_dir)
+                    print(f"[DEBUG] Compilation result: {'Success' if compile else 'Fail'}")
+
                     correctness = 'uncompilable'
                     if compile:
+                        print("[DEBUG] Running test suite...")
                         correctness, num_failed = general_command.general_test_suite(project_dir)
+                        print(f"[DEBUG] Test suite completed. Result: {correctness}, Failed tests: {num_failed}")
                         if correctness == 'plausible':
                             right += 1
-                            print(right, cnt, rank, "Correct patch:", patch, str(int(time.time() - s_time)) + 's')
+                            print(f"Correct patch found at rank {rank}, idx {idx} — {patch} (time: {int(time.time() - s_time)}s)")
                             current_is_correct = True
                         elif correctness == 'wrong':
-                            print(right, cnt, rank, "Wrong patch:", patch, str(int(time.time() - s_time)) + 's')
-
+                            print(f"Patch compiled but failed tests at rank {rank}, idx {idx}")
                     else:
-                        print(right, cnt, rank, 'Uncompilable patch:', patch, str(int(time.time() - s_time)) + 's')
+                        print(f"Patch failed to compile at rank {rank}, idx {idx}")
 
                     validated_result[key]['patches'].append({
                         'patch': patch, 'score': score, 'correctness': correctness, 'fix_type': patch_fix_type
                     })
 
+                    # Save compilation and test results
+                    compile_status = "Success" if compile else "Fail"
+                    test_single = "NA"
+                    test_all = "Pass" if correctness == "plausible" else ("Fail" if correctness == "wrong" else "NA")
+
+                    result_json = {
+                        "Compilation": compile_status,
+                        "TestSingle": test_single,
+                        "TestAll": test_all
+                    }
+
+                    if os.path.exists(patched_file) and (idx < 100 or compile):
+                        patch_txt_path = os.path.join(patch_output_dir, f'patch_{idx}.txt')
+                        with open(patched_file.replace('.bak', ''), 'r') as pf_src, open(patch_txt_path, 'w') as pf_dst:
+                            pf_dst.write(pf_src.read())
+                        print(f"[DEBUG] Wrote patch source to {patch_txt_path}")
+
+                        patch_json_path = os.path.join(patch_output_dir, f'patch_{idx}.json')
+                        with open(patch_json_path, 'w') as pf_json:
+                            json.dump(result_json, pf_json, indent=2)
+                        print(f"[DEBUG] Wrote patch result to {patch_json_path}")
+
+                    idx += 1
+
                     if os.path.exists(patched_file):
                         shutil.copyfile(patched_file, patched_file.replace('.bak', ''))
+                        print(f"[DEBUG] Restored original file from backup")
+
+
             except Exception as e:
                 print("###############ERR###############")
                 print(e)

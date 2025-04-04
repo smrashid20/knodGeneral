@@ -15,7 +15,7 @@ class Config:
         self.edge_vocabulary = edge_vocabulary
         self.hidden_dim = hidden_dim
         self.edge_dim = edge_dim
-        self.max_node_num = 1024
+        self.max_node_num = 8192
         self.num_head = num_head
         self.num_encoder_layer = num_encoder_layer
         self.num_father_layer = num_father_layer
