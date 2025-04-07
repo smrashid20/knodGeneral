@@ -28,7 +28,7 @@ public class CheckChainExtensions {
 
             if (
 //start of generated patch
-ret
+x.ex_pcpathlen
 //end of generated patch
 
                     && x.ex_pathlen != -1 && strict) {

@@ -28,7 +28,7 @@ public class CheckChainExtensions {
 
             if (
 //start of generated patch
-X509StoreCtx.param
+X509.caCheckResult
 //end of generated patch
 
                     && x.ex_pathlen != -1 && strict) {

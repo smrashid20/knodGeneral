@@ -19,7 +19,7 @@ public class EapPeap {
         if (tlvStatus == EAP_TLV_RESULT_SUCCESS) {
             
 //start of generated patch
-ret.decision = EAP_TLV_RESULT_FAILURE;
+resp_status = EAP_TLV_RESULT_FAILURE;
 resp_status = EapMethodRet.DECISION_FAIL;
 //end of generated patch
 

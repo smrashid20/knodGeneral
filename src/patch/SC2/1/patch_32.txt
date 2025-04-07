@@ -26,11 +26,10 @@ public class CheckChainExtensions {
                 }
             }
 
-            if (
 //start of generated patch
-0
+if (num == 0 )return 0;
 //end of generated patch
-
+            if ((x.ex_flags & X509.EXFLAG_CA) == 0
                     && x.ex_pathlen != -1 && strict) {
                 ctx.error = X509StoreCtx.X509_V_ERR_INVALID_EXTENSION;
                 ret = 0;

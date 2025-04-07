@@ -94,11 +94,11 @@ public class Handshake {
 
             session.getSecurityParameters().setTimestamp(System.currentTimeMillis() / 1000);
 
-            if (
 //start of generated patch
-(session.isDTLS() & 0) == 0
+logger.fine("HSK: Adv. version: " + session.getInternals() + "HSK: Adv. version: " + session.getInternals());
 //end of generated patch
-) {
+            if ((session.getInternals().getHskFlags() & Constants.HSK_HRR_RECEIVED) == 0 &&
+                !(session.isDTLS() && session.getInternals().getDtls().getHskHelloVerifyRequests() == 0)) {
                 ret = generateClientRandom(session);
                 if (ret < 0) {
                     extdata.clear();

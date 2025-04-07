@@ -105,7 +105,7 @@ public class CipherInitializer {
 
         if (
 //start of generated patch
-OPENSSL_NO_ENGINE == true
+tmpImpl >= 0
 //end of generated patch
 ) {
             if (!cipher.hasEncryptInit()) {

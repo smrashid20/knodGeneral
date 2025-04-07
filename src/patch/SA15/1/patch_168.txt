@@ -17,11 +17,16 @@ public class EapPeap {
 
 
         if (tlvStatus == EAP_TLV_RESULT_SUCCESS) {
-            
+            if (force_failure) {
+                resp_status = EAP_TLV_RESULT_FAILURE;
+                ret.decision = EapMethodRet.DECISION_FAIL;
 //start of generated patch
-resp_status = 1;
+return EAP_TLV_RESULT_SUCCESS;
 //end of generated patch
-
+            } else {
+                resp_status = EAP_TLV_RESULT_SUCCESS;
+                ret.decision = EapMethodRet.DECISION_UNCOND_SUCC;
+            }
         } else if (tlvStatus == EAP_TLV_RESULT_FAILURE) {
             resp_status = EAP_TLV_RESULT_FAILURE;
             ret.decision = EapMethodRet.DECISION_FAIL;

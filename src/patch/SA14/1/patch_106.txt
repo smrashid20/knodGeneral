@@ -29,7 +29,7 @@ public class TlsClient {
                 System.out.println("Client: In Finished state, setting CCS_OK");
                 
 //start of generated patch
-state = state;
+ret = HandshakeStates.SSL_ST_OK;
 //end of generated patch
 
                 if (ret <= 0)

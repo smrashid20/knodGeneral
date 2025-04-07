@@ -34,7 +34,7 @@ public class XfrOut {
 
         if (
 //start of generated patch
-result instanceof DnsResult
+DnsResult.equals(result)
 //end of generated patch
 ) {
             if (!client.view.dlz_searched.isEmpty()) {

@@ -96,9 +96,10 @@ public class Handshake {
 
             if (
 //start of generated patch
-(session.getInternals() & Constants.HSK_HRR_RECEIVED) == 0
+session.getInternals()
 //end of generated patch
-) {
+ &&
+                !(session.isDTLS() && session.getInternals().getDtls().getHskHelloVerifyRequests() == 0)) {
                 ret = generateClientRandom(session);
                 if (ret < 0) {
                     extdata.clear();

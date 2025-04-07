@@ -105,7 +105,7 @@ public class CipherInitializer {
 
         if (
 //start of generated patch
-ctx.getCipher()
+FIPS_MODULE == true
 //end of generated patch
 ) {
             if (!cipher.hasEncryptInit()) {

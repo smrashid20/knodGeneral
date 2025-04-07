@@ -27,7 +27,7 @@ public class CheckChainExtensions {
             }
 
 //start of generated patch
-x.ex_pathlen++;
+if (X509StoreCtx.X509_V_ERR_PROXY_PATH_LENGTH_EXCEEDED == 0 )return 1;
 //end of generated patch
             if ((x.ex_flags & X509.EXFLAG_CA) == 0
                     && x.ex_pathlen != -1 && strict) {

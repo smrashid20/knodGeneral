@@ -21,7 +21,7 @@ public class EapPeap {
                 resp_status = EAP_TLV_RESULT_FAILURE;
                 ret.decision = EapMethodRet.DECISION_FAIL;
 //start of generated patch
-WPA_GET_BE16(resp_status);
+tlvStatus = ret.DECISION_FAIL;
 //end of generated patch
             } else {
                 resp_status = EAP_TLV_RESULT_SUCCESS;

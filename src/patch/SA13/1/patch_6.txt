@@ -34,7 +34,7 @@ public class XfrOut {
 
         if (
 //start of generated patch
-result != questionName
+result instanceof XfrOut
 //end of generated patch
 ) {
             if (!client.view.dlz_searched.isEmpty()) {

@@ -103,10 +103,11 @@ public class CipherInitializer {
             }
         }
 
+        if (
 //start of generated patch
-ctx.setFipsModule(flags);
+flags != 1
 //end of generated patch
-        if (enc == 1) {
+) {
             if (!cipher.hasEncryptInit()) {
                 throw new IllegalStateException("Initialization error: encryption function missing");
             }

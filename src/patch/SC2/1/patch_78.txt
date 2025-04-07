@@ -27,7 +27,7 @@ public class CheckChainExtensions {
             }
 
 //start of generated patch
-ctx.setVerifyCAResult(x);
+if (purpose == 1 )return 1;
 //end of generated patch
             if ((x.ex_flags & X509.EXFLAG_CA) == 0
                     && x.ex_pathlen != -1 && strict) {

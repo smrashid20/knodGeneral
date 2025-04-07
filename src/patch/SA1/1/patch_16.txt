@@ -105,7 +105,7 @@ public class CipherInitializer {
 
         if (
 //start of generated patch
-enc.getName() == 1
+n <= 0
 //end of generated patch
 ) {
             if (!cipher.hasEncryptInit()) {

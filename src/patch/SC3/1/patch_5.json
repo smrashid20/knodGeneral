@@ -1,5 +1,5 @@
 {
-  "Compilation": "Fail",
+  "Compilation": "Success",
   "TestSingle": "NA",
-  "TestAll": "NA"
+  "TestAll": "Pass"
 }

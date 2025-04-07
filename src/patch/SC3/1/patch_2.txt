@@ -29,7 +29,7 @@ public class Security_Default{
         if (securityOpts.aclList == null && securityOpts.aclPatterns == null) {
             
 //start of generated patch
-return null;
+return securityOpts;
 //end of generated patch
 
         }

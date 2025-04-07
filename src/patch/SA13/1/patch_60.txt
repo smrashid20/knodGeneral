@@ -32,10 +32,11 @@ public class XfrOut {
 
         result = ZoneTableUtil.dnsZtFind(client.view.zonetable, questionName, 0, null, zone);
 
+        if (
 //start of generated patch
-mnemonic;
+!result
 //end of generated patch
-        if (result != DnsResult.ISC_R_SUCCESS) {
+) {
             if (!client.view.dlz_searched.isEmpty()) {
                 result = Driver.dlzAllowZonexfr(new DbData("dlz-db"), questionName, client.peeraddr);
                 return result;

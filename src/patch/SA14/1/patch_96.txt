@@ -29,7 +29,7 @@ public class TlsClient {
                 System.out.println("Client: In Finished state, setting CCS_OK");
                 
 //start of generated patch
-ret = state.ssl3_get_finished();
+ret = ssl3_get_finished().readChangeCipherSpec();
 //end of generated patch
 
                 if (ret <= 0)

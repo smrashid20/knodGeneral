@@ -105,7 +105,7 @@ public class CipherInitializer {
 
         if (
 //start of generated patch
-ctx.getIvLength() == 1
+enc.hasDecryptInit() == 1
 //end of generated patch
 ) {
             if (!cipher.hasEncryptInit()) {

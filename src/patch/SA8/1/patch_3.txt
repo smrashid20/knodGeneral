@@ -21,9 +21,7 @@ public class SSHKeyExchange{
         extStart = findSubstring(clientMethods[SSHConstants.SSH_KEX], "," + SSHConstants.KEX_EXTENSION_CLIENT);
         
 //start of generated patch
-if (extStart[SSHConstants.SSH_KEX] != null ){
-clientMethods[SSHConstants.SSH_KEX][SSHConstants.SSH_KEX] = truncateString(SSHConstants.SSH_KEX);
-}
+clientMethods[SSHConstants.SSH_KEX[SSHConstants.SSH_KEX]] = truncateString(clientMethods[SSHConstants.SSH_KEX]);
 //end of generated patch
 
 

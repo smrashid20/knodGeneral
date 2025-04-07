@@ -34,7 +34,7 @@ public class XfrOut {
 
         if (
 //start of generated patch
-!this.result
+"dlz-db"
 //end of generated patch
 ) {
             if (!client.view.dlz_searched.isEmpty()) {

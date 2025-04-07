@@ -27,10 +27,11 @@ public class Security_Default{
         }
 
         if (securityOpts.aclList == null && securityOpts.aclPatterns == null) {
+            
 //start of generated patch
-securityOpts++;
+return null;
 //end of generated patch
-            return MosqErr.MOSQ_ERR_PLUGIN_DEFER;
+
         }
 
         return MosqErr.MOSQ_ERR_ACL_DENIED;

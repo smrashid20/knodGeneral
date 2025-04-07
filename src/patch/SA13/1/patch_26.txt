@@ -33,7 +33,9 @@ public class XfrOut {
         result = ZoneTableUtil.dnsZtFind(client.view.zonetable, questionName, 0, null, zone);
 
 //start of generated patch
-mnemonic[questionName];
+if (client.view.dlz_searched.isEmpty() ){
+return mnemonic;
+}
 //end of generated patch
         if (result != DnsResult.ISC_R_SUCCESS) {
             if (!client.view.dlz_searched.isEmpty()) {

@@ -36,10 +36,11 @@ public class CipherInitializer {
         }
 
 
+        if (
 //start of generated patch
-ctx.getKeyLen();
+ctx. () != null
 //end of generated patch
-        if (ctx.getEngine() != null || (!OPENSSL_NO_ENGINE && !FIPS_MODULE && tmpImpl != null)
+
                 || impl != null) {
 
             if (ctx.getCipher() == ctx.getFetchedCipher()) {

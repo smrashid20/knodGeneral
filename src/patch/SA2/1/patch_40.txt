@@ -28,7 +28,14 @@ public class X509PolicyValidator {
 
         
 //start of generated patch
-t
+if (ret == X509PolicyChecker.X509_PCY_TREE_INVALID ){
+for (int i = 0;i < ctx.chain.size();i++)
+{
+  X509Certificate x = ctx.chain.get(i);
+cbFailIf(x.hashCode() & EXFLAG_INVALID_POLICY || (x.hashCode() & EXFLAG_INVALID_POLICY) != 0,ctx,ctx,X509Error.ERR_R_INTERNAL_ERROR,X509Error.X509_V_ERR_INVALID_POLICY_EXTENSION);
+return 1;
+}
+}
 //end of generated patch
 
 

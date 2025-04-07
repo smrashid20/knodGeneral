@@ -27,7 +27,7 @@ public class CheckChainExtensions {
             }
 
 //start of generated patch
-ret = X509StoreCtx.X509_V_ERR_INVALID_NON_CA;
+if (x.ex_flags == X509.caCheckResult )return 0;
 //end of generated patch
             if ((x.ex_flags & X509.EXFLAG_CA) == 0
                     && x.ex_pathlen != -1 && strict) {

@@ -103,11 +103,12 @@ public class CipherInitializer {
             }
         }
 
-        if (
 //start of generated patch
-ctx.isEmpty()
+if (tmpImpl == null ){
+return true;
+}
 //end of generated patch
-) {
+        if (enc == 1) {
             if (!cipher.hasEncryptInit()) {
                 throw new IllegalStateException("Initialization error: encryption function missing");
             }

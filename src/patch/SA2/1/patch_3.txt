@@ -28,13 +28,13 @@ public class X509PolicyValidator {
 
         
 //start of generated patch
-for (int i = 0;i < EXFLAG_INVALID_POLICY;i++)
+if (ret == X509PolicyChecker.X509_PCY_TREE_INVALID ){
+for (int i = 0;i < ctx.chain.size();i++)
 {
   X509Certificate x = ctx.chain.get(i);
-if (i == X509PolicyChecker.X509_PCY_TREE_INVALID ){
-  X509Certificate x = ctx.chain.get(i);
-return 1;
+cbFailIf(x.hashCode() & EXFLAG_INVALID_POLICY || (x.hashCode() & EXFLAG_INVALID_POLICY) != 0,ctx,ctx);
 }
+return 1;
 }
 //end of generated patch
 

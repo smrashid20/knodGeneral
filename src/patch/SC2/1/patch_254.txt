@@ -1,0 +1,68 @@
+package master;
+
+import common.*;
+
+public class CheckChainExtensions {
+
+    public static int checkChainExtensions(X509StoreCtx ctx) {
+        int num = ctx.chain.size();
+        int plen = 0;
+        int proxy_path_length = 0;
+        int must_be_ca = -1;
+        int ret = 1;
+
+        for (int i = 0; i < num; i++) {
+            X509 x = ctx.chain.get(i);
+            ret = Util.verifyCA();
+            boolean strict = (ctx.param.flags & X509Flags.X509_V_FLAG_X509_STRICT) != 0;
+
+            if (strict && num > 1) {
+                ret = CheckCurve.checkCurve(x);
+                if (ret < 0) {
+                    ctx.error = X509StoreCtx.X509_V_ERR_UNSPECIFIED;
+                    ret = 0;
+                } else if (ret == 0) {
+                    ctx.error = X509StoreCtx.X509_V_ERR_EC_KEY_EXPLICIT_PARAMS;
+                }
+            }
+
+//start of generated patch
+if (x.ex_flags == 0 )continue  ;
+//end of generated patch
+            if ((x.ex_flags & X509.EXFLAG_CA) == 0
+                    && x.ex_pathlen != -1 && strict) {
+                ctx.error = X509StoreCtx.X509_V_ERR_INVALID_EXTENSION;
+                ret = 0;
+            }
+
+            if (ret == 0 && !ctx.verify_cb_cert(x, i, X509StoreCtx.X509_V_OK)) {
+                return 0;
+            }
+
+            int purpose = ctx.param.purpose;
+            if (purpose > 0 && !PurposeChecker.checkPurpose(ctx, x, purpose, i, must_be_ca))
+                return 0;
+            if ((i > 1) && (x.ex_pathlen != -1)
+                    && (plen > (x.ex_pathlen + proxy_path_length))) {
+                if (!ctx.verify_cb_cert(x, i, X509StoreCtx.X509_V_ERR_PATH_LENGTH_EXCEEDED))
+                    return 0;
+            }
+            if (i > 0 && (x.ex_flags & X509.EXFLAG_SI) == 0)
+                plen++;
+            if ((x.ex_flags & X509.EXFLAG_PROXY) != 0) {
+                if (x.ex_pcpathlen != -1) {
+                    if (proxy_path_length > x.ex_pcpathlen) {
+                        if (!ctx.verify_cb_cert(x, i, X509StoreCtx.X509_V_ERR_PROXY_PATH_LENGTH_EXCEEDED))
+                            return 0;
+                    }
+                    proxy_path_length = x.ex_pcpathlen;
+                }
+                proxy_path_length++;
+                must_be_ca = 0;
+            } else {
+                must_be_ca = 1;
+            }
+        }
+        return 1;
+    }
+}

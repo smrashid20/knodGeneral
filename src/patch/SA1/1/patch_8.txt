@@ -104,7 +104,9 @@ public class CipherInitializer {
         }
 
 //start of generated patch
-tmpImpl++;
+if (tmpImpl != null ){
+return false;
+}
 //end of generated patch
         if (enc == 1) {
             if (!cipher.hasEncryptInit()) {

@@ -1,0 +1,203 @@
+import commons.*;
+
+import java.util.logging.Logger;
+
+public class Handshake {
+    private static final Logger logger = Logger.getLogger(Handshake.class.getName());
+    private static final int GNUTLS_RANDOM_SIZE = 32;
+    private static final int GNUTLS_CLIENT = 0;
+    private static final int GNUTLS_EXT_ANY = 1;
+    private static final int GNUTLS_EXT_MANDATORY = 0;
+    private static final int GNUTLS_EXT_FLAG_CLIENT_HELLO = 1;
+    private static final int GNUTLS_HANDSHAKE_CLIENT_HELLO = 1;
+    public static int sendClientHello(Session session, int again) {
+        Buffer bufel = null;
+        int type;
+        int ret = 0;
+        VersionEntry hver, minVer, maxVer;
+        byte[] tver = new byte[2];
+        Buffer extdata = new Buffer();
+        boolean rehandshake = false;
+        boolean addSrScsv = false;
+        int sessionIdLen = session.getInternals().getResumedSecurityParameters().getSessionIdSize();
+
+        if (again == 0) {
+            if (session.getInternals().isInitialNegotiationCompleted()) {
+                rehandshake = true;
+            }
+
+            ret = extdata.initHandshakeMbuffer();
+            if (ret < 0) {
+                return ret;
+            }
+
+            if (session.getInternals().getResumptionRequested() == 0 &&
+                session.getInternals().getPremasterSet() == 0) {
+                if (rehandshake) {
+                    hver = session.getVersion();
+                } else {
+                    hver = VersionUtils.legacyVersionMax(session);
+                }
+            } else {
+                hver = session.getInternals().getResumedSecurityParameters().getProtocolVersion();
+
+                if (hver != null && hver.isTls13Sem()) {
+                    hver = VersionUtils.legacyVersionMax(session);
+                }
+            }
+
+            if (hver == null) {
+                if ((session.getInternals().getFlags() & Session.INT_FLAG_NO_TLS13) != 0) {
+                    ret = Constants.GNUTLS_E_INSUFFICIENT_CREDENTIALS;
+                } else {
+                    ret = Constants.GNUTLS_E_NO_PRIORITIES_WERE_SET;
+                }
+                extdata.clear();
+                return ret;
+            }
+
+            if (session.getInternals().getDefaultHelloVersion()[0] != 0) {
+                tver[0] = session.getInternals().getDefaultHelloVersion()[0];
+                tver[1] = session.getInternals().getDefaultHelloVersion()[1];
+            } else {
+                tver[0] = hver.getMajor();
+                tver[1] = hver.getMinor();
+            }
+            ret = extdata.appendData(tver, 0, tver.length);
+            if (ret < 0) {
+                extdata.clear();
+                return ret;
+            }
+            logger.fine("HSK: Adv. version: " + ((int)tver[0] & 0xff) + "." + ((int)tver[1] & 0xff));
+            minVer = VersionUtils.versionLowest(session);
+            maxVer = VersionUtils.versionMax(session);
+            if (minVer == null || maxVer == null) {
+                ret = Constants.GNUTLS_E_NO_PRIORITIES_WERE_SET;
+                extdata.clear();
+                return ret;
+            }
+
+            if ((session.getInternals().getHskFlags() & Constants.HSK_HRR_RECEIVED) == 0 || session.getVersion() == null) {
+                session.setAdvVersion(hver.getMajor(), hver.getMinor());
+                if (!session.setCurrentVersion(hver.getId())) {
+                    ret = Constants.GNUTLS_E_UNSUPPORTED_VERSION_PACKET;
+                    extdata.clear();
+                    return ret;
+                }
+            }
+
+            if (session.getInternals().getPriorities().getMinRecordVersion() != 0) {
+                session.setDefaultVersion(minVer);
+            } else {
+                session.setDefaultVersion(hver);
+            }
+
+            session.getSecurityParameters().setTimestamp(System.currentTimeMillis() / 1000);
+
+//start of generated patch
+logger.info("HSK: Adv. version: " + bufel + "HSK: Adv. version: " + tver);
+//end of generated patch
+            if ((session.getInternals().getHskFlags() & Constants.HSK_HRR_RECEIVED) == 0 &&
+                !(session.isDTLS() && session.getInternals().getDtls().getHskHelloVerifyRequests() == 0)) {
+                ret = generateClientRandom(session);
+                if (ret < 0) {
+                    extdata.clear();
+                    return ret;
+                }
+            }
+
+            ret = extdata.appendData(session.getSecurityParameters().getClientRandom(), 0, GNUTLS_RANDOM_SIZE);
+            if (ret < 0) {
+                extdata.clear();
+                return ret;
+            }
+
+            if (maxVer.isTls13Sem() && session.getSecurityParameters().getSessionIdSize() == 0) {
+                ret = generateSessionId(session.getSecurityParameters());
+                if (ret < 0) {
+                    extdata.clear();
+                    return ret;
+                }
+            }
+
+            ret = extdata.appendDataPrefix(8,
+                    session.getInternals().getResumedSecurityParameters().getSessionId(),
+                    0,
+                    sessionIdLen);
+            if (ret < 0) {
+                extdata.clear();
+                return ret;
+            }
+
+            if (session.isDTLS()) {
+                ret = extdata.appendDataPrefix(8,
+                        session.getInternals().getDtls().getDcookie().getData(),
+                        0,
+                        session.getInternals().getDtls().getDcookie().getSize());
+                if (ret < 0) {
+                    extdata.clear();
+                    return ret;
+                }
+                session.getInternals().getDtls().freeDcookie();
+            }
+
+            if (!session.getInternals().isInitialNegotiationCompleted() &&
+                session.getSecurityParameters().getEntity() == GNUTLS_CLIENT &&
+                hver.getId() == Constants.GNUTLS_SSL3 &&
+                session.getInternals().getPriorities().getNoExtensions() != 0) {
+                addSrScsv = true;
+            }
+
+            ret = getClientCiphersuites(session, extdata, minVer, addSrScsv);
+            if (ret < 0) {
+                extdata.clear();
+                return ret;
+            }
+
+            ret = appendNullComp(session, extdata);
+            if (ret < 0) {
+                extdata.clear();
+                return ret;
+            }
+
+            if (session.getInternals().getPriorities().getNoExtensions() == 0) {
+                if (VersionUtils.versionHasExtensions(hver)) {
+                    type = GNUTLS_EXT_ANY;
+                } else {
+                    type = GNUTLS_EXT_MANDATORY;
+                }
+
+                ret = genHelloExtensions(session, extdata, GNUTLS_EXT_FLAG_CLIENT_HELLO, type);
+                if (ret < 0) {
+                    extdata.clear();
+                    return ret;
+                }
+            }
+
+            bufel = extdata.toMbuffer();
+        }
+
+        ret = sendHandshake(session, bufel, GNUTLS_HANDSHAKE_CLIENT_HELLO);
+
+        return ret;
+    }
+    private static int generateClientRandom(Session session) {
+        session.getSecurityParameters().setClientRandom();
+        return 0;
+    }
+    private static int generateSessionId(SecurityParameters params) {
+        return 0;
+    }
+    private static int appendNullComp(Session session, Buffer buffer) {
+        return 0;
+    }
+    private static int getClientCiphersuites(Session session, Buffer buffer, VersionEntry minVer, boolean addSrScsv) {
+        return 0;
+    }
+    private static int genHelloExtensions(Session session, Buffer buffer, int flag, int type) {
+        return 0;
+    }
+    private static int sendHandshake(Session session, Buffer buffer, int type) {
+        return 0;
+    }
+}
