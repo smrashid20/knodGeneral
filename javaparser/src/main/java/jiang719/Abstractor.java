@@ -183,13 +183,3 @@ public class Abstractor {
 	}
 
 }
-
-/*
-mvn install:install-file \
-  -Dfile=lib/src2abs-0.1-jar-with-dependencies.jar \
-  -DgroupId=edu.wm.cs \
-  -DartifactId=src2abs \
-  -Dversion=0.1 \
-  -Dpackaging=jar
-
-*/
