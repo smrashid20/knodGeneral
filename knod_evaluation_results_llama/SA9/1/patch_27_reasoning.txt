@@ -1,0 +1,17 @@
+The proposed patch aims to address a vulnerability in the existing code by introducing additional logging to track the version of the Handshake (HSK) protocol being used. Here are the steps taken in the proposed patch:
+
+1. **Identify the vulnerability**: The existing code has a vulnerability where it does not properly handle the version of the HSK protocol being used. This can lead to potential security issues if an outdated or unsupported version is used.
+
+2. **Determine the root cause**: The root cause of the vulnerability is the lack of logging and tracking of the HSK protocol version. This makes it difficult to detect and respond to potential security threats.
+
+3. **Propose a solution**: To address the vulnerability, the proposed patch introduces additional logging to track the version of the HSK protocol being used. This will provide valuable information for debugging and security monitoring purposes.
+
+4. **Implement the solution**: The proposed patch adds two log statements to track the version of the HSK protocol being used. The first log statement logs the internal state of the session, while the second log statement logs the maximum version supported.
+
+5. **Verify the solution**: The proposed patch does not introduce any new functionality, but rather provides additional logging to aid in debugging and security monitoring. Therefore, the solution can be verified by reviewing the logs to ensure that the correct version of the HSK protocol is being used.
+
+6. **Test the solution**: The proposed patch can be tested by simulating different scenarios where the HSK protocol version is changed or updated. The logs can be reviewed to ensure that the correct version is being tracked and logged.
+
+7. **Deploy the solution**: Once the proposed patch has been verified and tested, it can be deployed to production. The additional logging will provide valuable information for debugging and security monitoring purposes, helping to address the vulnerability and improve the overall security of the system.
+
+In summary, the proposed patch introduces additional logging to track the version of the HSK protocol being used, addressing a vulnerability in the existing code. The patch is designed to provide valuable information for debugging and security monitoring purposes, and can be verified, tested, and deployed to production to improve the overall security of the system.

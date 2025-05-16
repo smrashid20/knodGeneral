@@ -1,0 +1,20 @@
+**Patch Explanation: Fixing a Vulnerability in the Handshake State**
+
+The proposed patch aims to address a vulnerability in the handshake state of an SSL/TLS connection. The issue arises in the `SSL3_ST_CR_FINISHED_A` and `SSL3_ST_CR_FINISHED_B` states, where the code fails to properly verify the server's certificate. This oversight can lead to a security vulnerability, allowing an attacker to intercept and manipulate the connection.
+
+**Step 1: Identifying the Vulnerability**
+The buggy code only checks for the `SSL3_ST_CR_FINISHED_A` and `SSL3_ST_CR_FINISHED_B` states, but it does not verify the server's certificate in these states. This is a critical security flaw, as it allows an attacker to impersonate the server without being detected.
+
+**Step 2: Understanding the Proposed Patch**
+The proposed patch introduces a new print statement, `System.out.println(HandshakeStates.SSL3_ST_SR_CERT_VRFY_A)`, which indicates that the patch is attempting to verify the server's certificate in the `SSL3_ST_SR_CERT_VRFY_A` state.
+
+**Step 3: Analyzing the Patch's Intent**
+The patch's intent is to ensure that the server's certificate is properly verified before proceeding with the handshake. By printing the `SSL3_ST_SR_CERT_VRFY_A` state, the patch is likely trying to signal that the verification process has started.
+
+**Step 4: Inferring the Missing Verification Logic**
+Although the patch only includes a print statement, it implies that the actual verification logic is missing in the buggy code. The patch is likely intended to be a placeholder or a starting point for implementing the necessary verification logic.
+
+**Step 5: Expected Outcome**
+The expected outcome of the patch is to ensure that the server's certificate is properly verified in the `SSL3_ST_CR_FINISHED_A` and `SSL3_ST_CR_FINISHED_B` states. This would prevent an attacker from impersonating the server and would strengthen the security of the SSL/TLS connection.
+
+In summary, the proposed patch aims to address a security vulnerability in the handshake state by introducing a certificate verification step. While the patch only includes a print statement, it implies that the actual verification logic is missing and needs to be implemented to ensure the security of the SSL/TLS connection.

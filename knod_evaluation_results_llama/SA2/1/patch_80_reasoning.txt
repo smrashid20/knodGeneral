@@ -1,0 +1,29 @@
+**Patch Explanation: Fixing a Vulnerability in X509 Certificate Validation**
+
+The proposed patch aims to address a vulnerability in the X509 certificate validation process. The bug in the original code allows for a potential security risk, which is mitigated by the changes introduced in the patch.
+
+**Step 1: Iterating Over the Entire Certificate Chain**
+
+The patch starts by iterating over the entire certificate chain, from the first element (index 0) to the last element. This is a crucial change, as the original code only iterated from the second element (index 1) onwards. By starting from the first element, the patch ensures that all certificates in the chain are thoroughly checked.
+
+**Step 2: Checking for Invalid Policy and Flags**
+
+For each certificate in the chain, the patch checks two conditions:
+
+* If the certificate has an invalid policy (X509PolicyChecker.X509_PCY_TREE_INVALID).
+* If the certificate's hash code has an invalid policy flag (EXFLAG_INVALID_POLICY) set.
+
+These checks are performed using a single conditional statement, which simplifies the code and improves readability.
+
+**Step 3: Failing on Error**
+
+If either of the conditions in Step 2 is true, the patch calls the `cbFailIf` function to report an error. This function takes several parameters, including the certificate, its index, and error codes. The patch passes the certificate, its index, and the error codes to this function, ensuring that the error is properly reported and handled.
+
+**Key Changes and Improvements**
+
+The proposed patch introduces two key changes:
+
+* Iterating over the entire certificate chain, rather than starting from the second element.
+* Combining the two checks into a single conditional statement, improving code readability and simplicity.
+
+These changes address the vulnerability in the original code, ensuring that all certificates in the chain are thoroughly checked for invalid policies and flags. By doing so, the patch enhances the security and reliability of the X509 certificate validation process.

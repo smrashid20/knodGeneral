@@ -1,0 +1,23 @@
+**Patch Proposal: Fixing a Vulnerability in X509 Certificate Validation**
+
+The proposed patch aims to address a vulnerability in the X509 certificate validation process. The bug in the original code allows for a potential security risk by not properly checking the validity of certificates in a chain. Here are the steps taken in the proposed patch to fix this issue:
+
+**Step 1: Identify the Root Cause of the Vulnerability**
+The original code checks if the return value (`ret`) is equal to `X509PolicyChecker.X509_PCY_TREE_INVALID`. However, it does not properly handle the case where the certificate chain contains a certificate with an invalid policy extension. This oversight can lead to a security vulnerability.
+
+**Step 2: Iterate Through the Certificate Chain**
+The patch iterates through the certificate chain, starting from the second certificate (index 1), to check each certificate's validity. This is done to ensure that all certificates in the chain are properly validated.
+
+**Step 3: Check for Null Certificates**
+For each certificate in the chain, the patch checks if the certificate is null. If a null certificate is found, the validation process fails, and an error is reported.
+
+**Step 4: Check for Invalid Policy Extensions**
+The patch also checks if each certificate has an invalid policy extension by performing a bitwise AND operation with the `EXFLAG_INVALID_POLICY` flag. If the result is non-zero, it indicates that the certificate has an invalid policy extension, and the validation process fails.
+
+**Step 5: Report Errors and Fail Validation**
+If any of the checks in steps 3 or 4 fail, the patch reports an error using the `cbFailIf` function, which takes the error code `X509Error.X509_V_ERR_INVALID_POLICY_EXTENSION`. This ensures that the validation process fails and an error is reported to the user.
+
+**Step 6: Return a Failure Code**
+If any of the checks fail, the patch returns a failure code (1) to indicate that the validation process was unsuccessful.
+
+By following these steps, the proposed patch ensures that the X509 certificate validation process is more robust and secure, preventing potential security vulnerabilities.

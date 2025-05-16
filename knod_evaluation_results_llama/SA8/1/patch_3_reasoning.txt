@@ -1,0 +1,21 @@
+**Patch Explanation: Fixing a Vulnerability in SSH Key Exchange**
+
+The proposed patch aims to address a vulnerability in the Secure Shell (SSH) key exchange mechanism. The issue arises from the way the client's key exchange methods are processed. Here's a step-by-step breakdown of the changes introduced by the patch:
+
+**Understanding the Vulnerability**
+
+In the buggy code, the system attempts to find a specific substring (`SSHConstants.KEX_EXTENSION_CLIENT`) within the client's key exchange methods string (`clientMethods[SSHConstants.SSH_KEX]`). If the substring is found, the code truncates the string at the found position using the `truncateString` method. However, this approach can lead to a vulnerability, as it may allow an attacker to manipulate the key exchange methods string and potentially inject malicious data.
+
+**Patch Overview**
+
+The proposed patch simplifies the processing of the client's key exchange methods by removing the substring search and truncation steps. Instead, it directly truncates the entire key exchange methods string using the `truncateString` method.
+
+**Step-by-Step Explanation**
+
+1. **Remove Substring Search**: The patch eliminates the need to search for a specific substring within the client's key exchange methods string. This step is no longer necessary, as the patch takes a more straightforward approach to processing the string.
+2. **Direct Truncation**: The patch directly truncates the client's key exchange methods string using the `truncateString` method. This ensures that any potentially malicious data is removed from the string, preventing exploitation of the vulnerability.
+3. **Simplified Processing**: By removing the substring search and truncation steps, the patch simplifies the processing of the client's key exchange methods. This reduces the attack surface and makes the code more secure.
+
+**Conclusion**
+
+The proposed patch addresses a vulnerability in the SSH key exchange mechanism by simplifying the processing of the client's key exchange methods. By removing the substring search and truncation steps, the patch reduces the attack surface and prevents potential exploitation of the vulnerability. The direct truncation approach ensures that the client's key exchange methods string is processed securely, mitigating the risk of malicious data injection.

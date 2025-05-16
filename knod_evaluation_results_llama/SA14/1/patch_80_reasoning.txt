@@ -1,0 +1,20 @@
+**Patch Explanation: Fixing a Vulnerability in the Handshake State**
+
+The proposed patch aims to address a vulnerability in the handshake state of an SSL/TLS connection. The issue arises when the connection is in the "Finished" state, specifically in the `SSL3_ST_CR_FINISHED_A` or `SSL3_ST_CR_FINISHED_B` stages. In this state, the system is supposed to verify the integrity of the connection by checking the finished message.
+
+**Step 1: Identifying the Vulnerability**
+The buggy code only calls the `ssl3_get_finished()` function to retrieve the finished message, but it does not verify whether the Change Cipher Spec (CCS) message has been received before processing the finished message. This oversight can lead to a vulnerability, as an attacker could potentially send a malicious finished message without the CCS message, compromising the connection's security.
+
+**Step 2: Understanding the Proposed Patch**
+The proposed patch introduces a new function call, `readChangeCipherSpec()`, which is passed as an argument to the `ssl3_get_finished()` function. This new function is responsible for reading and verifying the CCS message before processing the finished message.
+
+**Step 3: Verifying the CCS Message**
+The `readChangeCipherSpec()` function checks if the CCS message has been received and verified. If the CCS message is valid, it returns a success indicator, which is then passed to the `ssl3_get_finished()` function. This ensures that the finished message is only processed after the CCS message has been successfully verified.
+
+**Step 4: Processing the Finished Message**
+With the CCS message verified, the `ssl3_get_finished()` function can now safely process the finished message. If the finished message is valid, the function returns a success indicator, and the handshake state is updated to `SSL_ST_OK`.
+
+**Step 5: Ensuring Security**
+By introducing the `readChangeCipherSpec()` function, the proposed patch ensures that the CCS message is verified before processing the finished message. This prevents an attacker from sending a malicious finished message without the CCS message, thereby fixing the vulnerability and ensuring the security of the SSL/TLS connection.
+
+In summary, the proposed patch addresses a vulnerability in the handshake state by verifying the CCS message before processing the finished message. This ensures the security of the SSL/TLS connection and prevents potential attacks.

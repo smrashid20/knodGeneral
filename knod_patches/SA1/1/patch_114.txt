@@ -1,0 +1,133 @@
+import commons.Cipher;
+import commons.CipherContext;
+import commons.CipherParams;
+import commons.Engine;
+
+
+public class CipherInitializer {
+    private static boolean OPENSSL_NO_ENGINE = false;
+    private static boolean FIPS_MODULE = false;
+
+    public static void setOpenSslNoEngine(boolean value) {
+        OPENSSL_NO_ENGINE = value;
+    }
+
+    public static void setFipsModule(boolean value) {
+        FIPS_MODULE = value;
+    }
+
+    public static boolean initializeCipher(
+            CipherContext ctx, Cipher cipher, Engine impl,
+            byte[] key, byte[] iv, int enc, CipherParams params) {
+
+        int n;
+        Engine tmpImpl = null;
+        if (!OPENSSL_NO_ENGINE && !FIPS_MODULE) {
+            tmpImpl = null;
+        }
+
+        if (enc == -1) {
+            enc = ctx.isEncrypt() ? 1 : 0;
+        } else {
+            if (enc != 0) {
+                enc = 1;
+            }
+            ctx.setEncrypt(enc);
+        }
+
+        if (cipher == null && ctx.getCipher() == null) {
+            throw new IllegalStateException("No cipher set");
+        }
+
+        if (cipher != null) {
+            ctx.setCipher(cipher);
+        }
+
+        if (!OPENSSL_NO_ENGINE && !FIPS_MODULE) {
+            if (ctx.getEngine() != null && ctx.getCipher() != null
+                    && (cipher == null || cipher.getName().equals(ctx.getCipher().getName()))) {
+                return true;
+            }
+
+            if (cipher != null && impl == null) {
+                tmpImpl = Engine.getCipherEngine(cipher.getName());
+            }
+        }
+
+        if (cipher != null && ctx.getCipher() != null) {
+            if (!ctx.getCipher().cleanup(ctx)) {
+                return false;
+            }
+            ctx.clearCipherData();
+        }
+
+        if (cipher != null && ctx.getCipher() != null) {
+            long flags = ctx.getFlags();
+            ctx.reset();
+            ctx.setEncrypt(enc);
+            ctx.setFlags(flags);
+        }
+
+        if (cipher == null) {
+            cipher = ctx.getCipher();
+        }
+
+        if (cipher == null || (FIPS_MODULE && !isFipsApproved(cipher))) {
+            throw new IllegalStateException("Cipher provider is null or not FIPS approved");
+        }
+
+        if (!cipher.hasProvider()) {
+            throw new IllegalStateException("Initialization error: cipher provider is null");
+        }
+
+        if (!cipher.equals(ctx.getFetchedCipher())) {
+            if (!cipher.incrementRefCount()) {
+                throw new IllegalStateException("Initialization error: failed to increase reference count");
+            }
+            ctx.freeFetchedCipher();
+            ctx.setFetchedCipher(cipher);
+        }
+
+        ctx.setCipher(cipher);
+
+        if (ctx.getAlgCtx() == null) {
+            ctx.setAlgCtx(cipher.createNewContext());
+            if (ctx.getAlgCtx() == null) {
+                throw new IllegalStateException("Initialization error: failed to create algorithm context");
+            }
+        }
+
+        if (ctx.hasNoPadding()) {
+            if (!ctx.setPadding(0)) {
+                return false;
+            }
+        }
+
+//start of generated patch
+if (!FIPS_MODULE ){
+return false;
+}
+//end of generated patch
+        if (enc == 1) {
+            if (!cipher.hasEncryptInit()) {
+                throw new IllegalStateException("Initialization error: encryption function missing");
+            }
+            return cipher.encryptInit(ctx.getAlgCtx(), key,
+                    key == null ? 0 : ctx.getKeyLength(),
+                    iv, iv == null ? 0 : ctx.getIvLength(), params);
+        }
+
+        if (!cipher.hasDecryptInit()) {
+            throw new IllegalStateException("Initialization error: decryption function missing");
+        }
+
+        return cipher.decryptInit(ctx.getAlgCtx(), key,
+                key == null ? 0 : ctx.getKeyLength(),
+                iv, iv == null ? 0 : ctx.getIvLength(), params);
+    }
+
+    private static boolean isFipsApproved(Cipher cipher) {
+        return cipher.getName().equals("AES") || cipher.getName().equals("SHA256");
+    }
+}
+

@@ -1,0 +1,20 @@
+**Proposed Patch Explanation: Fixing a Vulnerability in X509 Certificate Chain Validation**
+
+The proposed patch aims to address a vulnerability in the X509 certificate chain validation process. The bug in the original code lies in the way it checks for invalid policy extensions in the certificate chain. Here's a step-by-step breakdown of the changes introduced in the proposed patch:
+
+**Step 1: Adjusting the Loop Iteration**
+The original code starts the loop from index 1, skipping the first certificate in the chain. The proposed patch changes the loop to start from index 0, ensuring that all certificates in the chain are checked.
+
+**Step 2: Simplifying the Condition**
+The original code checks for two conditions: `x == null` and `(x.hashCode() & EXFLAG_INVALID_POLICY)!= 0`. The proposed patch combines these conditions into a single check: `x.hashCode() & EXFLAG_INVALID_POLICY || (x.hashCode() & EXFLAG_INVALID_POLICY)!= 0`. However, this simplification is unnecessary and may be considered redundant, as the second part of the condition is always true if the first part is true.
+
+**Step 3: Correcting the Error Reporting**
+In the original code, the `cbFailIf` function is called with the current certificate `x` as the third argument. In the proposed patch, the `ctx` object is passed instead of `x`. This change ensures that the error reporting is accurate and provides more context about the validation failure.
+
+**Step 4: Adding the Certificate Index to the Error Message**
+The proposed patch adds the certificate index `i` as the last argument to the `cbFailIf` function. This provides additional information about which certificate in the chain caused the validation failure.
+
+**Step 5: Returning an Error Code**
+Both the original code and the proposed patch return an error code of 1 when a validation failure occurs. This ensures that the validation process is terminated immediately when an invalid policy extension is detected.
+
+In summary, the proposed patch addresses the vulnerability by ensuring that all certificates in the chain are checked, simplifying the condition, correcting the error reporting, and providing more context about the validation failure. However, the simplification of the condition may be reconsidered to avoid redundancy.

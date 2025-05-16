@@ -1,0 +1,25 @@
+**Patch Explanation: Fixing a Vulnerability in Session Handling**
+
+The proposed patch aims to address a vulnerability in the session handling mechanism of a secure communication protocol. The bug is located in the code responsible for generating a client random value during the handshake process.
+
+**Understanding the Bug**
+
+The buggy code checks two conditions before generating a client random value. First, it verifies if the HSK_HRR_RECEIVED flag is not set in the session's internal flags. Second, it checks if the session is not using DTLS (Datagram Transport Layer Security) or if the DTLS hello verify requests are not zero. If both conditions are met, the code generates a client random value using the `generateClientRandom` function.
+
+However, this approach has a flaw. The code does not properly handle the case where the session is in a specific state, which can lead to a vulnerability.
+
+**The Proposed Patch**
+
+The proposed patch introduces a simple yet effective fix. It checks if the session's internal state is set to `GNUTLS_CLIENT`. If this condition is true, the function immediately returns the current return value (`ret`) without generating a client random value.
+
+**Rationale Behind the Patch**
+
+The patch is based on the assumption that when the session is in the `GNUTLS_CLIENT` state, generating a client random value is not necessary or may even be harmful. By skipping this step, the patch prevents potential security issues that could arise from the buggy code.
+
+**Impact of the Patch**
+
+The proposed patch has a minimal impact on the existing codebase. It only adds a simple conditional check, which does not alter the overall logic of the function. The patch ensures that the session handling mechanism is more robust and secure, preventing potential vulnerabilities that could be exploited by attackers.
+
+**Conclusion**
+
+In summary, the proposed patch addresses a vulnerability in the session handling mechanism by introducing a conditional check for the `GNUTLS_CLIENT` state. By skipping the generation of a client random value in this specific state, the patch prevents potential security issues and ensures a more robust and secure communication protocol.

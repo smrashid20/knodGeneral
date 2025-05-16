@@ -1,0 +1,20 @@
+**Patch Explanation: Fixing a Vulnerability in the Handshake State**
+
+The proposed patch aims to address a vulnerability in the handshake state of an SSL/TLS connection. The buggy code in question handles the `SSL3_ST_CR_FINISHED_A` and `SSL3_ST_CR_FINISHED_B` states, where the client is in the "Finished" state and is expected to set the `CCS_OK` flag.
+
+**Step 1: Identifying the Issue**
+The buggy code only checks if the `ssl3_get_finished()` function returns a value less than or equal to 0, and if so, returns the error code. However, it does not properly handle the case where the function returns a successful value. This oversight can lead to a vulnerability, as the handshake state is not properly updated.
+
+**Step 2: Understanding the Proposed Patch**
+The proposed patch introduces a new line of code, `state = readChangeCipherSpec();`, which is intended to fix the vulnerability. This line reads the ChangeCipherSpec (CCS) message from the server and updates the handshake state accordingly.
+
+**Step 3: Updating the Handshake State**
+By calling `readChangeCipherSpec()`, the patch ensures that the handshake state is properly updated to reflect the receipt of the CCS message. This is a critical step, as the CCS message indicates that the server has finished its part of the handshake and is ready to switch to the newly negotiated cipher suite.
+
+**Step 4: Ensuring Proper Handshake Completion**
+The patch ensures that the handshake is properly completed by updating the handshake state to reflect the successful receipt of the CCS message. This prevents potential vulnerabilities that could arise from an incomplete handshake.
+
+**Step 5: Preventing Potential Attacks**
+By properly handling the CCS message and updating the handshake state, the patch prevents potential attacks that could exploit the vulnerability in the buggy code. This includes attacks that could compromise the security of the SSL/TLS connection.
+
+In summary, the proposed patch addresses a vulnerability in the handshake state of an SSL/TLS connection by properly handling the CCS message and updating the handshake state. This ensures that the handshake is completed securely and prevents potential attacks that could compromise the connection.

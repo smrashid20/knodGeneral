@@ -1,0 +1,10 @@
+{
+  "Compilation": "Fail",
+  "TestSingle": "NA",
+  "TestAll": "NA",
+  "reasoning_cosine_similarity": 0.6480379104614258,
+  "reasoning_rouge_l": 0.19572953736654802,
+  "reasoning_gpt": false,
+  "patch_cosine_similarity": 0.7215858697891235,
+  "patch_rouge_l": 0.26373626373626374
+}

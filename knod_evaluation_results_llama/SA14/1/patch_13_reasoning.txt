@@ -1,0 +1,20 @@
+**Patch Explanation: Fixing a Vulnerability in the Handshake Process**
+
+The proposed patch aims to address a vulnerability in the handshake process of an SSL/TLS connection. Specifically, it targets the `HandshakeStates.SSL3_ST_CR_FINISHED_A` and `HandshakeStates.SSL3_ST_CR_FINISHED_B` states, where the client is in the "Finished" state.
+
+**Step 1: Understanding the Vulnerability**
+In the buggy code, after the client reaches the "Finished" state, it sets the handshake stage to `HandshakeStates.SSL_ST_OK` without properly verifying the Change Cipher Spec (CCS) message. This oversight allows an attacker to potentially inject malicious data into the connection, compromising its security.
+
+**Step 2: Identifying the Fix**
+To address this vulnerability, the proposed patch introduces a crucial step: `ret.readChangeCipherSpec()`. This method ensures that the CCS message is properly read and verified before proceeding with the handshake.
+
+**Step 3: Verifying the CCS Message**
+By calling `readChangeCipherSpec()`, the patch verifies that the CCS message is correctly formatted and valid. This step is essential in preventing an attacker from injecting malicious data into the connection.
+
+**Step 4: Ensuring Secure Handshake Completion**
+After successfully verifying the CCS message, the handshake can proceed securely. The patch ensures that the handshake stage is only set to `HandshakeStates.SSL_ST_OK` after the CCS message has been properly read and verified.
+
+**Step 5: Preventing Potential Attacks**
+By introducing this additional verification step, the patch prevents potential attacks that could exploit the vulnerability in the buggy code. This fix ensures that the handshake process is secure and reliable, protecting the connection from malicious activities.
+
+In summary, the proposed patch addresses a vulnerability in the handshake process by introducing a crucial verification step for the Change Cipher Spec message. By doing so, it ensures the security and reliability of the connection, preventing potential attacks that could compromise the handshake process.

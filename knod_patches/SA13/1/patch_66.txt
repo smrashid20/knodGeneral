@@ -1,0 +1,59 @@
+package master;
+
+import common.DbData;
+import common.DnsClient;
+import common.DnsResult;
+import common.DnsRdatatype;
+import common.DnsZone;
+import common.Driver;
+import common.ZoneType;
+import common.DnsView;
+import common.ZoneTableUtil;
+
+public class XfrOut {
+
+    public static DnsResult nsXfrStart(DnsClient client, DnsZone zone, DnsRdatatype reqtype) {
+        DnsResult result;
+        String mnemonic;
+        String questionName = zone.zoneName;
+        String questionClass = "IN";
+        boolean is_dlz = false;
+
+        switch (reqtype) {
+            case AXFR:
+                mnemonic = "AXFR";
+                break;
+            case IXFR:
+                mnemonic = "IXFR";
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported request type");
+        }
+
+        result = ZoneTableUtil.dnsZtFind(client.view.zonetable, questionName, 0, null, zone);
+
+        if (
+//start of generated patch
+isEmpty()
+//end of generated patch
+) {
+            if (!client.view.dlz_searched.isEmpty()) {
+                result = Driver.dlzAllowZonexfr(new DbData("dlz-db"), questionName, client.peeraddr);
+                return result;
+            } else {
+                return DnsResult.ISC_R_NOTFOUND;
+            }
+        } else {
+            switch (zone.zoneType) {
+                case DNS_ZONE_MASTER:
+                case DNS_ZONE_SLAVE:
+                case DNS_ZONE_MIRROR:
+                case DNS_ZONE_DLZ:
+                    break;
+                default:
+                    return DnsResult.ISC_R_NOTFOUND;
+            }
+            return DnsResult.ISC_R_SUCCESS;
+        }
+    }
+}

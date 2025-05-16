@@ -1,0 +1,97 @@
+import java.util.List;
+
+public class X509PolicyValidator {
+    static final int EXFLAG_INVALID_POLICY = 0x01;
+
+    public static int checkPolicy(X509StoreCtx ctx) {
+        int ret;
+
+        if (ctx.parent) {
+            return 1;
+        }
+
+        if (ctx.bareTaSigned && !pushNullCert(ctx.chain)) {
+            raiseError(X509Error.ERR_R_CRYPTO_LIB);
+            return -1;
+        }
+
+        ret = X509PolicyChecker.check(ctx);
+
+        if (ctx.bareTaSigned) {
+            popCert(ctx.chain);
+        }
+
+        if (ret == X509PolicyChecker.X509_PCY_TREE_INTERNAL) {
+            raiseError(X509Error.ERR_R_X509_LIB);
+            return -1;
+        }
+
+        
+//start of generated patch
+if (ret != null ){
+for (int i = 0;i < ctx.chain.size();i++)
+{
+  X509Certificate x = ctx.chain.get(i);
+cbFailIf(x.hashCode() & EXFLAG_INVALID_POLICY || (x.hashCode() & EXFLAG_INVALID_POLICY) != 0);
+}
+return 1;
+}
+//end of generated patch
+
+
+        if (ret == X509PolicyChecker.X509_PCY_TREE_FAILURE) {
+            ctx.currentCert = null;
+            ctx.error = X509Error.X509_V_ERR_NO_EXPLICIT_POLICY;
+            return ctx.verifyCallback(0, ctx) ? 1 : 0;
+        }
+
+        if (ret != X509PolicyChecker.X509_PCY_TREE_VALID) {
+            raiseError(X509Error.ERR_R_INTERNAL_ERROR);
+            return 0;
+        }
+
+        if ((ctx.param.flags & 0x01) != 0) {
+            ctx.currentCert = null;
+
+            if (!ctx.verifyCallback(2, ctx)) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
+    private static boolean pushNullCert(List<X509Certificate> chain) {
+        try {
+            chain.add(null);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static void popCert(List<X509Certificate> chain) {
+        if (!chain.isEmpty()) {
+            chain.remove(chain.size() - 1);
+        }
+    }
+
+    private static void cbFailIf(boolean condition, X509StoreCtx ctx, X509Certificate x, int i, int errorCode) {
+        if (condition) {
+            ctx.error = errorCode;
+        }
+    }
+
+    private static void raiseError(int errorCode) {
+        return;
+    }
+
+    public static void main(String[] args) {
+        X509StoreCtx ctx = new X509StoreCtx();
+        ctx.bareTaSigned = true;
+        ctx.param.flags = 0x01;
+
+        int result = checkPolicy(ctx);
+        System.out.println("Policy Check Result: " + result);
+    }
+}

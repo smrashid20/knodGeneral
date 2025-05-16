@@ -1,0 +1,23 @@
+**Patch Explanation: Fixing a Vulnerability in Cipher Handling**
+
+The proposed patch aims to address a vulnerability in the cipher handling mechanism of the OpenSSL library. The issue arises from the incorrect handling of the `OPENSSL_NO_ENGINE` flag, which is used to determine whether the engine-based cipher implementation should be used.
+
+**Step 1: Understanding the Buggy Code**
+
+The buggy code checks if the engine, temporary implementation, or implementation is not null. If any of these conditions are true, it proceeds to free the fetched cipher and set it to null. However, the check for `OPENSSL_NO_ENGINE` is incorrect, as it only checks if it is not defined (`!OPENSSL_NO_ENGINE`). This means that if `OPENSSL_NO_ENGINE` is defined, the engine-based implementation will not be used, even if it is available.
+
+**Step 2: Identifying the Vulnerability**
+
+The vulnerability lies in the fact that the engine-based implementation is not properly checked. If `OPENSSL_NO_ENGINE` is defined, the engine-based implementation will not be used, even if it is available. This can lead to a situation where the wrong cipher implementation is used, potentially compromising the security of the system.
+
+**Step 3: Applying the Patch**
+
+The proposed patch simply removes the negation operator (`!`) from the `OPENSSL_NO_ENGINE` check. This ensures that the engine-based implementation is properly checked and used if available.
+
+**Step 4: Expected Outcome**
+
+With the patch applied, the cipher handling mechanism will correctly check for the availability of the engine-based implementation. If `OPENSSL_NO_ENGINE` is defined, the engine-based implementation will not be used. However, if it is not defined, the engine-based implementation will be used if available. This ensures that the correct cipher implementation is used, mitigating the vulnerability.
+
+**Step 5: Conclusion**
+
+The proposed patch addresses a vulnerability in the cipher handling mechanism of the OpenSSL library. By correctly checking for the availability of the engine-based implementation, the patch ensures that the correct cipher implementation is used, mitigating the vulnerability and improving the overall security of the system.

@@ -1,0 +1,20 @@
+**Proposed Patch Explanation: Fixing a Vulnerability in the Handshake State**
+
+The proposed patch aims to address a vulnerability in the handshake state of an SSL/TLS connection. Specifically, it targets the `HandshakeStates.SSL3_ST_CR_FINISHED_A` and `HandshakeStates.SSL3_ST_CR_FINISHED_B` states, where the connection is in the "Finished" state.
+
+**Step 1: Verify the Handshake State**
+The patch begins by verifying that the current handshake state is indeed one of the two targeted states (`SSL3_ST_CR_FINISHED_A` or `SSL3_ST_CR_FINISHED_B`). This ensures that the patch only applies to the specific states that are vulnerable.
+
+**Step 2: Check for Errors in the Finished Message**
+The patch then checks the return value of the `ssl3_get_finished()` function, which retrieves the "Finished" message from the peer. If the return value is less than or equal to 0, it indicates an error, and the patch immediately returns the error code. This prevents the connection from proceeding with a potentially malicious or malformed "Finished" message.
+
+**Step 3: Verify the Finished Message**
+If the `ssl3_get_finished()` function returns a positive value, the patch verifies the contents of the "Finished" message. This involves checking the message's integrity and authenticity to ensure that it has not been tampered with or corrupted during transmission.
+
+**Step 4: Update the Handshake State**
+If the "Finished" message is verified successfully, the patch updates the handshake state to `HandshakeStates.SSL_ST_OK`. This indicates that the handshake has completed successfully, and the connection can proceed to the next stage.
+
+**Step 5: Additional Validation (Optional)**
+Depending on the specific requirements of the implementation, the patch may include additional validation steps to further ensure the security of the connection. For example, it may verify the peer's identity or check for any other potential security issues.
+
+By following these steps, the proposed patch aims to fix the vulnerability in the handshake state and prevent potential attacks that could exploit this weakness. The patch ensures that the connection is properly secured and validated before proceeding to the next stage, thereby protecting the integrity and confidentiality of the data being transmitted.

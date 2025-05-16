@@ -1,0 +1,18 @@
+**Patch Proposal: Fixing a Vulnerability in the SSL Handshake Process**
+
+The proposed patch aims to address a vulnerability in the SSL handshake process, specifically in the handling of the Finished state. The current implementation has a flaw that can be exploited, allowing malicious actors to intercept and manipulate the handshake.
+
+**Step 1: Identifying the Vulnerability**
+The vulnerability lies in the fact that the current implementation does not properly verify the authenticity of the Finished message. In the buggy code, when the handshake reaches the Finished state (SSL3_ST_CR_FINISHED_A or SSL3_ST_CR_FINISHED_B), the system simply prints a message and sets the handshake stage to OK without performing any validation.
+
+**Step 2: Understanding the Proposed Patch**
+The proposed patch introduces a new step in the handshake process. Before proceeding to the Finished state, the client will send a ClientHello message. This message is a crucial part of the SSL handshake, as it initiates the negotiation of the cryptographic parameters.
+
+**Step 3: How the Patch Fixes the Vulnerability**
+By sending the ClientHello message, the client ensures that the server is properly authenticated and that the handshake is legitimate. This additional step prevents malicious actors from intercepting and manipulating the handshake, as they would need to respond with a valid ServerHello message to proceed.
+
+**Step 4: Impact on the Handshake Process**
+The proposed patch does not alter the overall structure of the handshake process. Instead, it adds an essential security measure to prevent exploitation. The handshake will still proceed as usual, with the client and server exchanging messages to establish a secure connection.
+
+**Step 5: Conclusion**
+The proposed patch addresses a critical vulnerability in the SSL handshake process by introducing a necessary authentication step. By sending the ClientHello message, the client ensures the legitimacy of the handshake, preventing malicious actors from intercepting and manipulating the process. This patch is a crucial security measure that enhances the overall security of the SSL handshake.

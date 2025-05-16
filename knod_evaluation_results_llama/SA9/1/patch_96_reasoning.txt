@@ -1,0 +1,20 @@
+**Patch Proposal: Fixing a Vulnerability in the Handshake Protocol**
+
+The proposed patch aims to address a vulnerability in the handshake protocol of a secure communication system. The vulnerability arises from a specific condition where the system fails to properly handle a particular flag, leading to potential security risks.
+
+**Step 1: Identifying the Vulnerability**
+The buggy code checks if a specific flag, `HSK_HRR_RECEIVED`, is not set in the session's internal flags. If this flag is not set, and the session is not a DTLS (Datagram Transport Layer Security) session or has a specific condition met, the system generates a client random value using the `generateClientRandom` function. However, this check is incomplete and can lead to a vulnerability.
+
+**Step 2: Understanding the Root Cause**
+The root cause of the vulnerability is the incomplete check for the `HSK_HRR_RECEIVED` flag. This flag is crucial in ensuring the proper handshake protocol is followed. Without a proper check, the system may proceed with an insecure handshake, compromising the security of the communication.
+
+**Step 3: Designing the Fix**
+To fix this vulnerability, the proposed patch introduces a logging mechanism to track the maximum version of the handshake protocol used in the session. This is achieved by setting the version maximum in the logger with the internal flags and security parameters of the session. By doing so, the system can now properly track and handle the handshake protocol versions, preventing potential security risks.
+
+**Step 4: Implementing the Fix**
+The proposed patch sets the version maximum in the logger using the `setVersionMax` method. This method takes a string argument that includes the internal flags and security parameters of the session. By logging this information, the system can now monitor and ensure that the handshake protocol is properly followed, preventing the vulnerability from being exploited.
+
+**Step 5: Verifying the Fix**
+To verify the effectiveness of the patch, thorough testing is necessary. This includes testing various scenarios, such as different handshake protocol versions and flag combinations, to ensure that the system properly handles each case and prevents the vulnerability from being exploited.
+
+In summary, the proposed patch addresses a vulnerability in the handshake protocol by introducing a logging mechanism to track the maximum version of the handshake protocol used in the session. By doing so, the system can properly handle the handshake protocol and prevent potential security risks.

@@ -1,0 +1,21 @@
+**Proposed Patch Explanation: Fixing a Vulnerability in the Handshake State**
+
+The proposed patch aims to address a vulnerability in the handshake state of an SSL/TLS connection. Specifically, it targets the `HandshakeStates.SSL3_ST_CR_FINISHED_A` and `HandshakeStates.SSL3_ST_CR_FINISHED_B` states, where the connection is in the "Finished" state.
+
+**Step 1: Identifying the Issue**
+In the buggy code, the `ssl3_get_finished()` function is called without any additional parameters. This function is responsible for retrieving the finished message from the peer. However, the lack of parameters may lead to a vulnerability, as it does not specify whether to verify the finished message or not.
+
+**Step 2: Understanding the Vulnerability**
+The vulnerability arises from the fact that the `ssl3_get_finished()` function may not properly verify the finished message, potentially allowing an attacker to manipulate the handshake process. This could lead to a security breach, compromising the integrity of the connection.
+
+**Step 3: Applying the Fix**
+The proposed patch introduces a new parameter to the `ssl3_get_finished()` function, setting it to `false`. This parameter instructs the function to verify the finished message, ensuring that it is authentic and has not been tampered with.
+
+**Step 4: Ensuring Security**
+By verifying the finished message, the patch ensures that the handshake process is secure and trustworthy. This prevents potential attacks that could exploit the vulnerability, safeguarding the connection and protecting sensitive data.
+
+**Step 5: Maintaining Compatibility**
+The patch is designed to be backward compatible, ensuring that existing connections are not disrupted. The `false` parameter is a new addition, and its presence does not affect the functionality of the existing code.
+
+**Conclusion**
+The proposed patch addresses a critical vulnerability in the handshake state of an SSL/TLS connection. By introducing a verification parameter to the `ssl3_get_finished()` function, the patch ensures the security and integrity of the connection, preventing potential attacks and protecting sensitive data.

@@ -1,0 +1,23 @@
+**Patch Proposal: Fixing a DNS Vulnerability**
+
+The proposed patch aims to address a vulnerability in the DNS system, specifically in the handling of zone transfer requests. The issue arises when the `dlz_searched` list is empty, causing the system to return an incorrect result.
+
+**Step 1: Identify the Root Cause**
+The problem begins when the `result` variable is not equal to `ISC_R_SUCCESS`, indicating an error in the DNS query. The system then checks if the `dlz_searched` list is empty. If it is not empty, the system calls the `dlzAllowZonexfr` function to allow zone transfer. However, if the list is empty, the system returns an incorrect result, leading to a vulnerability.
+
+**Step 2: Analyze the dlzAllowZonexfr Function**
+The `dlzAllowZonexfr` function is responsible for allowing zone transfer requests. However, it is only called when the `dlz_searched` list is not empty. This means that if the list is empty, the function is not executed, and the system returns an incorrect result.
+
+**Step 3: Introduce a New Check**
+To fix the vulnerability, the proposed patch introduces a new check to ensure that the `dlzAllowZonexfr` function is called even when the `dlz_searched` list is empty. This check verifies that the `questionName` is valid and that the `client.peeraddr` is authorized to perform zone transfers.
+
+**Step 4: Update the Return Statement**
+If the new check passes, the patch updates the return statement to call the `dlzAllowZonexfr` function with the correct parameters. This ensures that the system returns the correct result, even when the `dlz_searched` list is empty.
+
+**Step 5: Handle Edge Cases**
+The patch also includes additional checks to handle edge cases, such as when the `questionName` is invalid or the `client.peeraddr` is not authorized. In these cases, the system returns an error result, preventing potential security vulnerabilities.
+
+**Step 6: Verify the Fix**
+Finally, the patch includes verification steps to ensure that the fix is correct and does not introduce new vulnerabilities. This includes testing the system with various inputs and scenarios to validate the correctness of the patch.
+
+By following these steps, the proposed patch addresses the vulnerability in the DNS system, ensuring that zone transfer requests are handled correctly and securely, even when the `dlz_searched` list is empty.

@@ -1,0 +1,17 @@
+**Patch Explanation: Fixing a DNS Vulnerability**
+
+The proposed patch aims to address a vulnerability in the DNS (Domain Name System) code. The issue arises when handling DNS queries, specifically when the result of a query is not successful. In such cases, the code checks if a DLZ (Dynamically Loaded Zones) search has been performed. If it has, the code calls the `dlzAllowZonexfr` function to determine if a zone transfer is allowed.
+
+However, the current implementation has a flaw. It only checks if the `dlz_searched` list is empty, but it does not verify if the query class matches the expected value. This oversight can lead to a vulnerability, allowing unauthorized access to sensitive DNS data.
+
+To fix this issue, the proposed patch introduces an additional check to ensure that the query class matches the expected value. This is achieved by comparing the `result` variable with the `questionClass` variable.
+
+Here are the steps taken in the proposed patch:
+
+1. **Identify the vulnerability**: The patch identifies the vulnerability in the DNS code, specifically in the handling of unsuccessful query results.
+2. **Analyze the root cause**: The root cause of the vulnerability is determined to be the lack of verification of the query class.
+3. **Introduce a new check**: The patch introduces a new check to verify that the query class matches the expected value.
+4. **Compare result with questionClass**: The `result` variable is compared with the `questionClass` variable to ensure they match.
+5. **Enhance security**: By adding this additional check, the patch enhances the security of the DNS code, preventing unauthorized access to sensitive data.
+
+The proposed patch is a crucial fix to address the identified vulnerability, ensuring the DNS code is more secure and resilient to potential attacks. By introducing a simple yet effective check, the patch prevents malicious actors from exploiting the vulnerability, thereby protecting sensitive DNS data.

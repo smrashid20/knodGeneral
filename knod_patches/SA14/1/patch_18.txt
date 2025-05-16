@@ -1,0 +1,69 @@
+package master;
+
+import common.TlsState;
+import common.HandshakeStates;
+import common.HandshakeException;
+
+public class TlsClient {
+    public TlsState state;
+
+    public TlsClient() {
+        this.state = new TlsState();
+        this.state.handshakeStage = 0;
+        this.state.flags = 0;
+        this.state.handshakeComplete = false;
+        this.state.masterSecretDerived = false;
+        this.state.SSL3_FLAGS_CCS_OK = 0x0080;
+    }
+
+    public int ssl3_connect() {
+        int ret = -1;
+        switch (state.handshakeStage) {
+            case 0:
+                System.out.println("Client: Sending ClientHello");
+                state.handshakeStage = HandshakeStates.SSL3_ST_CR_FINISHED_A;
+                ret = 1;
+                break;
+            case HandshakeStates.SSL3_ST_CR_FINISHED_A:
+            case HandshakeStates.SSL3_ST_CR_FINISHED_B:
+                System.out.println("Client: In Finished state, setting CCS_OK");
+//start of generated patch
+System.out.println("Client: Sending ClientHello");
+//end of generated patch
+                ret = ssl3_get_finished();
+                if (ret <= 0)
+                    return ret;
+                state.handshakeStage = HandshakeStates.SSL_ST_OK;
+                break;
+            case HandshakeStates.SSL_ST_OK:
+                state.handshakeComplete = true;
+                ret = 1;
+                break;
+            default:
+                throw new HandshakeException("Client: Unknown handshake state");
+        }
+        return ret;
+    }
+
+    private int ssl3_get_finished() {
+        System.out.println("Client: ssl3_get_finished() succeeded");
+        return 1;
+    }
+
+    public int readChangeCipherSpec() {
+        if ((state.flags & state.SSL3_FLAGS_CCS_OK) == 0) {
+           return 0;
+        }
+        System.out.println("Client: CCS accepted");
+        state.flags &= ~state.SSL3_FLAGS_CCS_OK;
+        return 1;
+    }
+
+    public void readServerFinished() {
+        if (state.handshakeStage != HandshakeStates.SSL_ST_OK) {
+            throw new HandshakeException("Client: Not ready for Finished");
+        }
+        System.out.println("Client: Received Finished; handshake complete");
+        state.handshakeComplete = true;
+    }
+}

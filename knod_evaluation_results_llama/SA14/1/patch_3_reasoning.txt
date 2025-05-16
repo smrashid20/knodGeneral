@@ -1,0 +1,17 @@
+**Patch Explanation: Fixing a Vulnerability in the Handshake State**
+
+The proposed patch aims to address a vulnerability in the handshake state of an SSL/TLS connection. Specifically, it targets the `HandshakeStates.SSL3_ST_CR_FINISHED_A` and `HandshakeStates.SSL3_ST_CR_FINISHED_B` states, where the connection is in the "Finished" state.
+
+**Step 1: Identify the Vulnerability**
+The buggy code has a logical flaw in its handling of the "Finished" state. When the connection reaches this state, the code checks the return value of the `ssl3_get_finished()` function and updates the handshake stage to `HandshakeStates.SSL_ST_OK` only if the return value is greater than 0. However, this approach is incorrect because it ignores the possibility of a successful completion of the `ssl3_get_finished()` function with a return value of 0.
+
+**Step 2: Analyze the Consequences**
+The vulnerability can lead to a situation where the handshake stage is not updated correctly, potentially causing the connection to remain in an inconsistent state. This can result in unexpected behavior, such as incorrect encryption or authentication, which can compromise the security of the connection.
+
+**Step 3: Propose a Solution**
+The proposed patch addresses the vulnerability by removing the conditional check for the return value of `ssl3_get_finished()`. Instead, the function is called unconditionally, ensuring that the handshake stage is updated correctly regardless of the return value. This approach ensures that the connection is properly transitioned to the `HandshakeStates.SSL_ST_OK` state, even if `ssl3_get_finished()` returns 0.
+
+**Step 4: Verify the Fix**
+By applying the proposed patch, the handshake state is updated correctly, and the connection is properly transitioned to the `HandshakeStates.SSL_ST_OK` state. This ensures that the connection is in a consistent state, and the vulnerability is fixed.
+
+In summary, the proposed patch fixes a vulnerability in the handshake state by ensuring that the `ssl3_get_finished()` function is called unconditionally, regardless of its return value. This approach ensures that the connection is properly transitioned to the `HandshakeStates.SSL_ST_OK` state, fixing the vulnerability and preventing potential security issues.

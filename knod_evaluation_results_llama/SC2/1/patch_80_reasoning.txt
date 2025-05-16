@@ -1,0 +1,18 @@
+**Patch Explanation: Fixing a Vulnerability in Certificate Validation**
+
+The proposed patch aims to address a vulnerability in the certificate validation process. The issue arises from the way the code handles certain conditions when validating X.509 certificates. Here's a step-by-step breakdown of the changes introduced by the patch:
+
+**Current Issue:**
+The buggy code checks for specific conditions related to the certificate's curve and extensions. However, it does not properly handle the case where the certificate's flags are not set correctly. This oversight can lead to a vulnerability, allowing malicious certificates to pass validation.
+
+**Patch Solution:**
+The proposed patch introduces a simple yet effective solution to address this vulnerability. The patch checks if the certificate's flags (`x.ex_flags`) are identical to the expected flags (`X509.ex_flags`). If they are, the function immediately returns 0, indicating that the certificate is invalid.
+
+**Rationale:**
+The patch assumes that if the certificate's flags are not set correctly, it is likely a malicious attempt to bypass validation. By returning 0 in this case, the patch ensures that such certificates are rejected, preventing potential security breaches.
+
+**Impact:**
+The patch has a significant impact on the security of the certificate validation process. By rejecting certificates with incorrect flags, it prevents potential attacks that rely on exploiting this vulnerability. This change does not affect the validation of legitimate certificates, as they will have their flags set correctly.
+
+**Conclusion:**
+In summary, the proposed patch addresses a vulnerability in the certificate validation process by introducing a simple check for correct certificate flags. By rejecting certificates with incorrect flags, the patch enhances the security of the validation process, preventing potential attacks and ensuring the integrity of the system.

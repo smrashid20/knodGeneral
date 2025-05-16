@@ -1,0 +1,20 @@
+**Patch Explanation: Fixing a Vulnerability in the Handshake State**
+
+The proposed patch aims to address a vulnerability in the handshake state of an SSL/TLS connection. The buggy code has a flaw in its handling of the Finished state, which can lead to security issues. Here's a step-by-step breakdown of the changes introduced by the patch:
+
+**Step 1: Identify the Vulnerability**
+The buggy code has a case statement that handles the Finished state of the handshake (SSL3_ST_CR_FINISHED_A and SSL3_ST_CR_FINISHED_B). However, it directly sets the handshake stage to OK (SSL_ST_OK) without properly verifying the server's Finished message. This oversight can allow an attacker to manipulate the handshake and compromise the security of the connection.
+
+**Step 2: Introduce a New Function Call**
+The proposed patch replaces the buggy code with a single function call: `readServerFinished()`. This function is designed to properly read and verify the server's Finished message, ensuring that the handshake is secure.
+
+**Step 3: Verify the Server's Finished Message**
+The `readServerFinished()` function reads the server's Finished message and checks its contents. This includes verifying the message's integrity and authenticity, ensuring that it has not been tampered with or altered during transmission.
+
+**Step 4: Update the Handshake State**
+If the server's Finished message is verified successfully, the `readServerFinished()` function updates the handshake state to reflect the new status. This ensures that the handshake stage is accurately represented and that the connection can proceed securely.
+
+**Step 5: Return the Result**
+The `readServerFinished()` function returns the result of the verification process. If the verification fails, the function returns an error code, indicating that the handshake has failed. If the verification succeeds, the function returns a success code, allowing the handshake to proceed.
+
+By introducing the `readServerFinished()` function, the proposed patch ensures that the server's Finished message is properly verified, addressing the vulnerability in the buggy code. This change enhances the security of the SSL/TLS connection and prevents potential attacks that could exploit the flaw.

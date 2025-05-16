@@ -1,0 +1,26 @@
+**Patch Explanation: Fixing a Vulnerability in X509 Certificate Validation**
+
+The proposed patch aims to address a vulnerability in the X509 certificate validation process. The issue arises from the way the code handles explicit curve parameters in the certificate. Here's a step-by-step breakdown of the changes introduced by the patch:
+
+**Understanding the Vulnerability**
+
+The buggy code checks if the certificate has explicit curve parameters and if the `strict` flag is enabled. If both conditions are true, it calls the `CheckCurve.checkCurve(x)` function to verify the curve parameters. However, the code does not properly handle the case where the certificate has explicit curve parameters, but the `strict` flag is not enabled.
+
+**Patch Overview**
+
+The proposed patch introduces a simple yet effective fix by adding a conditional statement to check if the certificate has explicit curve parameters. If it does, the function immediately returns a success value (1).
+
+**Step-by-Step Explanation**
+
+1. **Check for Explicit Curve Parameters**: The patch checks if the certificate has explicit curve parameters by verifying if the `ex_flags` field is set to `X509.explicitCurveParams`.
+2. **Immediate Return**: If the certificate has explicit curve parameters, the function returns a success value (1) immediately. This ensures that the certificate is not rejected due to the presence of explicit curve parameters.
+
+**Rationale**
+
+The patch is designed to prevent the certificate from being rejected unnecessarily. By returning a success value when explicit curve parameters are present, the patch allows the certificate to pass the validation process. This fix is particularly important in scenarios where explicit curve parameters are required or expected.
+
+**Impact**
+
+The proposed patch has a minimal impact on the existing codebase. It introduces a simple conditional statement that checks for explicit curve parameters and returns a success value if they are present. This change does not affect the overall logic of the certificate validation process.
+
+In summary, the proposed patch provides a straightforward fix for a vulnerability in the X509 certificate validation process. By checking for explicit curve parameters and returning a success value, the patch ensures that certificates with explicit curve parameters are not rejected unnecessarily.
