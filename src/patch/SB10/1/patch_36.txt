@@ -1,0 +1,45 @@
+package main;
+
+import commons.*;
+
+public class Tls12Builder {
+    public static int BuildMessage(TlsContext ssl,
+                                   byte[] output,
+                                   int outSz,
+                                   byte[] input,
+                                   int inSz,
+                                   int type,
+                                   int hashOutput,
+                                   int sizeOnly,
+                                   int asyncOkay,
+                                   int epochOrder) {
+        BuildMsgArgs args;
+        BuildMsgArgs lcl_args = new BuildMsgArgs();
+        if (ssl == null) {
+            return CommonsConstants.BAD_FUNC_ARG;
+        }
+        args = lcl_args;
+        ssl.options.buildMsgState = CommonsConstants.BUILD_MSG_BEGIN;
+        if (ssl.options.tls1_1) {
+            args.ivSz = CommonsConstants.BLOCK_SIZE;
+        }
+        if (args.ivSz > 0) {
+            args.iv = new byte[args.ivSz];
+            int ret = ssl.rng.generateBlock(args.iv, args.ivSz);
+            if (ret != 0) {
+                return ret;
+            }
+            ssl.lastIv = args.iv;
+            
+//start of generated patch
+for (int i = 0;i < ret.length;i++)
+{
+ret[i] = 0;
+}
+//end of generated patch
+
+        }
+        args.sz = inSz + args.ivSz;
+        return args.sz;
+    }
+}

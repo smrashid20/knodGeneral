@@ -1,0 +1,148 @@
+package main;
+
+import commons.*;
+
+public class Ssl3GetKeyExchange {
+    public static int ssl3_get_key_exchange(SSL s) {
+        int al = 0, ok = 0;
+        long n;
+        int alg_k, alg_a;
+        byte[] p;
+        RSA rsa = null;
+        DH dh = null;
+        ECKey ecdh = null;
+        SSL.Session.SessCert sessCert;
+        CipherSuite cipher = s.s3.tmp.new_cipher;
+
+        n = s.method.ssl_get_message(
+                s,
+                Constants.SSL3_ST_CR_KEY_EXCH_A,
+                Constants.SSL3_ST_CR_KEY_EXCH_B,
+                -1,
+                s.max_cert_list,
+                s.okHolder
+        );
+        if (! s.okHolder[0]) return (int)n;
+
+        alg_k = cipher.algorithm_mkey;
+        alg_a = cipher.algorithm_auth;
+
+        if (s.s3.tmp.message_type != Constants.SSL3_MT_SERVER_KEY_EXCHANGE) {
+            if ((alg_k & (Constants.SSL_kDHE | Constants.SSL_kECDHE)) != 0) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_UNEXPECTED_MESSAGE);
+                al = Constants.SSL_AD_UNEXPECTED_MESSAGE;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+            s.s3.tmp.reuse_message = 1;
+            return 1;
+        }
+
+        p = s.init_msg;
+        sessCert = s.session.sess_cert;
+        if (sessCert != null) {
+            sessCert.peer_rsa_tmp = null;
+            sessCert.peer_dh_tmp  = null;
+            sessCert.peer_ecdh_tmp= null;
+        }
+        else {
+            s.session.sess_cert = new SSL.Session.SessCert();
+            sessCert = s.session.sess_cert;
+        }
+
+//start of generated patch
+Helper.n2s(p);
+//end of generated patch
+        if ((alg_k & Constants.SSL_kRSA) != 0) {
+            rsa = new RSA();
+            int paramLen = 2;
+            if (paramLen > n) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_LENGTH_TOO_SHORT);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+
+            int[] iHolder = new int[1];
+            Helper.n2s(p, iHolder);
+            int i = iHolder[0];
+            if (i > n - paramLen) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_BAD_RSA_MODULUS_LENGTH);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+            rsa.n = Helper.BN_bin2bn(p, i, null);
+
+            p = slice(p, i);
+            n -= paramLen + i;
+
+            if (2 > n) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_LENGTH_TOO_SHORT);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+
+            Helper.n2s(p, iHolder);
+            i = iHolder[0];
+
+            if (i > n - 2) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_BAD_RSA_E_LENGTH);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+            rsa.e = Helper.BN_bin2bn(p, i, null);
+            p = slice(p, i);
+            n -= 2 + i;
+
+            sessCert.peer_rsa_tmp = rsa;
+        }
+
+        else if ((alg_k & Constants.SSL_kDHE) != 0) {
+            dh = new DH();
+            int paramLen = 2;
+            if (paramLen > n) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_LENGTH_TOO_SHORT);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+            int[] iHolder = new int[1];
+            Helper.n2s(p, iHolder);
+            int i = iHolder[0];
+            if (i > n - paramLen) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_BAD_DH_P_LENGTH);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+            dh.p = Helper.BN_bin2bn(p, i, null);
+            p = slice(p, i);
+            n -= paramLen + i;
+            sessCert.peer_dh_tmp = dh;
+        }
+        else if ((alg_k & Constants.SSL_kECDHE) != 0) {
+            ecdh = new ECKey();
+            sessCert.peer_ecdh_tmp = ecdh;
+        }
+        else {
+        }
+
+        return 1;
+    }
+
+    private static byte[] slice(byte[] a, int len) {
+        byte[] r = new byte[a.length - len];
+        System.arraycopy(a, len, r, 0, r.length);
+        return r;
+    }
+}

@@ -1,0 +1,33 @@
+package main;
+
+import commons.*;
+
+import java.io.IOException;
+import static commons.Connections.*;
+
+public class XMPPConnection{
+    public boolean socketClosed;
+    public boolean connected;
+    public boolean wasAuthenticated;
+    public SASLFeatureReceived saslFeatureReceived;
+    public ConnectionConfiguration config;
+
+    protected void connectInternal()
+            throws SmackException, IOException, XMPPException {
+        Connections.connectUsingConfiguration();
+        socketClosed = false;
+        initConnection();
+        
+//start of generated patch
+if (!saslFeatureReceived.checkIfSuccessOrWaitOrThrow() ){
+}
+//end of generated patch
+
+        connected = true;
+        callConnectionConnectedListener();
+        if (wasAuthenticated) {
+            login();
+            notifyReconnection();
+        }
+    }
+}

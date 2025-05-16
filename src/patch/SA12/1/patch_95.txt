@@ -1,0 +1,85 @@
+package main;
+
+import commons.*;
+
+public class Tls13FinishedHandler {
+    public static int DoTls13Finished(WOLFSSL ssl, byte[] input, int[] inOutIdx,
+                                      int size, int totalSz, int sniff) {
+        int ret;
+        int finishedSz = 0;
+        byte[] secret;
+        byte[] mac = new byte[32];
+
+        Tls13Helper.WOLFSSL_START(Constants.WC_FUNC_FINISHED_DO);
+        
+//start of generated patch
+WOLFSSL_ENTER("DoTls13Finished",Constants.decrypt_error);
+//end of generated patch
+
+
+        if (inOutIdx[0] + size + ssl.keys.padSz > totalSz)
+            return Constants.BUFFER_E;
+
+        if (ssl.options.handShakeDone) {
+            ret = Tls13Helper.DeriveFinishedSecret(ssl, ssl.clientSecret,
+                    ssl.keys.client_write_MAC_secret);
+            if (ret != 0)
+                return ret;
+            secret = ssl.keys.client_write_MAC_secret;
+        }
+        else if (ssl.options.side == Constants.WOLFSSL_CLIENT_END) {
+            ret = Tls13Helper.DeriveFinishedSecret(ssl, ssl.clientSecret,
+                    ssl.keys.client_write_MAC_secret);
+            if (ret != 0)
+                return ret;
+            ret = Tls13Helper.DeriveFinishedSecret(ssl, ssl.serverSecret,
+                    ssl.keys.server_write_MAC_secret);
+            if (ret != 0)
+                return ret;
+            secret = ssl.keys.server_write_MAC_secret;
+        }
+        else {
+            secret = ssl.keys.client_write_MAC_secret;
+        }
+
+        if (sniff == Constants.NO_SNIFF) {
+            ret = Tls13Helper.BuildTls13HandshakeHmac(ssl, secret, mac,
+                    new int[]{ finishedSz });
+            if (ret != 0)
+                return ret;
+            if (size != finishedSz)
+                return Constants.BUFFER_ERROR;
+        }
+
+        if (sniff == Constants.NO_SNIFF) {
+            if (Tls13Helper.XMEMCMP(input, inOutIdx[0], mac, size) != 0) {
+                Tls13Helper.SendAlert(ssl, Constants.alert_fatal,
+                        Constants.decrypt_error);
+                return Constants.VERIFY_FINISHED_ERROR;
+            }
+        }
+
+        inOutIdx[0] += size + ssl.keys.padSz;
+
+        if (ssl.options.side == Constants.WOLFSSL_SERVER_END &&
+                !ssl.options.handShakeDone) {
+            ret = Tls13Helper.SetKeysSide(ssl, Constants.DECRYPT_SIDE_ONLY);
+            if (ret != 0)
+                return ret;
+        }
+
+        if (ssl.options.side == Constants.WOLFSSL_CLIENT_END)
+            ssl.options.serverState = Constants.SERVER_FINISHED_COMPLETE;
+
+        if (ssl.options.side == Constants.WOLFSSL_SERVER_END) {
+            ssl.options.clientState = Constants.CLIENT_FINISHED_COMPLETE;
+            ssl.options.handShakeState = Constants.HANDSHAKE_DONE;
+            ssl.options.handShakeDone = true;
+        }
+
+        Tls13Helper.WOLFSSL_LEAVE("DoTls13Finished", 0);
+        Tls13Helper.WOLFSSL_END(Constants.WC_FUNC_FINISHED_DO);
+
+        return 0;
+    }
+}

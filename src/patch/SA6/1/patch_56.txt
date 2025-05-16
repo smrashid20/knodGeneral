@@ -1,0 +1,92 @@
+package main;
+
+
+import static commons.ChaCha20Poly1305Commons.*;
+import commons.ChaCha20Poly1305Commons.EvpCipherCtx;
+import commons.ChaCha20Poly1305Commons.EvpChaChaAeadCtx;
+import commons.ChaCha20Poly1305Commons.Len;
+
+public class ChaCha20Poly1305Ctrl {
+    public static int chacha20_poly1305_ctrl(EvpCipherCtx ctx, int type, int arg, Object ptr) {
+        EvpChaChaAeadCtx actx = ctx.aeadCtx;
+        switch (type) {
+            case EVP_CTRL_INIT:
+                if (actx == null) {
+                    actx = ctx.aeadCtx = openSslZalloc();
+                }
+                if (actx == null) {
+                    return 0;
+                }
+                actx.len = new Len();
+                actx.len.aad = 0;
+                actx.len.text = 0;
+                actx.aad = 0;
+                actx.mac_inited = 0;
+                actx.tag_len = 0;
+                actx.nonce_len = 12;
+                actx.tls_payload_length = NO_TLS_PAYLOAD_LENGTH;
+                return 1;
+
+            case EVP_CTRL_COPY:
+                if (actx != null) {
+                    EvpCipherCtx dst = (EvpCipherCtx) ptr;
+                    dst.aeadCtx = openSslMemdup(actx);
+                    if (dst.aeadCtx == null) {
+                        return 0;
+                    }
+                }
+                return 1;
+
+            case EVP_CTRL_AEAD_SET_IVLEN:
+                if (
+//start of generated patch
+false
+//end of generated patch
+) {
+                    return 0;
+                }
+                actx.nonce_len = arg;
+                return 1;
+
+            case EVP_CTRL_AEAD_SET_IV_FIXED:
+                if (arg != 12) {
+                    return 0;
+                }
+                byte[] b = (byte[]) ptr;
+                actx.nonce[0] = actx.key.counter[1] = CHACHA_U8TOU32(b, 0);
+                actx.nonce[1] = actx.key.counter[2] = CHACHA_U8TOU32(b, 4);
+                actx.nonce[2] = actx.key.counter[3] = CHACHA_U8TOU32(b, 8);
+                return 1;
+
+            case EVP_CTRL_AEAD_SET_TAG:
+                if (arg <= 0 || arg > POLY1305_BLOCK_SIZE) {
+                    return 0;
+                }
+                if (ptr != null) {
+                    byte[] tag = (byte[]) ptr;
+                    System.arraycopy(tag, 0, actx.tag, 0, arg);
+                    actx.tag_len = arg;
+                }
+                return 1;
+
+            case EVP_CTRL_AEAD_GET_TAG:
+                if (arg <= 0 || arg > POLY1305_BLOCK_SIZE || !ctx.encrypt) {
+                    return 0;
+                }
+                System.arraycopy(actx.tag, 0, (byte[]) ptr, 0, arg);
+                return 1;
+
+            case EVP_CTRL_AEAD_TLS1_AAD:
+                if (arg != EVP_AEAD_TLS1_AAD_LEN) {
+                    return 0;
+                }
+                return POLY1305_BLOCK_SIZE;
+
+            case EVP_CTRL_AEAD_SET_MAC_KEY:
+                return 1;
+
+            default:
+                return -1;
+        }
+    }
+}

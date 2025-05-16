@@ -1,0 +1,12 @@
+[INFO] Generating general AST patches...
+finish loading vocabulary, node vocabulary: 1087 , edge vocabulary: 152
+discard: [0, 0, 0, 0] , sum: 0
+1 last id: 1
+identifier dataset load finish
+beam size: 200
+0 src: 59 tgt: 3 oom: 0
+1 [1]
+[INFO] Skipping insert AST generation: no content in JSON (/home/KNOD/src/../data/general_input/input_insert_ast.json)
+[INFO] Skipping empty hypo file: /home/KNOD/src/../data/general_output/general.txt
+[WARN] Skipping missing hypo file: /home/KNOD/src/../data/general_output/insert.txt
+[ERROR] No valid hypo files found. Aborting reranking.

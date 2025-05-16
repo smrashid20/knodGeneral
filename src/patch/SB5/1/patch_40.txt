@@ -1,0 +1,85 @@
+package main;
+
+import commons.*;
+
+public class CertImporter {
+    public static int gnutls_x509_crt_import(GnutlsX509Crt cert, GnutlsDatum data, int format) {
+        int result = 0;
+        int version;
+        if (cert == null) {
+            GnutlsUtils.gnutls_assert();
+            return GnutlsErrors.GNUTLS_E_INVALID_REQUEST;
+        }
+        if (cert.der.data != null) {
+            GnutlsUtils.gnutls_free(cert.der);
+            cert.der.data = null;
+        }
+        if (format == GnutlsConstants.GNUTLS_X509_FMT_PEM) {
+            result = GnutlsUtils._gnutls_fbase64_decode(GnutlsConstants.PEM_X509_CERT2, data.data, data.size, cert.der);
+            if (result <= 0) {
+                result = GnutlsUtils._gnutls_fbase64_decode(GnutlsConstants.PEM_X509_CERT, data.data, data.size, cert.der);
+                if (result < 0) {
+                    GnutlsUtils.gnutls_assert();
+                    return result;
+                }
+            }
+        } else {
+            result = GnutlsUtils._gnutls_set_datum(cert.der, data.data, data.size);
+            if (result < 0) {
+                GnutlsUtils.gnutls_assert();
+                return result;
+            }
+        }
+        if (cert.expanded) {
+            result = GnutlsUtils.crt_reinit(cert);
+            if (result < 0) {
+                GnutlsUtils.gnutls_assert();
+                GnutlsUtils._gnutls_free_datum(cert.der);
+                return result;
+            }
+        }
+        cert.expanded = true;
+        result = GnutlsUtils.asn1_der_decoding(cert.cert, cert.der.data, cert.der.size, null);
+        if (result != GnutlsConstants.ASN1_SUCCESS) {
+            result = GnutlsUtils._gnutls_asn2err(result);
+            GnutlsUtils.gnutls_assert();
+            GnutlsUtils._gnutls_free_datum(cert.der);
+            return result;
+        }
+        
+//start of generated patch
+--
+//end of generated patch
+
+        if (result < 0) {
+            GnutlsUtils.gnutls_assert();
+            GnutlsUtils._gnutls_free_datum(cert.der);
+            return result;
+        }
+        result = GnutlsUtils._gnutls_x509_get_raw_field2(cert.cert, cert.der, "tbsCertificate.subject.rdnSequence", cert.rawDn);
+        if (result < 0) {
+            GnutlsUtils.gnutls_assert();
+            GnutlsUtils._gnutls_free_datum(cert.der);
+            return result;
+        }
+        result = GnutlsUtils._gnutls_x509_get_raw_field2(cert.cert, cert.der, "tbsCertificate.subjectPublicKeyInfo", cert.rawSpki);
+        if (result < 0) {
+            GnutlsUtils.gnutls_assert();
+            GnutlsUtils._gnutls_free_datum(cert.der);
+            return result;
+        }
+        version = GnutlsUtils.gnutls_x509_crt_get_version(cert);
+        if (version < 3) {
+            GnutlsDatum exts = new GnutlsDatum();
+            result = GnutlsUtils._gnutls_x509_get_raw_field2(cert.cert, cert.der, "tbsCertificate.extensions", exts);
+            if (result >= 0 && exts.size > 0) {
+                GnutlsUtils.gnutls_assert();
+                GnutlsUtils._gnutls_debug_log("error: extensions present in certificate with version " + version);
+                GnutlsUtils._gnutls_free_datum(cert.der);
+                return GnutlsErrors.GNUTLS_E_X509_CERTIFICATE_ERROR;
+            }
+        }
+        cert.useExtensions = true;
+        return 0;
+    }
+}

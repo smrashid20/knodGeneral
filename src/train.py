@@ -107,6 +107,7 @@ def train(model, train_dataset, valid_dataset, epochs, save_dir):
         oom, nan = 0, 0
         start_time = time.time()
         for i, batch in enumerate(train_loader):
+            print("Epoch: {}".format(i+1))
             batch = {
                 k: v.squeeze(0).to(devices_id[0]) for (k, v) in batch.items()
             }
@@ -141,7 +142,7 @@ def train(model, train_dataset, valid_dataset, epochs, save_dir):
                     del father_rule_loss, father_loss, edge_rule_loss, edge_loss, node_loss, loss
                 except Exception as e:
                     pass
-            if i % 1000 == 0 and i > 0:
+            if i % 1 == 0 and i > 0:
                 info = "epoch: {}, step: {}/{}, loss: {} ({}, {}, {}, {}, {}), lr: {}, " \
                        "oom: {}, nan: {}, time: {}s, ".format(
                     epoch + 1, i, len(train_loader),
@@ -209,8 +210,8 @@ def trainer_main(training_data_path, validating_data_path, save_dir, epochs=2):
 
 if __name__ == "__main__":
     if torch.cuda.is_available():
-        os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
-        devices_id = [1, 5, 6, 7]
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
+        devices_id = [0, 1, 2, 3]
 
     training_data_path = SRC_DIR + '../data/general_training_ast.json'
     validating_data_path = SRC_DIR + '../data/general_validation_ast.json'

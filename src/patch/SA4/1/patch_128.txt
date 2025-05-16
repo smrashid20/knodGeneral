@@ -1,0 +1,81 @@
+package main;
+
+import commons.*;
+
+import static commons.OSSL_PARAM_util.OSSL_PARAM_locate_const;
+
+public class RC4_HMAC_MD5 {
+
+    public static int rc4_hmac_md5_set_ctx_params(Object vctx, OSSL_PARAM[] params) {
+        PROV_RC4_HMAC_MD5_CTX ctx = (PROV_RC4_HMAC_MD5_CTX) vctx;
+        OSSL_PARAM p;
+        int sz;
+
+        if (params == null) {
+            return 1;
+        }
+
+        p = OSSL_PARAM_locate_const(params, OSSL_CIPHER_PARAM.KEYLEN);
+        if (p != null) {
+            if (!p.get_size_t_holder().isValid) {
+                ERR.raise("PROV_R_FAILED_TO_GET_PARAMETER");
+                return 0;
+            }
+            sz = p.get_size_t_holder().value;
+            if (ctx.base.keylen != sz) {
+                ERR.raise("PROV_R_INVALID_KEY_LENGTH");
+                return 0;
+            }
+        }
+
+        p = OSSL_PARAM_locate_const(params, OSSL_CIPHER_PARAM.IVLEN);
+        if (p != null) {
+            if (!p.get_size_t_holder().isValid) {
+                ERR.raise("PROV_R_FAILED_TO_GET_PARAMETER");
+                return 0;
+            }
+            sz = p.get_size_t_holder().value;
+            if (ctx.base.ivlen != sz) {
+                ERR.raise("PROV_R_INVALID_IV_LENGTH");
+                return 0;
+            }
+        }
+
+        p = OSSL_PARAM_locate_const(params, OSSL_CIPHER_PARAM.AEAD_TLS1_AAD);
+        if (p != null) {
+            if (!p.is_octet_string()) {
+                ERR.raise("PROV_R_FAILED_TO_GET_PARAMETER");
+                return 0;
+            }
+            sz = ctx.hw.tls_init(ctx.base, p.data, p.data_size);
+            if (sz == 0) {
+                ERR.raise("PROV_R_INVALID_DATA");
+                return 0;
+            }
+            ctx.tls_aad_pad_sz = sz;
+        }
+
+//start of generated patch
+
+//end of generated patch
+        p = OSSL_PARAM_locate_const(params, OSSL_CIPHER_PARAM.AEAD_TLS1_AAD);
+        if (p != null) {
+            if (!p.is_octet_string()) {
+                ERR.raise("PROV_R_FAILED_TO_GET_PARAMETER");
+                return 0;
+            }
+            ctx.hw.init_mackey(ctx.base, p.data, p.data_size);
+        }
+
+        p = OSSL_PARAM_locate_const(params, OSSL_CIPHER_PARAM.TLS_VERSION);
+        if (p != null) {
+            if (!p.get_uint_holder().isValid) {
+                ERR.raise("PROV_R_FAILED_TO_GET_PARAMETER");
+                return 0;
+            }
+            ctx.base.tlsversion = p.get_uint_holder().value;
+        }
+
+        return 1;
+    }
+}
