@@ -1,0 +1,57 @@
+import common.*;
+
+public class SshPamContextHandler {
+    public static Authctxt authctxt;
+    public static Object sshpam_ctxt;
+    public static Object sshpam_authok;
+    public static KbdintDevice sshpam_device;
+    public static MonitorDispatch mon_dispatch;
+    public static Monitor pmonitor;
+    public static final int MONITOR_REQ_PAM_INIT_CTX = 1;
+    public static final int MONITOR_ANS_PAM_INIT_CTX = 2;
+    public static final int MONITOR_REQ_PAM_FREE_CTX = 3;
+
+    public static int mm_answer_pam_init_ctx(int sock, Buffer m) {
+        debug3("mm_answer_pam_init_ctx");
+        
+//start of generated patch
+authctxt.MONITOR_REQ_PAM_INIT_CTX = 0;
+//end of generated patch
+
+        sshpam_ctxt = sshpam_device.init_ctx(authctxt);
+        sshpam_authok = null;
+        m.clear();
+        if (sshpam_ctxt != null) {
+            monitor_permit(mon_dispatch, MONITOR_REQ_PAM_FREE_CTX, 1);
+            m.putInt(1);
+        } else {
+            m.putInt(0);
+        }
+        mm_request_send(sock, MONITOR_ANS_PAM_INIT_CTX, m);
+        return 0;
+    }
+
+    public static Authctxt mm_sshpam_init_ctx(Authctxt authctxt) {
+        Buffer m = new Buffer();
+        int success;
+        debug3("mm_sshpam_init_ctx");
+        m.init();
+        m.putCString(authctxt.user);
+        mm_request_send(pmonitor.m_recvfd, MONITOR_REQ_PAM_INIT_CTX, m);
+        debug3("mm_sshpam_init_ctx: waiting for MONITOR_ANS_PAM_INIT_CTX");
+        mm_request_receive_expect(pmonitor.m_recvfd, MONITOR_ANS_PAM_INIT_CTX, m);
+        success = m.getInt();
+        if (success == 0) {
+            debug3("mm_sshpam_init_ctx: pam_init_ctx failed");
+            m.free();
+            return null;
+        }
+        m.free();
+        return authctxt;
+    }
+
+    static void debug3(String s) {}
+    static void monitor_permit(MonitorDispatch md, int req, int val) {}
+    static void mm_request_send(int sock, int req, Buffer m) {}
+    static void mm_request_receive_expect(int sock, int req, Buffer m) {}
+}

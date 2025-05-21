@@ -1,0 +1,107 @@
+package main;
+
+import commons.*;
+
+public class TlsCrlVerifier {
+    public static int tls_verify_crl(int ok, X509StoreCtx ctx) {
+        int i = 0, n = 0, res = 0;
+        X509Name subject = null;
+        X509Name issuer = null;
+        X509Certificate xs = null;
+        CrlList crls = null;
+        X509StoreCtx storeCtx = null;
+        if (Commons.tls_crl_store == null) {
+            return ok;
+        }
+        Commons.tls_log("CRL store present, checking client certificate against configured CRLs");
+        xs = ctx.getCurrentCert();
+        subject = xs.getSubjectName();
+        Commons.pr_trace_msg("verifying cert: subject = '%s'", subject.toString());
+        issuer = xs.getIssuerName();
+        Commons.pr_trace_msg("verifying cert: issuer = '%s'", issuer.toString());
+        storeCtx = X509StoreCtx.newInstance();
+        if (storeCtx.init(Commons.tls_crl_store, null, null) <= 0) {
+            Commons.tls_log("error initializing CRL store context");
+            storeCtx.free();
+            return ok;
+        }
+        if (Commons.OPENSSL_VERSION_NUMBER >= Commons.OPENSSL_1_1 && !Commons.HAVE_LIBRESSL) {
+            crls = storeCtx.get1_crls(subject);
+        }
+        else if (Commons.OPENSSL_VERSION_NUMBER >= Commons.OPENSSL_1_0 && !Commons.HAVE_LIBRESSL) {
+            crls = Commons.get1_crls(storeCtx, subject);
+        }
+        else {
+            crls = null;
+        }
+        if (crls != null) {
+            for (i = 0; i < crls.size(); i++) {
+                Crl crl = crls.get(i);
+                Commons.tls_log("CA CRL: Issuer: " + issuer.toString());
+                PubKey pubkey = xs.getPublicKey();
+                res = crl.verify(pubkey);
+                if (res <= 0) {
+                    Commons.tls_log("invalid signature on CRL");
+                    ctx.setError(Commons.X509_V_ERR_CRL_SIGNATURE_FAILURE);
+                    crls.free();
+                    storeCtx.cleanup();
+                    storeCtx.free();
+                    return Commons.FALSE;
+                }
+                res = crl.nextUpdateCmp();
+                if (res == 0) {
+                    Commons.tls_log("CRL has invalid nextUpdate field");
+                    ctx.setError(Commons.X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD);
+                    crls.free();
+                    storeCtx.cleanup();
+                    storeCtx.free();
+                    return Commons.FALSE;
+                }
+                if (res < 0) {
+                    Commons.tls_log("CRL is expired, revoking all certificates until an updated CRL is obtained");
+                    ctx.setError(Commons.X509_V_ERR_CRL_HAS_EXPIRED);
+                    crls.free();
+                    storeCtx.cleanup();
+                    storeCtx.free();
+                    return Commons.FALSE;
+                }
+            }
+            crls.free();
+            crls = null;
+        }
+        
+//start of generated patch
+if (Commons.OPENSSL_VERSION_NUMBER >= Commons.OPENSSL_1_1 ){
+crls = Commons.get1_crls(subject);
+}
+else {
+crls = null;
+}
+//end of generated patch
+
+        if (crls != null) {
+            for (i = 0; i < crls.size(); i++) {
+                Crl crl = crls.get(i);
+                n = crl.revokedCount();
+                for (int j = 0; j < n; j++) {
+                    X509Revoked revoked = crl.getRevoked(j);
+                    SerialNumber sn = revoked.getSerialNumber();
+                    if (sn.equals(xs.getSerialNumber())) {
+                        Commons.tls_log(
+                                "certificate with serial number " + sn +
+                                        " revoked per CRL from issuer '" + issuer.toString() + "'");
+                        ctx.setError(Commons.X509_V_ERR_CERT_REVOKED);
+                        crls.free();
+                        storeCtx.cleanup();
+                        storeCtx.free();
+                        return Commons.FALSE;
+                    }
+                }
+            }
+            crls.free();
+        }
+        storeCtx.cleanup();
+        storeCtx.free();
+        return ok;
+    }
+}

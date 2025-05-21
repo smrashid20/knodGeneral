@@ -1,0 +1,166 @@
+package main;
+
+import commons.*;
+
+public class CertificateVerifier {
+    public static int x509_check_signature(X509Certificate issuer,
+                                           AlgorithmIdentifier signature,
+                                           byte[] signValue,
+                                           int signValueLen,
+                                           byte[] signedData,
+                                           int signedDataLen)
+    {
+        CryptoPublicKey pk;
+        byte[] data;
+        int dataLen;
+        ASN1Hdr hdr = new ASN1Hdr();
+        ASN1Oid oid = new ASN1Oid();
+        byte[] hash = new byte[64];
+        int hashLen;
+        int[] addrLen = new int[] { signedDataLen };
+        byte[][] addr = new byte[][] { signedData };
+        if (!OidUtils.x509PkcsOid(signature.oid) ||
+                signature.oid.len != 7 ||
+                signature.oid.oid[5] != 1)
+        {
+            Logger.log(Logger.MSG_DEBUG, "X509: Unrecognized signature algorithm");
+            return -1;
+        }
+        pk = Crypto.importKey(issuer.getPublicKey(), issuer.getPublicKeyLen());
+        if (pk == null)
+            return -1;
+        dataLen = signValueLen;
+        data = new byte[dataLen];
+        if (Crypto.decryptPkcs1(pk, signValue, signValueLen, data, new int[]{dataLen}) < 0) {
+            Logger.log(Logger.MSG_DEBUG, "X509: Failed to decrypt signature");
+            Crypto.freeKey(pk);
+            return -1;
+        }
+        Crypto.freeKey(pk);
+        Logger.hexdump(Logger.MSG_MSGDUMP, "X509: Signature data D", data, dataLen);
+        if (ASN1.getNext(data, dataLen, hdr) < 0 ||
+                hdr.clazz != ASN1.CLASS_UNIVERSAL ||
+                hdr.tag != ASN1.TAG_SEQUENCE)
+        {
+            Logger.log(Logger.MSG_DEBUG, String.format(
+                    "X509: Expected SEQUENCE (DigestInfo) - found class %d tag 0x%x",
+                    hdr.clazz, hdr.tag));
+            return -1;
+        }
+        int pos = hdr.payloadOffset;
+        int end = pos + hdr.length;
+        if (ASN1.getNext(data, pos, end - pos, hdr) < 0 ||
+                hdr.clazz != ASN1.CLASS_UNIVERSAL ||
+                hdr.tag != ASN1.TAG_SEQUENCE)
+        {
+            Logger.log(Logger.MSG_DEBUG, String.format(
+                    "X509: Expected SEQUENCE (AlgorithmIdentifier) - found class %d tag 0x%x",
+                    hdr.clazz, hdr.tag));
+            return -1;
+        }
+        int daEnd = hdr.payloadOffset + hdr.length;
+        
+//start of generated patch
+int next = ASN1.getOid(data,hdr.oid);
+//end of generated patch
+
+        if (OidUtils.x509Sha1Oid(oid)) {
+            if (signature.oid.oid[6] != 5) {
+                Logger.log(Logger.MSG_DEBUG, String.format(
+                        "X509: digestAlgorithm SHA1 does not match with certificate signatureAlgorithm (%d)",
+                        signature.oid.oid[6]));
+                return -1;
+            }
+        } else if (OidUtils.x509Sha256Oid(oid)) {
+            if (signature.oid.oid[6] != 11) {
+                Logger.log(Logger.MSG_DEBUG, String.format(
+                        "X509: digestAlgorithm SHA256 does not match with certificate signatureAlgorithm (%d)",
+                        signature.oid.oid[6]));
+                return -1;
+            }
+        } else if (OidUtils.x509Sha384Oid(oid)) {
+            if (signature.oid.oid[6] != 12) {
+                Logger.log(Logger.MSG_DEBUG, String.format(
+                        "X509: digestAlgorithm SHA384 does not match with certificate signatureAlgorithm (%d)",
+                        signature.oid.oid[6]));
+                return -1;
+            }
+        } else if (OidUtils.x509Sha512Oid(oid)) {
+            if (signature.oid.oid[6] != 13) {
+                Logger.log(Logger.MSG_DEBUG, String.format(
+                        "X509: digestAlgorithm SHA512 does not match with certificate signatureAlgorithm (%d)",
+                        signature.oid.oid[6]));
+                return -1;
+            }
+        } else if (!OidUtils.x509DigestOid(oid)) {
+            Logger.log(Logger.MSG_DEBUG, "X509: Unrecognized digestAlgorithm");
+            return -1;
+        } else {
+            switch (oid.oid[5]) {
+                case 5:
+                    if (signature.oid.oid[6] != 4) {
+                        Logger.log(Logger.MSG_DEBUG, String.format(
+                                "X509: digestAlgorithm MD5 does not match with certificate signatureAlgorithm (%d)",
+                                signature.oid.oid[6]));
+                        return -1;
+                    }
+                    break;
+                default:
+                    Logger.log(Logger.MSG_DEBUG, String.format(
+                            "X509: Unsupported digestAlgorithm (%d)", oid.oid[5]));
+                    return -1;
+            }
+        }
+        pos = daEnd;
+        if (ASN1.getNext(data, pos, end - pos, hdr) < 0 ||
+                hdr.clazz != ASN1.CLASS_UNIVERSAL ||
+                hdr.tag != ASN1.TAG_OCTET_STRING)
+        {
+            Logger.log(Logger.MSG_DEBUG, String.format(
+                    "X509: Expected OCTETSTRING (Digest) - found class %d tag 0x%x",
+                    hdr.clazz, hdr.tag));
+            return -1;
+        }
+        Logger.hexdump(Logger.MSG_MSGDUMP, "X509: Decrypted Digest", data, hdr.payloadOffset, hdr.length);
+        switch (signature.oid.oid[6]) {
+            case 4:
+                Hash.md5(addr, addrLen, hash);
+                hashLen = 16;
+                break;
+            case 5:
+                Hash.sha1(addr, addrLen, hash);
+                hashLen = 20;
+                break;
+            case 11:
+                Hash.sha256(addr, addrLen, hash);
+                hashLen = 32;
+                break;
+            case 12:
+                Hash.sha384(addr, addrLen, hash);
+                hashLen = 48;
+                break;
+            case 13:
+                Hash.sha512(addr, addrLen, hash);
+                hashLen = 64;
+                break;
+            default:
+                Logger.log(Logger.MSG_INFO, String.format(
+                        "X509: Unsupported certificate signature algorithm (%d)", signature.oid.oid[6]));
+                return -1;
+        }
+        if (hdr.length != hashLen ||
+                !ByteUtils.equals(data, hdr.payloadOffset, hash, 0, hdr.length))
+        {
+            Logger.log(Logger.MSG_INFO, "X509: Certificate Digest does not match with calculated tbsCertificate hash");
+            return -1;
+        }
+        if (hdr.payloadOffset + hdr.length < dataLen) {
+            Logger.hexdump(Logger.MSG_INFO,
+                    "X509: Extra data after certificate signature hash",
+                    data, hdr.payloadOffset + hdr.length, dataLen - hdr.payloadOffset - hdr.length);
+            return -1;
+        }
+        Logger.log(Logger.MSG_DEBUG, "X509: Certificate Digest matches with calculated tbsCertificate hash");
+        return 0;
+    }
+}

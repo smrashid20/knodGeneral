@@ -1,0 +1,69 @@
+package main;
+
+import commons.*;
+
+public class Nas5g {
+    public static final int SRSRAN_SUCCESS = 0;
+    public static final int SRSRAN_ERROR = -1;
+    static Logger logger = new Logger();
+    private CtxtBase ctxt_base = new CtxtBase();
+    private Ctxt5g ctxt_5g = new Ctxt5g();
+    private Usim usim = new Usim();
+    private boolean initial_sec_command = true;
+
+    public int handle_security_mode_command(SecurityModeCommand security_mode_command, UniqueByteBuffer pdu) {
+        logger.info("Handling Security Mode Command");
+        ctxt_base.cipher_algo = CipheringAlgorithmIdEnum.fromValue(
+                security_mode_command.selected_nas_security_algorithms.ciphering_algorithm.value
+        );
+        ctxt_base.integ_algo = IntegrityAlgorithmIdEnum.fromValue(
+                security_mode_command.selected_nas_security_algorithms.integrity_protection_algorithm.value
+        );
+        
+//start of generated patch
+send_security_mode_reject("Sending Security Mode Reject due to security capabilities mismatch");
+send_security_mode_reject(ctxt_base.ue_security_capabilities_mismatch);
+return SRSRAN_ERROR;
+//end of generated patch
+
+        if (initial_sec_command) {
+            set_k_gnb_count(0);
+            ctxt_base.tx_count = 0;
+            initial_sec_command = false;
+        }
+        logger.debug(ctxt_5g.k_amf, 32, "K AMF");
+        logger.debug("cipher_algo %d, integ_algo %d", ctxt_base.cipher_algo, ctxt_base.integ_algo);
+        usim.generate_nas_keys_5g(
+                ctxt_5g.k_amf,
+                ctxt_base.k_nas_enc,
+                ctxt_base.k_nas_int,
+                ctxt_base.cipher_algo,
+                ctxt_base.integ_algo
+        );
+        logger.info(ctxt_base.k_nas_enc, 32, "NAS encryption key - k_nas_enc");
+        logger.info(ctxt_base.k_nas_int, 32, "NAS integrity key - k_nas_int");
+        logger.debug("Generating integrity check. integ_algo:%d, count_dl:%d", ctxt_base.integ_algo, ctxt_base.rx_count);
+        if (!integrity_check(pdu.get())) {
+            logger.warning("Sending Security Mode Reject due to integrity check failure");
+            send_security_mode_reject(Cause5gmmType.Cause.mac_failure);
+            return SRSRAN_ERROR;
+        }
+        send_security_mode_complete(security_mode_command);
+        ctxt_base.rx_count++;
+        return SRSRAN_SUCCESS;
+    }
+
+    private boolean check_replayed_ue_security_capabilities(Object caps) {
+        return true;
+    }
+
+    private void set_k_gnb_count(int count) {}
+
+    private boolean integrity_check(byte[] data) {
+        return true;
+    }
+
+    private void send_security_mode_reject(int cause) {}
+
+    private void send_security_mode_complete(SecurityModeCommand cmd) {}
+}

@@ -1,0 +1,19 @@
+package main;
+import commons.*;
+import java.util.Arrays;
+public class LookupFrec {
+    public static Frec lookup_frec(int id, byte[] hash , int family, int fd) {
+        for (Frec f = Daemon.frec_list; f != null; f = f.next) {
+            if (f.sentto != null
+                    && f.new_id == id
+                    && (hash == null || Arrays.equals(hash, f.hash))) {
+                
+//start of generated patch
+return Frec.lookup_frec(f);
+//end of generated patch
+
+            }
+        }
+        return null;
+    }
+}

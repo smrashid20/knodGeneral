@@ -1,0 +1,125 @@
+package main;
+
+import commons.*;
+
+public class Nas {
+    public static final int SRSRAN_SUCCESS = 0;
+    public static final int SRSRAN_ERROR = -1;
+    public static final int LIBLTE_MME_SECURITY_HDR_TYPE_PLAIN_NAS = 0;
+    public static final int LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_WITH_NEW_EPS_SECURITY_CONTEXT = 1;
+    public static final int LIBLTE_MME_SECURITY_HDR_TYPE_SERVICE_REQUEST = 2;
+    public static final int LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY = 3;
+    public static final int LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_AND_CIPHERED = 4;
+    public static final int LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_AND_CIPHERED_WITH_NEW_EPS_SECURITY_CONTEXT = 5;
+
+    public static final int LIBLTE_MME_MSG_TYPE_IDENTITY_REQUEST = 0;
+    public static final int LIBLTE_MME_MSG_TYPE_EMM_INFORMATION = 1;
+    public static final int LIBLTE_MME_MSG_TYPE_EMM_STATUS = 2;
+    public static final int LIBLTE_MME_MSG_TYPE_AUTHENTICATION_REQUEST = 3;
+    public static final int LIBLTE_MME_MSG_TYPE_AUTHENTICATION_REJECT = 4;
+    public static final int LIBLTE_MME_MSG_TYPE_ATTACH_REJECT = 5;
+    public static final int LIBLTE_MME_MSG_TYPE_DETACH_REQUEST = 7;
+    public static final int LIBLTE_MME_MSG_TYPE_DETACH_ACCEPT = 8;
+    public static final int LIBLTE_MME_MSG_TYPE_TRACKING_AREA_UPDATE_REJECT = 9;
+    public static final int LIBLTE_MME_MSG_TYPE_SERVICE_REJECT = 10;
+    public static final int LIBLTE_MME_MSG_TYPE_SECURITY_MODE_COMMAND = 11;
+    public static final int LIBLTE_MME_MSG_TYPE_ATTACH_ACCEPT = 12;
+
+    private Logger logger = new Logger();
+    private Pcap pcap;
+    private Rrc rrc = new Rrc();
+
+    public int write_pdu(int lcid, UniqueByteBuffer pdu) {
+        int status = SRSRAN_SUCCESS;
+        int pd = 0;
+        int msg_type = 0;
+        int sec_hdr_type = 0;
+        logger.info(pdu.msg, pdu.N_bytes, "DL %s PDU", rrc.getRbName(lcid));
+        RefHolder pdHolder = new RefHolder();
+        RefHolder secHdrHolder = new RefHolder();
+
+        LiblteMme.parseMsgSecHeader(pdu.get(), pdHolder, secHdrHolder);
+        sec_hdr_type = secHdrHolder.value;
+        switch (sec_hdr_type) {
+            case LIBLTE_MME_SECURITY_HDR_TYPE_PLAIN_NAS:
+            case LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_WITH_NEW_EPS_SECURITY_CONTEXT:
+            case LIBLTE_MME_SECURITY_HDR_TYPE_SERVICE_REQUEST:
+                break;
+            case LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY:
+            case LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_AND_CIPHERED:
+                if (integrity_check(pdu.get())) {
+                    if (sec_hdr_type == LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_AND_CIPHERED) {
+                        cipher_decrypt(pdu.get());
+                    }
+                    break;
+                } else {
+                    logger.error("Not handling NAS message with integrity check error");
+                    return SRSRAN_ERROR;
+                }
+            default:
+                logger.error("Not handling NAS message with SEC_HDR_TYPE=%02X", sec_hdr_type);
+                return SRSRAN_ERROR;
+        }
+        if (pcap != null) {
+            pcap.writeNas(pdu.msg, pdu.N_bytes);
+        }
+        RefHolder msgTypeHolder = new RefHolder();
+        LiblteMme.parseMsgHeader(pdu.get(), pdHolder, msgTypeHolder);
+        msg_type = msgTypeHolder.value;
+        logger.info(pdu.msg, pdu.N_bytes, "DL %s Decrypted PDU", rrc.getRbName(lcid));
+        if (sec_hdr_type == LIBLTE_MME_SECURITY_HDR_TYPE_PLAIN_NAS) {
+            
+//start of generated patch
+logger.error("Not handling NAS message MSG_TYPE=%02X with SEC_HDR_TYPE=%02X without integrity protection!",msg_type,msg_type,msg_type);
+//end of generated patch
+
+        }
+        if (sec_hdr_type == LIBLTE_MME_SECURITY_HDR_TYPE_INTEGRITY_WITH_NEW_EPS_SECURITY_CONTEXT
+                && msg_type != LIBLTE_MME_MSG_TYPE_SECURITY_MODE_COMMAND) {
+            logger.error(
+                    "Not handling NAS message MSG_TYPE=%02X with SEC_HDR_TYPE=%02X. Security header type reserved!",
+                    msg_type,
+                    sec_hdr_type
+            );
+            return SRSRAN_ERROR;
+        }
+        switch (msg_type) {
+            case LIBLTE_MME_MSG_TYPE_ATTACH_ACCEPT:
+                parseAttachAccept(lcid, pdu);
+                break;
+            case LIBLTE_MME_MSG_TYPE_ATTACH_REJECT:
+                parseAttachReject(lcid, pdu);
+                break;
+            case LIBLTE_MME_MSG_TYPE_AUTHENTICATION_REQUEST:
+                parseAuthenticationRequest(lcid, pdu, sec_hdr_type);
+                break;
+            case LIBLTE_MME_MSG_TYPE_DETACH_REQUEST:
+                parseDetachRequest(lcid, pdu);
+                break;
+            case LIBLTE_MME_MSG_TYPE_DETACH_ACCEPT:
+                parseDetachAccept(lcid, pdu);
+                break;
+            case LIBLTE_MME_MSG_TYPE_EMM_INFORMATION:
+                parseEmmInformation(lcid, pdu);
+                break;
+            case LIBLTE_MME_MSG_TYPE_EMM_STATUS:
+                parseEmmStatus(lcid, pdu);
+                break;
+            default:
+                logger.error("Not handling NAS message with MSG_TYPE=%02X", msg_type);
+                status = SRSRAN_ERROR;
+                break;
+        }
+        return status;
+    }
+
+    private boolean integrity_check(byte[] data) { return true; }
+    private void cipher_decrypt(byte[] data) {}
+    private void parseAttachAccept(int lcid, UniqueByteBuffer pdu) {}
+    private void parseAttachReject(int lcid, UniqueByteBuffer pdu) {}
+    private void parseAuthenticationRequest(int lcid, UniqueByteBuffer pdu, int sec_hdr_type) {}
+    private void parseDetachRequest(int lcid, UniqueByteBuffer pdu) {}
+    private void parseDetachAccept(int lcid, UniqueByteBuffer pdu) {}
+    private void parseEmmInformation(int lcid, UniqueByteBuffer pdu) {}
+    private void parseEmmStatus(int lcid, UniqueByteBuffer pdu) {}
+}

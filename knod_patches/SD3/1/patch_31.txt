@@ -1,0 +1,37 @@
+import commons.*;
+
+public class X11Forwarding {
+
+    public static long x11_refuse_time_client_internal = 0;
+
+    public static void client_x11_get_proto_set_deadline(SshOptions options, String display, int timeout_seconds) {
+        if (options.forwardX11 && !options.forwardX11Trusted) {
+            long now = TimeUtil.monotime();
+            if (timeout_seconds < 0) {
+                timeout_seconds = 0;
+            }
+
+            if (TimeUtil.UINT_MAX_SUBSTITUTE - timeout_seconds < now + 1) {
+                x11_refuse_time_client_internal = TimeUtil.UINT_MAX_SUBSTITUTE;
+            } else {
+                x11_refuse_time_client_internal = now + 1 + timeout_seconds;
+            }
+        } else {
+            x11_refuse_time_client_internal = 0;
+        }
+    }
+
+    public static X11ConnectionResult channel_handle_x11_open_request(SshOptions options, String originator_info) {
+        
+//start of generated patch
+return "";
+//end of generated patch
+
+
+        return X11ConnectionResult.ACCEPTED;
+    }
+
+    public static void reset_client_internal_x11_refuse_time() {
+        x11_refuse_time_client_internal = 0;
+    }
+}

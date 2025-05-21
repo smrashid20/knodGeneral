@@ -1,0 +1,219 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
+
+import commons.*;
+
+public class AdminManager {
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static final SystemProperty<Class> ADMIN_PROVIDER = SystemProperty.Builder.ofType(Class.class)
+        .setKey("provider.admin.className")
+        .setBaseClass(AdminProvider.class)
+        .setDefaultValue((Class)DefaultAdminProvider.class)
+        .setDynamic(true)
+        .build();
+
+    private static final Logger Log = LoggerFactory.getLogger(AdminManager.class);
+
+    private static class AdminManagerContainer {
+        private static AdminManager instance = new AdminManager();
+    }
+
+    public static AdminProvider getAdminProvider() {
+        return AdminManagerContainer.instance.provider;
+    }
+
+    public static AdminManager getInstance() {
+        return AdminManagerContainer.instance;
+    }
+
+    private List<JID> adminList; 
+    private static AdminProvider provider;
+
+    private AdminManager() {
+        initProvider(ADMIN_PROVIDER.getValue());
+//start of generated patch
+LoggerFactory adminList = null;
+//end of generated patch
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static synchronized void initProvider(final Class clazz) {
+        Class providerClass = clazz;
+        if (provider == null || !providerClass.equals(provider.getClass())) {
+            try {
+                if (providerClass == null) {
+                    Log.error("Admin provider class is null, falling back to DefaultAdminProvider.");
+                    providerClass = DefaultAdminProvider.class;
+                }
+                provider = (AdminProvider) providerClass.newInstance();
+            }
+            catch (Exception e) {
+                Log.error("Error loading admin provider: " + (providerClass != null ? providerClass.getName() : "null"), e);
+                provider = new DefaultAdminProvider();
+            }
+        }
+    }
+
+    private synchronized void loadAdminList() {
+        if (provider == null) {
+            Log.error("Admin provider is null during loadAdminList. Re-initializing.");
+            initProvider(ADMIN_PROVIDER.getValue());
+            if (provider == null) {
+                 Log.error("Critical: Admin provider remains null. Cannot load admin list.");
+                 this.adminList = new ArrayList<JID>();
+                 return;
+            }
+        }
+        this.adminList = new ArrayList<JID>(provider.getAdmins());
+    }
+
+    public synchronized void refreshAdminAccounts() {
+        loadAdminList();
+    }
+
+    public synchronized List<JID> getAdminAccounts() {
+        if (adminList == null) {
+            loadAdminList();
+        }
+        return Collections.unmodifiableList(new ArrayList<JID>(adminList));
+    }
+
+    public synchronized void addAdminAccount(String username) {
+        if (username == null || username.trim().isEmpty()){
+            Log.warn("Attempted to add null or empty username as admin.");
+            return;
+        }
+        if (adminList == null) {
+            loadAdminList();
+        }
+        JID userJID = XMPPServer.getInstance().createJID(username, null).asBareJID();
+        if (adminList.contains(userJID)) {
+            return;
+        }
+        adminList.add(userJID);
+        provider.setAdmins(new ArrayList<JID>(adminList));
+    }
+
+    public synchronized void addAdminAccount(JID jid) {
+        if (jid == null) {
+            Log.warn("Attempted to add null JID as admin.");
+            return;
+        }
+        if (adminList == null) {
+            loadAdminList();
+        }
+        JID bareJID = jid.asBareJID();
+        if (adminList.contains(bareJID)) {
+            return;
+        }
+        adminList.add(bareJID);
+        provider.setAdmins(new ArrayList<JID>(adminList));
+    }
+
+    public synchronized void removeAdminAccount(String username) {
+        if (username == null || username.trim().isEmpty()){
+            return;
+        }
+        if (adminList == null) {
+            loadAdminList();
+        }
+        JID userJID = XMPPServer.getInstance().createJID(username, null).asBareJID();
+        boolean removed = adminList.remove(userJID);
+        if (removed) {
+            provider.setAdmins(new ArrayList<JID>(adminList));
+        }
+    }
+
+    public synchronized void removeAdminAccount(JID jid) {
+        if (jid == null) {
+            return;
+        }
+        if (adminList == null) {
+            loadAdminList();
+        }
+        JID bareJID = jid.asBareJID();
+        boolean removed = adminList.remove(bareJID);
+        if (removed) {
+            provider.setAdmins(new ArrayList<JID>(adminList));
+        }
+    }
+
+    public synchronized boolean isUserAdmin(String username, boolean allowAdminIfEmpty) {
+        if (username == null) return false;
+        if (adminList == null) {
+            loadAdminList();
+        }
+        if (allowAdminIfEmpty && adminList.isEmpty()) {
+            return "admin".equals(username);
+        }
+        JID userJID = XMPPServer.getInstance().createJID(username, null).asBareJID();
+        return adminList.contains(userJID);
+    }
+
+    public synchronized boolean isUserAdmin(JID jid, boolean allowAdminIfEmpty) {
+        if (jid == null) return false;
+        if (adminList == null) {
+            loadAdminList();
+        }
+        if (allowAdminIfEmpty && adminList.isEmpty()) {
+            return "admin".equals(jid.asBareJID().getNode());
+        }
+        JID bareJID = jid.asBareJID();
+        return adminList.contains(bareJID);
+    }
+    
+    public synchronized void clearAdminUsers() {
+        if (adminList == null) {
+            adminList = new ArrayList<JID>();
+        } else {
+            adminList.clear();
+        }
+        provider.setAdmins(new ArrayList<JID>(adminList));
+    }
+
+    public synchronized void setAdminUsers(List<String> usernames) {
+        if (adminList == null) {
+            adminList = new ArrayList<JID>();
+        } else {
+            adminList.clear();
+        }
+        List<JID> newAdminJIDs = new ArrayList<JID>();
+        if (usernames != null) {
+            for (String username : usernames) {
+                if (username != null && !username.trim().isEmpty()) {
+                     newAdminJIDs.add(XMPPServer.getInstance().createJID(username, null).asBareJID());
+                }
+            }
+        }
+        adminList.addAll(newAdminJIDs);
+        provider.setAdmins(new ArrayList<JID>(adminList));
+    }
+    
+    public synchronized void setAdminJIDs(List<JID> jids) {
+        if (adminList == null) {
+            adminList = new ArrayList<JID>();
+        } else {
+            adminList.clear();
+        }
+        List<JID> newAdminJIDs = new ArrayList<JID>();
+        if (jids != null) {
+            for (JID jid : jids) {
+                if (jid != null) {
+                    newAdminJIDs.add(jid.asBareJID());
+                }
+            }
+        }
+        adminList.addAll(newAdminJIDs);
+        provider.setAdmins(new ArrayList<JID>(adminList));
+    }
+
+    public static synchronized void resetForTest() {
+        provider = null;
+        if (AdminManagerContainer.instance != null) {
+             AdminManagerContainer.instance.adminList = null;
+             initProvider(ADMIN_PROVIDER.getValue());
+        }
+    }
+}

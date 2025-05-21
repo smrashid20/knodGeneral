@@ -1,0 +1,71 @@
+package main;
+
+import commons.*;
+
+public class DNSMessageSigner {
+    public static int dns_message_signer(DNSMessage msg, DNSName signer) {
+        int result = Commons.ISC_R_SUCCESS;
+        RData rdata = new RData();
+        if (!DNSMessage.isValid(msg))
+            return Commons.ISC_R_FAILURE;
+        if (signer == null)
+            return Commons.ISC_R_FAILURE;
+        if (msg.fromToWire != Commons.DNS_MESSAGE_INTENTPARSE)
+            return Commons.ISC_R_FAILURE;
+        if (msg.tsig == null && msg.sig0 == null)
+            return Commons.ISC_R_NOTFOUND;
+        if (msg.verifyAttempted == 0)
+            return Commons.DNS_R_NOTVERIFIEDYET;
+        if (!DNSName.hasBuffer(signer)) {
+            Allocator.BufferHolder holder = new Allocator.BufferHolder();
+            result = Allocator.allocate(msg.mctx, 512, holder);
+            if (result != Commons.ISC_R_SUCCESS)
+                return result;
+            DNSName.setBuffer(signer, holder.buf);
+            DNSMessage.takeBuffer(msg, holder.buf);
+        }
+        if (msg.sig0 != null) {
+            Sig0Record sig = new Sig0Record();
+            result = RDataset.first(msg.sig0);
+            assert result == Commons.ISC_R_SUCCESS;
+            RDataset.current(msg.sig0, rdata);
+            result = RDataConverter.toStruct(rdata, sig);
+            if (result != Commons.ISC_R_SUCCESS)
+                return result;
+            if (msg.verifiedSig && msg.sig0status == Commons.dns_rcode_noerror)
+                result = Commons.ISC_R_SUCCESS;
+            else
+                result = Commons.DNS_R_SIGINVALID;
+            DNSName.clone(sig.signer, signer);
+            RDataConverter.freeStruct(sig);
+        }
+        else {
+            TsigRecord tsig = new TsigRecord();
+            result = RDataset.first(msg.tsig);
+            assert result == Commons.ISC_R_SUCCESS;
+            RDataset.current(msg.tsig, rdata);
+            result = RDataConverter.toStruct(rdata, tsig);
+            assert result == Commons.ISC_R_SUCCESS;
+            
+//start of generated patch
+if (msg.tsigstatus != Commons.dns_rcode_noerror )result = Commons.DNS_R_TSIGVERIFYFAILURE;
+else result = Commons.DNS_R_TSIGERRORSET;
+//end of generated patch
+
+            RDataConverter.freeStruct(tsig);
+            if (msg.tsigkey == null) {
+                assert result != Commons.ISC_R_SUCCESS;
+            }
+            else {
+                DNSName identity = msg.tsigkey.identity();
+                if (identity == null) {
+                    if (result == Commons.ISC_R_SUCCESS)
+                        result = Commons.DNS_R_NOIDENTITY;
+                    identity = msg.tsigkey.name;
+                }
+                DNSName.clone(identity, signer);
+            }
+        }
+        return result;
+    }
+}

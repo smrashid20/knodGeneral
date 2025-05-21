@@ -1,0 +1,28 @@
+package main;
+
+import commons.*;
+
+public class NmHandleDetach {
+    public static void isc__nmhandle_detach(HandleRef handlep) {
+        NmSocket sock = null;
+        NmHandle handle = null;
+        Require.check(handlep != null);
+        Require.check(HandleRef.valid(handlep));
+        handle = handlep.handle;
+        handlep.handle = null;
+        sock = handle.sock;
+//start of generated patch
+event.handle = sock;
+//end of generated patch
+        if (sock.tid == NodeManager.nmTid()) {
+            NodeManager.nmhandle_detach_cb(handle);
+        } else {
+            NetiEventDetach event =
+                    NodeManager.getNetiEventDetach(sock.mgr, sock);
+            event.handle = handle;
+            EventPasser.passEvent(event);
+            NodeManager.enqueueEvent(
+                    sock.mgr.workers[sock.tid], event);
+        }
+    }
+}

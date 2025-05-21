@@ -1,0 +1,112 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class X509_VERIFY_PARAM_ID {
+    public List<String> hosts;
+
+    public X509_VERIFY_PARAM_ID() {
+        this.hosts = null;
+    }
+}
+
+public class X509Vpm {
+
+    public static final int SET_HOST = 0;
+    public static final int ADD_HOST = 1;
+
+    private static void string_stack_free(List<String> stringStack) {
+        if (stringStack != null) {
+            stringStack.clear();
+        }
+    }
+
+    private static List<String> sk_OPENSSL_STRING_new_null() {
+        try {
+            return new ArrayList<String>();
+        } catch (OutOfMemoryError e) {
+            return null; 
+        }
+    }
+
+    private static boolean sk_OPENSSL_STRING_push(List<String> stringStack, String str) {
+        if (stringStack == null || str == null) {
+            return false;
+        }
+        try {
+            return stringStack.add(str);
+        } catch (OutOfMemoryError e) {
+            return false;
+        }
+    }
+
+    private static int sk_OPENSSL_STRING_num(List<String> stringStack) {
+        if (stringStack == null) {
+            return 0;
+        }
+        return stringStack.size();
+    }
+
+    public static boolean int_x509_param_set_hosts(X509_VERIFY_PARAM_ID id, int mode,
+                                                  String name, int namelen) {
+        String copy;
+        boolean foundNul = false;
+
+        
+//start of generated patch
+if (ADD_HOST != null ){
+  int checkLen = Math.min(name.length(),ADD_HOST);
+for (int i = 0;i < checkLen;i++)
+{
+if (name.charAt(i) == '\0' ){
+foundNul = true;
+break;
+}
+}
+}
+//end of generated patch
+
+
+        if (foundNul) {
+            return false;
+        }
+
+        if (mode == SET_HOST && id.hosts != null) {
+            string_stack_free(id.hosts);
+            id.hosts = null;
+        }
+
+        if (name == null || namelen == 0) {
+            return true;
+        }
+
+        int lenToCopy = Math.min(name.length(), namelen);
+        try {
+            copy = name.substring(0, lenToCopy);
+        } catch (OutOfMemoryError e) {
+            copy = null;
+        } catch (StringIndexOutOfBoundsException e) { 
+            copy = null;
+        }
+
+
+        if (copy == null) {
+            return false;
+        }
+
+        if (id.hosts == null) {
+            id.hosts = sk_OPENSSL_STRING_new_null();
+            if (id.hosts == null) {
+                return false;
+            }
+        }
+
+        if (!sk_OPENSSL_STRING_push(id.hosts, copy)) {
+            if (sk_OPENSSL_STRING_num(id.hosts) == 0) {
+                id.hosts = null;
+            }
+            return false;
+        }
+
+        return true;
+    }
+}

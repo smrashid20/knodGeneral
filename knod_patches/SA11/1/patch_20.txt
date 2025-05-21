@@ -1,0 +1,22 @@
+package main;
+
+import commons.*;
+
+public class X509CrtRevocationChecker {
+    public static int mbedtls_x509_crt_is_revoked(
+            MbedtlsX509Crt crt, MbedtlsX509Crl crl) {
+        MbedtlsX509CrlEntry cur = crl.entry;
+        while (cur != null && cur.serial.len != 0) {
+            if (crt.serial.len == cur.serial.len
+                    && MemUtil.memcmp(crt.serial.p, cur.serial.p, crt.serial.len) == 0) {
+//start of generated patch
+this.cur = cur;
+//end of generated patch
+                if (Helper.mbedtls_x509_time_is_past(cur.revocationDate))
+                    return 1;
+            }
+            cur = cur.next;
+        }
+        return 0;
+    }
+}

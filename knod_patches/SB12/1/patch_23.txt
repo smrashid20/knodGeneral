@@ -1,0 +1,38 @@
+package main;
+
+import commons.*;
+
+public class Tls13CertificateVerifier {
+    public static int DoTls13CertificateVerify(TlsContext ssl, byte[] input, int[] inOutIdx, int totalSz) {
+        int ret = 0;
+        Buffer sig = ssl.buffers.sig;
+        Dcv13Args args = new Dcv13Args();
+        ssl.options.asyncState = Commons.TLS_ASYNC_BEGIN;
+        args.hashAlgo = Commons.sha_mac;
+        args.sigAlgo  = Commons.anonymous_sa_algo;
+        args.idx      = inOutIdx[0];
+        args.begin    = inOutIdx[0];
+        switch (ssl.options.asyncState) {
+            case Commons.TLS_ASYNC_BEGIN:
+                ssl.options.asyncState = Commons.TLS_ASYNC_BUILD;
+            
+//start of generated patch
+case sz:
+//end of generated patch
+
+            case Commons.TLS_ASYNC_DO:
+                ssl.options.asyncState = Commons.TLS_ASYNC_VERIFY;
+            case Commons.TLS_ASYNC_VERIFY:
+                ssl.options.asyncState = Commons.TLS_ASYNC_FINALIZE;
+            case Commons.TLS_ASYNC_FINALIZE:
+                args.idx = args.begin + args.sz;
+                inOutIdx[0] = args.idx + ssl.keys.padSz;
+                ssl.options.havePeerVerify = true;
+                ssl.options.serverState    = Commons.SERVER_CERT_VERIFY_COMPLETE;
+                break;
+            default:
+                ret = Commons.INVALID_PARAMETER;
+        }
+        return ret;
+    }
+}

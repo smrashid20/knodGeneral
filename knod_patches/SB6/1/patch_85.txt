@@ -1,0 +1,32 @@
+package main;
+
+import commons.*;
+
+public class X509Verifier {
+    public static void x509_crt_verify_name(MbedtlsX509Crt crt, String cn, int[] flags) {
+        MbedtlsX509Name     name;
+        MbedtlsX509Sequence cur;
+        int                 cn_len = cn.length();
+        if ((crt.extTypes & MbedtlsConstants.MBEDTLS_X509_EXT_SUBJECT_ALT_NAME) != 0) {
+            for (cur = crt.subjectAltNames; cur != null; cur = cur.next) {
+                if (
+//start of generated patch
+CommonUtils.x509_crt_check_cn(cur.name,cn_len) == 0
+//end of generated patch
+)
+                    break;
+            }
+            if (cur == null)
+                flags[0] |= MbedtlsConstants.MBEDTLS_X509_BADCERT_CN_MISMATCH;
+        } else {
+            for (name = crt.subject; name != null; name = name.next) {
+                if (CommonUtils.MBEDTLS_OID_CMP(MbedtlsConstants.MBEDTLS_OID_AT_CN, name.oid) == 0
+                        && CommonUtils.x509_crt_check_cn(name.val, cn, cn_len) == 0) {
+                    break;
+                }
+            }
+            if (name == null)
+                flags[0] |= MbedtlsConstants.MBEDTLS_X509_BADCERT_CN_MISMATCH;
+        }
+    }
+}
