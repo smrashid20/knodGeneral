@@ -1,0 +1,9 @@
+        int daEnd = hdr.payloadOffset + hdr.length;
+        int next = ASN1.getOid(data, hdr.payloadOffset, hdr.length, oid);
+        if (OidUtils.x509Sha1Oid(oid)) {
+            if (signature.oid.oid[6] != 5) {
+                Logger.log(Logger.MSG_DEBUG, String.format(
+                        "X509: digestAlgorithm SHA1 does not match with certificate signatureAlgorithm (%d)",
+                        signature.oid.oid[6]));
+                return -1;
+            }

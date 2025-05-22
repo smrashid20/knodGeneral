@@ -1,0 +1,74 @@
+package main;
+
+import commons.*;
+
+public class Tls13CertificateVerifier {
+    public static int DoTls13CertificateVerify(TlsContext ssl, byte[] input, int[] inOutIdx, int totalSz) {
+        int ret = 0;
+        Buffer sig = ssl.buffers.sig;
+        Dcv13Args args = new Dcv13Args();
+        ssl.options.asyncState = Commons.TLS_ASYNC_BEGIN;
+        args.hashAlgo = Commons.sha_mac;
+        args.sigAlgo  = Commons.anonymous_sa_algo;
+        args.idx      = inOutIdx[0];
+        args.begin    = inOutIdx[0];
+        switch (ssl.options.asyncState) {
+            case Commons.TLS_ASYNC_BEGIN:
+                ssl.options.asyncState = Commons.TLS_ASYNC_BUILD;
+            case Commons.TLS_ASYNC_BUILD:
+                if ((args.idx - args.begin) + Commons.ENUM_LEN + Commons.ENUM_LEN > totalSz) {
+                    return Commons.BUFFER_ERROR;
+                }
+                ret = Helpers.DecodeTls13SigAlg(input, args);
+                if (ret < 0) {
+                    return ret;
+                }
+                args.idx += Commons.OPAQUE16_LEN;
+                if ((args.idx - args.begin) + Commons.OPAQUE16_LEN > totalSz) {
+                    return Commons.BUFFER_ERROR;
+                }
+                args.sz = Helpers.ato16(input, args.idx);
+                args.idx += Commons.OPAQUE16_LEN;
+                if ((args.idx - args.begin) + args.sz > totalSz || args.sz > Commons.ENCRYPT_LEN) {
+                    return Commons.BUFFER_ERROR;
+                }
+                if (args.sigAlgo == Commons.ed25519_sa_algo && !ssl.peerEd25519KeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ED25519 sig but not ED25519 cert");
+                    return Commons.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == Commons.ed448_sa_algo && !ssl.peerEd448KeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ED448 sig but not ED448 cert");
+                    return Commons.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == Commons.ecc_dsa_sa_algo && !ssl.peerEccDsaKeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ECC sig but not ECC cert");
+                    return Commons.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == Commons.rsa_sa_algo) {
+                    Wslib.WOLFSSL_MSG("Peer sent PKCS#1.5 algo but not in certificate");
+                    return Commons.INVALID_PARAMETER;
+                }
+                if (args.sigAlgo == Commons.rsa_pss_sa_algo && !ssl.peerRsaKeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent RSA sig but not RSA cert");
+                    return Commons.SIG_VERIFY_E;
+                }
+                sig.buffer = new byte[args.sz];
+                System.arraycopy(input, args.idx, sig.buffer, 0, args.sz);
+                sig.length = args.sz;
+                ssl.options.asyncState = Commons.TLS_ASYNC_DO;
+            case Commons.TLS_ASYNC_DO:
+                ssl.options.asyncState = Commons.TLS_ASYNC_VERIFY;
+            case Commons.TLS_ASYNC_VERIFY:
+                ssl.options.asyncState = Commons.TLS_ASYNC_FINALIZE;
+            case Commons.TLS_ASYNC_FINALIZE:
+                args.idx = args.begin + args.sz;
+                inOutIdx[0] = args.idx + ssl.keys.padSz;
+                ssl.options.havePeerVerify = true;
+                ssl.options.serverState    = Commons.SERVER_CERT_VERIFY_COMPLETE;
+                break;
+            default:
+                ret = Commons.INVALID_PARAMETER;
+        }
+        return ret;
+    }
+}

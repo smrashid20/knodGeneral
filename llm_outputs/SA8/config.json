@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA8",
+    "project_name": "SA8",
+    "language": "java",
+    "vul_code_file_rel_path": "src/SSHKeyExchange.java",
+    "vul_code_func_start_line": 16,
+    "vul_code_func_end_line": 42,
+    "vul_code_block_start_line": 21,
+    "vul_code_block_end_line": 24,
+    "vul_code_func_fixed_start_line": 16,
+    "vul_code_func_fixed_end_line": 51,
+    "vul_code_block_fixed_start_line": 21,
+    "vul_code_block_fixed_end_line": 33,
+    "vul_code_initial_block_start": 21,
+    "vul_code_initial_block_end": 21,
+    "vul_code_context_lines": ["3-19"],
+    "context_lines": [{
+        "src/SSHKeyExchange.java": ["3-19"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "SSHKeyExchange.java",
+    "vul_code_lines":  ["21"],
+    "vul_code_line": 21,
+    "rem_start": 22,
+    "rem_end": 24,
+    "add_start": 21,
+    "add_end": 33
+}

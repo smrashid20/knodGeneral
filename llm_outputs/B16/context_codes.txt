@@ -1,0 +1,61 @@
+### src/forward.c ###
+      char *types = querystr(auth_dns ? "auth" : "query", type);
+      
+      if (family == AF_INET) 
+	log_query(F_QUERY | F_IPV4 | F_FORWARD, daemon->namebuff, 
+		  (union all_addr *)&source_addr.in.sin_addr, types);
+      else
+	log_query(F_QUERY | F_IPV6 | F_FORWARD, daemon->namebuff, 
+		  (union all_addr *)&source_addr.in6.sin6_addr, types);
+
+#ifdef HAVE_AUTH
+      /* find queries for zones we're authoritative for, and answer them directly */
+      if (!auth_dns && !option_bool(OPT_LOCALISE))
+	for (zone = daemon->auth_zones; zone; zone = zone->next)
+
+............
+  
+  if (!nowild)
+    {
+      struct cmsghdr *cmptr;
+      msg.msg_control = &control_u;
+      msg.msg_controllen = sizeof(control_u);
+      cmptr = CMSG_FIRSTHDR(&msg);
+
+      if (to->sa.sa_family == AF_INET)
+	{
+#if defined(HAVE_LINUX_NETWORK)
+	  struct in_pktinfo p;
+	  p.ipi_ifindex = 0;
+	  p.ipi_spec_dst = source->addr4;
+	  msg.msg_controllen = CMSG_SPACE(sizeof(struct in_pktinfo));
+	  memcpy(CMSG_DATA(cmptr), &p, sizeof(p));
+	  cmptr->cmsg_len = CMSG_LEN(sizeof(struct in_pktinfo));
+	  cmptr->cmsg_level = IPPROTO_IP;
+	  cmptr->cmsg_type = IP_PKTINFO;
+#elif defined(IP_SENDSRCADDR)
+	  msg.msg_controllen = CMSG_SPACE(sizeof(struct in_addr));
+	  memcpy(CMSG_DATA(cmptr), &(source->addr4), sizeof(source->addr4));
+	  cmptr->cmsg_len = CMSG_LEN(sizeof(struct in_addr));
+	  cmptr->cmsg_level = IPPROTO_IP;
+	  cmptr->cmsg_type = IP_SENDSRCADDR;
+#endif
+	}
+      else
+	{
+	  struct in6_pktinfo p;
+	  p.ipi6_ifindex = iface; /* Need iface for IPv6 to handle link-local addrs */
+	  p.ipi6_addr = source->addr6;
+	  msg.msg_controllen = CMSG_SPACE(sizeof(struct in6_pktinfo));
+	  memcpy(CMSG_DATA(cmptr), &p, sizeof(p));
+	  cmptr->cmsg_len = CMSG_LEN(sizeof(struct in6_pktinfo));
+	  cmptr->cmsg_type = daemon->v6pktinfo;
+	  cmptr->cmsg_level = IPPROTO_IPV6;
+	}
+    }
+  
+  while (retry_send(sendmsg(fd, &msg, 0)));
+
+  if (errno != 0)
+
+............

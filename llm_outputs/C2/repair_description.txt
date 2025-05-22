@@ -1,0 +1,11 @@
+The repair of the vulnerability involves a two-step process to address the issue of the overwritten result of the previous check to confirm that certificates in the chain are valid CA certificates. 
+
+The first step is to reorder the checks to ensure that the result of the previous check is not overwritten. This is achieved by adding a condition to check if the previous check was successful before performing the additional strict check for explicit elliptic curve parameters. This ensures that if the previous check failed, the result is not overwritten, and the error is properly propagated.
+
+The second step is to add a similar condition to the subsequent check for non-CA certificates. This check should only be performed if the previous checks were successful, ensuring that the result of the previous check is not overwritten. This condition is added to prevent the bypass of the check that non-CA certificates must not be able to issue other certificates.
+
+By adding these conditions, the repair ensures that the checks are performed in the correct order, and the results of the previous checks are not overwritten. This prevents the vulnerability that allowed non-CA certificates to issue other certificates when the X509_V_FLAG_X509_STRICT flag is set and no purpose is configured.
+
+The repair also ensures that the error handling is properly performed, and the correct error codes are returned in case of any errors. This ensures that the application can properly handle the errors and take the necessary actions.
+
+Overall, the repair is a simple yet effective fix that addresses the vulnerability by reordering the checks and adding conditions to ensure that the results of the previous checks are not overwritten. This repair can be applied to the affected code to prevent the vulnerability and ensure the security of the certificate verification process.

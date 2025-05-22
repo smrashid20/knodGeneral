@@ -1,0 +1,3 @@
+The Record Protocol requires an algorithm to generate keys required by the current connection state from the security parameters provided by the handshake protocol.
+The master secret is expanded into a sequence of secure bytes, which is then split to a client write MAC key, a server write MAC key, a client write encryption key, and a server write encryption key. Each of these is generated from the byte sequence in that order. Unused values are empty. Some AEAD ciphers may additionally require a client write IV and a server write IV.
+When keys and MAC keys are generated, the master secret is used as an entropy source.

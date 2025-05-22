@@ -1,0 +1,17 @@
+All implementations MUST send and use these extensions when offering applicable features:
+
+* "supported\_versions" is REQUIRED for all ClientHello, ServerHello, and HelloRetryRequest messages.
+* "signature\_algorithms" is REQUIRED for certificate authentication.
+* "supported\_groups" is REQUIRED for ClientHello messages using DHE or ECDHE key exchange.
+* "key\_share" is REQUIRED for DHE or ECDHE key exchange.
+* "pre\_shared\_key" is REQUIRED for PSK key agreement.
+* "psk\_key\_exchange\_modes" is REQUIRED for PSK key agreement.
+
+A client is considered to be attempting to negotiate using this specification if the ClientHello contains a "supported\_versions" extension with 0x0304 contained in its body. Such a ClientHello message MUST meet the following requirements:
+
+* If not containing a "pre\_shared\_key" extension, it MUST contain both a "signature\_algorithms" extension and a "supported\_groups" extension.
+* If containing a "supported\_groups" extension, it MUST also contain a "key\_share" extension, and vice versa. An empty KeyShare.client\_shares vector is permitted.
+
+Servers receiving a ClientHello which does not conform to these requirements MUST abort the handshake with a "missing\_extension" alert.
+
+Additionally, all implementations MUST support the use of the "server\_name" extension with applications capable of using it. Servers MAY require clients to send a valid "server\_name" extension. Servers requiring this extension SHOULD respond to a ClientHello lacking a "server\_name" extension by terminating the connection with a "missing\_extension" alert.

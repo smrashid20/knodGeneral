@@ -1,0 +1,8 @@
+    if (s->ctx->app_verify_callback != NULL) {
+        i = s->ctx->app_verify_callback(ctx, s->ctx->app_verify_arg);
+    } else {
+        i = X509_verify_cert(ctx);
+        /* We treat an error in the same way as a failure to verify */
+        if (i < 0)
+            i = 0;
+    }

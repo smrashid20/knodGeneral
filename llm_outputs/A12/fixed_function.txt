@@ -1,0 +1,120 @@
+int DoTls13Finished(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
+                           word32 size, word32 totalSz, int sniff)
+{
+    int    ret;
+    word32 finishedSz = 0;
+    byte*  secret;
+    byte   mac[WC_MAX_DIGEST_SIZE];
+
+    WOLFSSL_START(WC_FUNC_FINISHED_DO);
+    WOLFSSL_ENTER("DoTls13Finished");
+
+#if !defined(NO_CERTS) && !defined(WOLFSSL_NO_CLIENT_AUTH)
+    /* verify the client sent certificate if required */
+    if (ssl->options.side == WOLFSSL_SERVER_END &&
+            (ssl->options.mutualAuth || ssl->options.failNoCert)) {
+        if (!ssl->options.havePeerVerify && !ssl->options.resuming) {
+            ret = NO_PEER_CERT;
+            DoCertFatalAlert(ssl, ret);
+            return ret;
+        }
+    }
+#endif
+
+    /* check against totalSz */
+    if (*inOutIdx + size + ssl->keys.padSz > totalSz)
+        return BUFFER_E;
+
+    if (ssl->options.handShakeDone) {
+        ret = DeriveFinishedSecret(ssl, ssl->clientSecret,
+                                   ssl->keys.client_write_MAC_secret);
+        if (ret != 0)
+            return ret;
+
+        secret = ssl->keys.client_write_MAC_secret;
+    }
+    else if (ssl->options.side == WOLFSSL_CLIENT_END) {
+        /* All the handshake messages have been received to calculate
+         * client and server finished keys.
+         */
+        ret = DeriveFinishedSecret(ssl, ssl->clientSecret,
+                                   ssl->keys.client_write_MAC_secret);
+        if (ret != 0)
+            return ret;
+
+        ret = DeriveFinishedSecret(ssl, ssl->serverSecret,
+                                   ssl->keys.server_write_MAC_secret);
+        if (ret != 0)
+            return ret;
+
+        secret = ssl->keys.server_write_MAC_secret;
+    }
+    else {
+        secret = ssl->keys.client_write_MAC_secret;
+    }
+
+    if (sniff == NO_SNIFF) {
+        ret = BuildTls13HandshakeHmac(ssl, secret, mac, &finishedSz);
+    #if defined(OPENSSL_ALL) || defined(WOLFSSL_HAPROXY) || defined(WOLFSSL_WPAS)
+        if (ssl->options.side == WOLFSSL_CLIENT_END) {
+            XMEMCPY(ssl->serverFinished, mac, finishedSz);
+            ssl->serverFinished_len = finishedSz;
+        }
+        else {
+            XMEMCPY(ssl->clientFinished, mac, finishedSz);
+            ssl->clientFinished_len = finishedSz;
+        }
+    #endif
+        if (ret != 0)
+            return ret;
+        if (size != finishedSz)
+            return BUFFER_ERROR;
+    }
+
+#ifdef WOLFSSL_CALLBACKS
+    if (ssl->hsInfoOn) AddPacketName(ssl, "Finished");
+    if (ssl->toInfoOn) AddLateName("Finished", &ssl->timeoutInfo);
+#endif
+
+    if (sniff == NO_SNIFF) {
+        /* Actually check verify data. */
+        if (XMEMCMP(input + *inOutIdx, mac, size) != 0){
+            WOLFSSL_MSG("Verify finished error on hashes");
+            SendAlert(ssl, alert_fatal, decrypt_error);
+            return VERIFY_FINISHED_ERROR;
+        }
+    }
+
+    /* Force input exhaustion at ProcessReply by consuming padSz. */
+    *inOutIdx += size + ssl->keys.padSz;
+
+    if (ssl->options.side == WOLFSSL_SERVER_END &&
+                                                  !ssl->options.handShakeDone) {
+#ifdef WOLFSSL_EARLY_DATA
+        if (ssl->earlyData != no_early_data) {
+            if ((ret = DeriveTls13Keys(ssl, no_key, DECRYPT_SIDE_ONLY, 1)) != 0)
+                return ret;
+        }
+#endif
+        /* Setup keys for application data messages from client. */
+        if ((ret = SetKeysSide(ssl, DECRYPT_SIDE_ONLY)) != 0)
+            return ret;
+    }
+
+#ifndef NO_WOLFSSL_CLIENT
+    if (ssl->options.side == WOLFSSL_CLIENT_END)
+        ssl->options.serverState = SERVER_FINISHED_COMPLETE;
+#endif
+#ifndef NO_WOLFSSL_SERVER
+    if (ssl->options.side == WOLFSSL_SERVER_END) {
+        ssl->options.clientState = CLIENT_FINISHED_COMPLETE;
+        ssl->options.handShakeState = HANDSHAKE_DONE;
+        ssl->options.handShakeDone  = 1;
+    }
+#endif
+
+    WOLFSSL_LEAVE("DoTls13Finished", 0);
+    WOLFSSL_END(WC_FUNC_FINISHED_DO);
+
+    return 0;
+}

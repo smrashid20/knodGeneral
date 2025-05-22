@@ -1,0 +1,9 @@
+### src/master/CheckChainExtensions.java ###
+    public static int checkChainExtensions(X509StoreCtx ctx) {
+        int num = ctx.chain.size();
+        int plen = 0;
+        int proxy_path_length = 0;
+        int must_be_ca = -1;
+        int ret = 1;
+
+............

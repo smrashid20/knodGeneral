@@ -1,0 +1,24 @@
+{
+    "vul_id": "A13",
+    "project_name": "BIND",
+    "language": "cpp",
+    "vul_code_file_rel_path": "lib/ns/xfrout.c",
+    "vul_code_func_start_line": 736,
+    "vul_code_func_end_line": 1159,
+    "vul_code_block_start_line": 820,
+    "vul_code_block_end_line": 860,
+    "vul_code_func_fixed_start_line": 736,
+    "vul_code_func_fixed_end_line": 1159,
+    "vul_code_block_fixed_start_line": 820,
+    "vul_code_block_fixed_end_line": 860,
+    "vul_code_initial_block_start": 817,
+    "vul_code_initial_block_end": 817,
+    "vul_code_context_lines": ["736-780", "61-107"],
+    "context_lines": [{
+        "lib/ns/xfrout.c": ["736-780", "61-107"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "xfrout.c",
+    "vul_code_lines":  ["820"],
+    "vul_code_line": 820
+}

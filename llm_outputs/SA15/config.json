@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA15",
+    "project_name": "SA15",
+    "language": "java",
+    "vul_code_file_rel_path": "src/master/EapPeap.java",
+    "vul_code_func_start_line": 13,
+    "vul_code_func_end_line": 39,
+    "vul_code_block_start_line": 19,
+    "vul_code_block_end_line": 33,
+    "vul_code_func_fixed_start_line": 13,
+    "vul_code_func_fixed_end_line": 42,
+    "vul_code_block_fixed_start_line": 19,
+    "vul_code_block_fixed_end_line": 36,
+    "vul_code_initial_block_start": 22,
+    "vul_code_initial_block_end": 23,
+    "vul_code_context_lines": ["5-11"],
+    "context_lines": [{
+        "src/master/EapPeap.java": ["5-11"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "EapPeap.java",
+    "vul_code_lines":  ["23"],
+    "vul_code_line": 23,
+    "rem_start": 23,
+    "rem_end": 23,
+    "add_start": 23,
+    "add_end": 27
+}

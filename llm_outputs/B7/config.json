@@ -1,0 +1,24 @@
+{
+    "vul_id": "B7",
+    "project_name": "src",
+    "language": "cpp",
+    "vul_code_file_rel_path": "lib/libcrypto/x509/x509_verify.c",
+    "vul_code_func_start_line": 473,
+    "vul_code_func_end_line": 522,
+    "vul_code_block_start_line": 494,
+    "vul_code_block_end_line": 521,
+    "vul_code_func_fixed_start_line": 473,
+    "vul_code_func_fixed_end_line": 526,
+    "vul_code_block_fixed_start_line": 494,
+    "vul_code_block_fixed_end_line": 525,
+    "vul_code_initial_block_start": 494,
+    "vul_code_initial_block_end": 495,
+    "vul_code_context_lines": ["473-481", "33-41"],
+    "context_lines": [{
+        "lib/libcrypto/x509/x509_verify.c": ["473-481", "33-41"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "x509_verify.c",
+    "vul_code_lines":  ["512"],
+    "vul_code_line": 512
+}

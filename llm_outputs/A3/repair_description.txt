@@ -1,0 +1,15 @@
+The repair steps for the OpenSSL vulnerability involve modifying the code to correctly handle legacy custom ciphers passed to encryption and decryption initialization functions. Here's a step-by-step explanation of the repair:
+
+1. **Identify the root cause**: The vulnerability arises from the incorrect handling of custom ciphers created using the EVP_CIPHER_meth_new() function. Specifically, when the NID_undef value is passed to EVP_CIPHER_meth_new(), the code incorrectly matches the NULL cipher as equivalent and fetches it from the available providers.
+
+2. **Determine the conditions for the vulnerability**: The vulnerability occurs when the ctx->engine, tmpimpl, or impl is not NULL, indicating that a custom cipher is being used. Additionally, the cipher's origin should be checked to ensure it is a legacy custom cipher (EVP_ORIG_METH).
+
+3. **Modify the condition to check for legacy custom ciphers**: The repair adds two new conditions to the if statement to check for legacy custom ciphers. The first condition checks if the cipher is not NULL and its origin is EVP_ORIG_METH. The second condition checks if the cipher is NULL but the ctx->cipher is not NULL and its origin is EVP_ORIG_METH.
+
+4. **Free the fetched cipher and reset the context**: If any of the conditions are met, the code frees the fetched cipher using EVP_CIPHER_free() and resets the ctx->fetched_cipher to NULL. This ensures that the NULL cipher is not used for encryption or decryption.
+
+5. **Redirect to the legacy code path**: After freeing the fetched cipher and resetting the context, the code jumps to the legacy code path using the "goto legacy" statement. This ensures that the encryption or decryption operation is performed using the correct custom cipher.
+
+6. **Verify the fix**: The repair should be verified by testing the code with various scenarios, including passing NID_undef to EVP_CIPHER_meth_new() and ensuring that the NULL cipher is not used for encryption or decryption.
+
+By following these steps, the repair ensures that OpenSSL correctly handles legacy custom ciphers and prevents the vulnerability from being exploited.

@@ -1,0 +1,47 @@
+### tools/thumbnail.c ###
+static void
+setImage1(const uint8* br, uint32 rw, uint32 rh)
+{
+    int step = rh;
+    int limit = tnh;
+    int err = 0;
+    int bpr = TIFFhowmany8(rw);
+    int sy = 0;
+    uint8* row = thumbnail;
+    uint32 dy;
+
+............
+#ifndef HAVE_GETOPT
+extern int getopt(int, char**, char*);
+#endif
+
+#define	streq(a,b)	(strcmp(a,b) == 0)
+
+#ifndef TIFFhowmany8
+# define TIFFhowmany8(x) (((x)&0x07)?((uint32)(x)>>3)+1:(uint32)(x)>>3)
+#endif
+
+typedef enum {
+    EXP50,
+    EXP60,
+    EXP70,
+    EXP80,
+    EXP90,
+    EXP,
+    LINEAR
+} Contrast;
+
+static	uint32 tnw = 216;		/* thumbnail width */
+static	uint32 tnh = 274;		/* thumbnail height */
+static	Contrast contrast = LINEAR;	/* current contrast */
+static	uint8* thumbnail;
+
+static	int cpIFD(TIFF*, TIFF*);
+static	int generateThumbnail(TIFF*, TIFF*);
+static	void initScale();
+static	void usage(void);
+
+extern	char* optarg;
+extern	int optind;
+
+............

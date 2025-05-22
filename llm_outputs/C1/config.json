@@ -1,0 +1,24 @@
+{
+    "vul_id": "C1",
+    "project_name": "openssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "ssl/ssl_cert.c",
+    "vul_code_func_start_line": 365,
+    "vul_code_func_end_line": 448,
+    "vul_code_block_start_line": 426,
+    "vul_code_block_end_line": 429,
+    "vul_code_func_fixed_start_line": 372,
+    "vul_code_func_fixed_end_line": 459,
+    "vul_code_block_fixed_start_line": 433,
+    "vul_code_block_fixed_end_line": 440,
+    "vul_code_initial_block_start": 426,
+    "vul_code_initial_block_end": 426,
+    "vul_code_context_lines": ["28-41"],
+    "context_lines": [{
+        "ssl/ssl_cert.c": ["28-41"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "ssl_cert.c",
+    "vul_code_lines":  ["429"],
+    "vul_code_line": 429
+}

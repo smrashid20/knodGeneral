@@ -4,39 +4,40 @@ import re
 import sys
 
 from evaluation_metric import cosine_similarity_between_texts, rouge_l_score_between_texts
+from interact_with_llama import generate_gt_reasoning_llama
 
 
-# def generate_gt_reasoning(vul_id: str):
-#     print(f"[DEBUG] Starting GT reasoning generation for: {vul_id}")
-#     base_path = os.path.join("llm_outputs", vul_id)
-#
-#     description_path = os.path.join(base_path, "vulnerability_description.txt")
-#     buggy_path = os.path.join(base_path, "buggy_block.txt")
-#     fixed_path = os.path.join(base_path, "fixed_block.txt")
-#     output_file = os.path.join(base_path, f"gt_reasoning_llama.txt")
-#
-#     print(f"[DEBUG] Checking if GT reasoning file exists: {output_file}")
-#     if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
-#         print(f"[SKIP] Ground truth reasoning already exists for {vul_id} using llama.")
-#         return
-#
-#     try:
-#         with open(description_path, 'r') as f:
-#             vulnerability_description = f.read()
-#         print(f"[DEBUG] Loaded vulnerability_description from {description_path}")
-#         with open(buggy_path, 'r') as f:
-#             buggy_block = f.read()
-#         print(f"[DEBUG] Loaded buggy_block from {buggy_path}")
-#         with open(fixed_path, 'r') as f:
-#             fixed_block = f.read()
-#         print(f"[DEBUG] Loaded fixed_block from {fixed_path}")
-#     except FileNotFoundError as e:
-#         print(f"[ERROR] Missing input file: {e.filename}")
-#         return
-#
-#     print(f"[INFO] Generating ground truth reasoning for {vul_id} using llama...")
-#     generate_gt_reasoning_llama(vulnerability_description, buggy_block, fixed_block, output_file)
-#     print(f"[SUCCESS] Reasoning saved to {output_file}")
+def generate_gt_reasoning(vul_id: str):
+    print(f"[DEBUG] Starting GT reasoning generation for: {vul_id}")
+    base_path = os.path.join("llm_outputs", vul_id)
+
+    description_path = os.path.join(base_path, "vulnerability_description.txt")
+    buggy_path = os.path.join(base_path, "buggy_block.txt")
+    fixed_path = os.path.join(base_path, "fixed_block.txt")
+    output_file = os.path.join(base_path, f"gt_reasoning_llama.txt")
+
+    print(f"[DEBUG] Checking if GT reasoning file exists: {output_file}")
+    if os.path.exists(output_file) and os.path.getsize(output_file) > 0:
+        print(f"[SKIP] Ground truth reasoning already exists for {vul_id} using llama.")
+        return
+
+    try:
+        with open(description_path, 'r') as f:
+            vulnerability_description = f.read()
+        print(f"[DEBUG] Loaded vulnerability_description from {description_path}")
+        with open(buggy_path, 'r') as f:
+            buggy_block = f.read()
+        print(f"[DEBUG] Loaded buggy_block from {buggy_path}")
+        with open(fixed_path, 'r') as f:
+            fixed_block = f.read()
+        print(f"[DEBUG] Loaded fixed_block from {fixed_path}")
+    except FileNotFoundError as e:
+        print(f"[ERROR] Missing input file: {e.filename}")
+        return
+
+    print(f"[INFO] Generating ground truth reasoning for {vul_id} using llama...")
+    generate_gt_reasoning_llama(vulnerability_description, buggy_block, fixed_block, output_file)
+    print(f"[SUCCESS] Reasoning saved to {output_file}")
 
 
 def extract_patch_from_text(text: str) -> str:
@@ -129,12 +130,12 @@ def evaluate_llm(vul_id: str, target_model_name: str):
                 original_json["Plausible"] = True
             elif original_json["TestAll"] == "Pass":
                 original_json["Plausible"] = True
-            # elif original_json["TestSingle"] == "NA" and original_json["TestAll"] == "NA":
-            #     if (original_json["Compilation"] == "Success"
-            #             and original_json["reasoning_cosine_similarity"] >= 0.84
-            #             and original_json["reasoning_rouge_l"] >= 0.34
+            elif original_json["TestSingle"] == "NA" and original_json["TestAll"] == "NA":
+                if (original_json["Compilation"] == "Success"
+                        and original_json["reasoning_cosine_similarity"] >= 0.84
+                        and original_json["reasoning_rouge_l"] >= 0.34):
             #             and original_json["reasoning_gpt"] == True):
-            #         original_json["Plausible"] = True
+                    original_json["Plausible"] = True
             else:
                 original_json["Plausible"] = False
 
@@ -156,7 +157,7 @@ if __name__ == "__main__":
 
     vul_id = sys.argv[1]
     target_model_name = "llama"
-    # print(f"[START] Processing vulnerability: {vul_id}")
-    # generate_gt_reasoning(vul_id)
+    print(f"[START] Processing vulnerability: {vul_id}")
+    generate_gt_reasoning(vul_id)
     evaluate_llm(vul_id, target_model_name)
     print(f"[COMPLETE] Evaluation finished for: {vul_id}")

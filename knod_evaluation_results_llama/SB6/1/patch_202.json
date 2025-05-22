@@ -1,0 +1,8 @@
+{
+  "Compilation": "Success",
+  "TestSingle": "NA",
+  "TestAll": "Fail",
+  "patch_cosine_similarity": 0.26327985525131226,
+  "patch_rouge_l": 0.13333333333333336,
+  "Plausible": false
+}

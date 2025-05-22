@@ -1,0 +1,113 @@
+### lib/isc/netmgr/netmgr.c ###
+void
+isc__nmhandle_detach(isc_nmhandle_t **handlep FLARG) {
+	isc_nmsocket_t *sock = NULL;
+	isc_nmhandle_t *handle = NULL;
+
+	REQUIRE(handlep != NULL);
+	REQUIRE(VALID_NMHANDLE(*handlep));
+
+	handle = *handlep;
+	*handlep = NULL;
+
+............
+static const isc_statscounter_t udp4statsindex[] = {
+	isc_sockstatscounter_udp4open,
+	isc_sockstatscounter_udp4openfail,
+	isc_sockstatscounter_udp4close,
+	isc_sockstatscounter_udp4bindfail,
+	isc_sockstatscounter_udp4connectfail,
+	isc_sockstatscounter_udp4connect,
+	-1,
+	-1,
+	isc_sockstatscounter_udp4sendfail,
+	isc_sockstatscounter_udp4recvfail,
+	isc_sockstatscounter_udp4active
+};
+
+static const isc_statscounter_t udp6statsindex[] = {
+	isc_sockstatscounter_udp6open,
+	isc_sockstatscounter_udp6openfail,
+	isc_sockstatscounter_udp6close,
+	isc_sockstatscounter_udp6bindfail,
+	isc_sockstatscounter_udp6connectfail,
+	isc_sockstatscounter_udp6connect,
+	-1,
+	-1,
+	isc_sockstatscounter_udp6sendfail,
+	isc_sockstatscounter_udp6recvfail,
+	isc_sockstatscounter_udp6active
+};
+
+static const isc_statscounter_t tcp4statsindex[] = {
+	isc_sockstatscounter_tcp4open,	      isc_sockstatscounter_tcp4openfail,
+	isc_sockstatscounter_tcp4close,	      isc_sockstatscounter_tcp4bindfail,
+	isc_sockstatscounter_tcp4connectfail, isc_sockstatscounter_tcp4connect,
+	isc_sockstatscounter_tcp4acceptfail,  isc_sockstatscounter_tcp4accept,
+	isc_sockstatscounter_tcp4sendfail,    isc_sockstatscounter_tcp4recvfail,
+	isc_sockstatscounter_tcp4active
+};
+
+static const isc_statscounter_t tcp6statsindex[] = {
+	isc_sockstatscounter_tcp6open,	      isc_sockstatscounter_tcp6openfail,
+	isc_sockstatscounter_tcp6close,	      isc_sockstatscounter_tcp6bindfail,
+	isc_sockstatscounter_tcp6connectfail, isc_sockstatscounter_tcp6connect,
+	isc_sockstatscounter_tcp6acceptfail,  isc_sockstatscounter_tcp6accept,
+	isc_sockstatscounter_tcp6sendfail,    isc_sockstatscounter_tcp6recvfail,
+	isc_sockstatscounter_tcp6active
+};
+
+............
+static thread_local int isc__nm_tid_v = ISC_NETMGR_TID_UNKNOWN;
+
+/*
+ * Set by the -T dscp option on the command line. If set to a value
+ * other than -1, we check to make sure DSCP values match it, and
+ * assert if not. (Not currently in use.)
+ */
+int isc_dscp_check_value = -1;
+
+static void
+nmsocket_maybe_destroy(isc_nmsocket_t *sock FLARG);
+static void
+nmhandle_free(isc_nmsocket_t *sock, isc_nmhandle_t *handle);
+static isc_threadresult_t
+nm_thread(isc_threadarg_t worker0);
+static void
+async_cb(uv_async_t *handle);
+
+static bool
+process_netievent(isc__networker_t *worker, isc__netievent_t *ievent);
+static isc_result_t
+process_queue(isc__networker_t *worker, netievent_type_t type);
+static void
+wait_for_priority_queue(isc__networker_t *worker);
+static void
+drain_queue(isc__networker_t *worker, netievent_type_t type);
+
+static void
+isc__nm_async_stop(isc__networker_t *worker, isc__netievent_t *ev0);
+static void
+isc__nm_async_pause(isc__networker_t *worker, isc__netievent_t *ev0);
+static void
+isc__nm_async_resume(isc__networker_t *worker, isc__netievent_t *ev0);
+static void
+isc__nm_async_detach(isc__networker_t *worker, isc__netievent_t *ev0);
+static void
+isc__nm_async_close(isc__networker_t *worker, isc__netievent_t *ev0);
+
+static void
+isc__nm_threadpool_initialize(uint32_t workers);
+static void
+isc__nm_work_cb(uv_work_t *req);
+static void
+isc__nm_after_work_cb(uv_work_t *req, int status);
+
+/*%<
+ * Issue a 'handle closed' callback on the socket.
+ */
+
+static void
+nmhandle_detach_cb(isc_nmhandle_t **handlep FLARG);
+
+............

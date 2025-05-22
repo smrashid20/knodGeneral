@@ -1,0 +1,11 @@
+The repair of the vulnerability in the int_x509_param_set_hosts function involves a two-step process. 
+
+First, the code checks if the name is not null and the name length is zero. If this condition is met, it updates the name length to be the actual length of the name. This step is crucial in handling the special case of a zero name length, which was previously not supported.
+
+Second, the code proceeds with the original logic of checking for null characters in the name, but now with the corrected name length. This ensures that the hostname verification is not silently omitted, preventing man-in-the-middle attackers from spoofing servers and obtaining sensitive information.
+
+The key aspect of the repair is the addition of the initial check for a zero name length. This check allows the function to handle the special case where the name length is zero, which was previously not supported. By updating the name length to the actual length of the name, the function can now correctly perform hostname verification, even in this special case.
+
+The repair does not modify the original logic of checking for null characters in the name, but rather ensures that this logic is applied correctly by using the updated name length. This approach ensures that the function remains backward compatible and does not introduce any new vulnerabilities.
+
+Overall, the repair is a straightforward and targeted fix that addresses the specific vulnerability in the int_x509_param_set_hosts function. By handling the special case of a zero name length, the repair ensures that the function correctly performs hostname verification, preventing potential security risks.

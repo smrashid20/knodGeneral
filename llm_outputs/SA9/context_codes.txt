@@ -1,0 +1,21 @@
+### src/Handshake.java ###
+public class Handshake {
+    private static final Logger logger = Logger.getLogger(Handshake.class.getName());
+    private static final int GNUTLS_RANDOM_SIZE = 32;
+    private static final int GNUTLS_CLIENT = 0;
+    private static final int GNUTLS_EXT_ANY = 1;
+    private static final int GNUTLS_EXT_MANDATORY = 0;
+    private static final int GNUTLS_EXT_FLAG_CLIENT_HELLO = 1;
+    private static final int GNUTLS_HANDSHAKE_CLIENT_HELLO = 1;
+    public static int sendClientHello(Session session, int again) {
+        Buffer bufel = null;
+        int type;
+        int ret = 0;
+        VersionEntry hver, minVer, maxVer;
+        byte[] tver = new byte[2];
+        Buffer extdata = new Buffer();
+        boolean rehandshake = false;
+        boolean addSrScsv = false;
+        int sessionIdLen = session.getInternals().getResumedSecurityParameters().getSessionIdSize();
+
+............

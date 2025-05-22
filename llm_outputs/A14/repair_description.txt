@@ -1,0 +1,17 @@
+The repair steps for the OpenSSL vulnerability, also known as the "CCS Injection" vulnerability, involve modifying the code to properly restrict processing of ChangeCipherSpec messages. Here are the steps:
+
+1. **Check for CCS Flag**: The first step is to check if the SSL3_FLAGS_CCS_OK flag is set in the s->s3->flags variable. This flag indicates whether a ChangeCipherSpec message has already been received and processed.
+
+2. **Prevent Multiple CCS Messages**: If the SSL3_FLAGS_CCS_OK flag is not set, the code should prevent the processing of the ChangeCipherSpec message. This is done by setting the alert level to SSL_AD_UNEXPECTED_MESSAGE and logging an error message using SSLerr.
+
+3. **Clear CCS Flag**: After processing a valid ChangeCipherSpec message, the SSL3_FLAGS_CCS_OK flag should be cleared to prevent subsequent ChangeCipherSpec messages from being processed.
+
+4. **Verify Cipher Availability**: The code should verify that a cipher is available to change to before processing the ChangeCipherSpec message. If no cipher is available, an alert level of SSL_AD_UNEXPECTED_MESSAGE should be set and an error message logged.
+
+5. **Validate Record Payload**: The code should validate the record payload of the ChangeCipherSpec message to ensure it conforms to the expected format. If the payload is invalid, an alert level of SSL_AD_ILLEGAL_PARAMETER should be set and an error message logged.
+
+6. **Invoke Callback Function**: If a message callback function is registered, it should be invoked to notify the application of the ChangeCipherSpec message.
+
+7. **Perform Cipher Change**: Finally, the code should perform the actual cipher change by calling the ssl3_do_change_cipher_spec function.
+
+By implementing these steps, the OpenSSL code can properly restrict processing of ChangeCipherSpec messages and prevent man-in-the-middle attackers from triggering the use of a zero-length master key, thereby hijacking sessions or obtaining sensitive information.

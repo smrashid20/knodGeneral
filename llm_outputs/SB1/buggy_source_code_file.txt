@@ -1,0 +1,168 @@
+package main;
+
+import commons.*;
+
+public class Ssl3GetCertVerify {
+    public static int ssl3_get_cert_verify(SSL s) {
+        EVP_PKEY pkey = null;
+        byte[] p;
+        int al, ret = 0;
+        long n;
+        int type = 0, i = 0, j = 0;
+        X509 peer;
+        EVP_MD_CTX mctx = new EVP_MD_CTX();
+        Helper.EVP_MD_CTX_init(mctx);
+
+        boolean[] okHolder = new boolean[1];
+        n = s.method.ssl_get_message(s,
+                Constants.SSL3_ST_SR_CERT_VRFY_A,
+                Constants.SSL3_ST_SR_CERT_VRFY_B,
+                -1,
+                Constants.SSL3_RT_MAX_PLAIN_LENGTH,
+                okHolder);
+        if (!okHolder[0]) return (int)n;
+
+        if (s.session.peer != null) {
+            peer = s.session.peer;
+            pkey = Helper.X509_get_pubkey(peer);
+            type = Helper.X509_certificate_type(peer, pkey);
+        } else {
+            peer = null;
+            pkey = null;
+        }
+
+        if (s.s3.tmp.message_type != Constants.SSL3_MT_CERTIFICATE_VERIFY) {
+            s.s3.tmp.reuse_message = 1;
+            if (peer != null && (type & Constants.EVP_PKT_SIGN) != 0) {
+                al = Constants.SSL_AD_UNEXPECTED_MESSAGE;
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                        Constants.SSL_R_MISSING_VERIFY_MESSAGE);
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return ret;
+            }
+            return 1;
+        }
+
+        if (peer == null) {
+            Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                    Constants.SSL_R_NO_CLIENT_CERT_RECEIVED);
+            al = Constants.SSL_AD_UNEXPECTED_MESSAGE;
+            Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+            return ret;
+        }
+
+        if ((type & Constants.EVP_PKT_SIGN) == 0) {
+            Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                    Constants.SSL_R_SIGNATURE_FOR_NON_SIGNING_CERTIFICATE);
+            al = Constants.SSL_AD_ILLEGAL_PARAMETER;
+            Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+            return ret;
+        }
+
+        if (s.s3.change_cipher_spec) {
+            Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                    Constants.SSL_R_CCS_RECEIVED_EARLY);
+            al = Constants.SSL_AD_UNEXPECTED_MESSAGE;
+            Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+            return ret;
+        }
+
+        p = s.init_msg;
+        if (n == 64 && (pkey.type == Constants.NID_id_GostR3410_94 ||
+                pkey.type == Constants.NID_id_GostR3410_2001)) {
+            i = 64;
+        } else {
+            if (Helper.SSL_USE_SIGALGS(s)) {
+                EVP_MD_CTX[] mdHolder = new EVP_MD_CTX[1];
+                int rv = Helper.tls12_check_peer_sigalg(mdHolder, s, p, pkey);
+                if (rv != 1) {
+                    al = Constants.SSL_AD_INTERNAL_ERROR;
+                    Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                    return ret;
+                }
+                p = slice(p, 2);
+                n -= 2;
+            }
+            int[] iHolder = new int[1];
+            Helper.n2s(p, iHolder);
+            i = iHolder[0];
+            n -= 2;
+            if (i > n) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                        Constants.SSL_R_LENGTH_MISMATCH);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return ret;
+            }
+        }
+
+        j = Helper.EVP_PKEY_size(pkey);
+        if (i > j || n > j || n <= 0) {
+            Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                    Constants.SSL_R_WRONG_SIGNATURE_SIZE);
+            al = Constants.SSL_AD_DECODE_ERROR;
+            Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+            return ret;
+        }
+
+        if (Helper.SSL_USE_SIGALGS(s)) {
+            long hdatalen = 1;
+            Object hdata = null;
+            if (hdatalen <= 0) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                        Constants.SSL_AD_INTERNAL_ERROR);
+                al = Constants.SSL_AD_INTERNAL_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return ret;
+            }
+            if (!Helper.EVP_VerifyInit_ex(mctx, null, null)
+                    || !Helper.EVP_VerifyUpdate(mctx, hdata, (int)hdatalen)
+                    || Helper.EVP_VerifyFinal(mctx, p, i, pkey) <= 0) {
+                al = Constants.SSL_AD_DECRYPT_ERROR;
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                        Constants.SSL_R_BAD_SIGNATURE);
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return ret;
+            }
+        } else if (pkey.type == Constants.EVP_PKEY_RSA) {
+            if (Helper.RSA_verify(0, s.s3.tmp.cert_verify_md, 36, p, i, null) <= 0) {
+                al = Constants.SSL_AD_DECRYPT_ERROR;
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                        Constants.SSL_R_BAD_RSA_SIGNATURE);
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return ret;
+            }
+        } else if (pkey.type == Constants.EVP_PKEY_DSA) {
+            if (Helper.DSA_verify(0, s.s3.tmp.cert_verify_md, 20, p, i, null) <= 0) {
+                al = Constants.SSL_AD_DECRYPT_ERROR;
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                        Constants.SSL_R_BAD_DSA_SIGNATURE);
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return ret;
+            }
+        } else if (pkey.type == Constants.EVP_PKEY_EC) {
+            if (Helper.ECDSA_verify(0, s.s3.tmp.cert_verify_md, 20, p, i, null) <= 0) {
+                al = Constants.SSL_AD_DECRYPT_ERROR;
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                        Constants.SSL_R_BAD_ECDSA_SIGNATURE);
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return ret;
+            }
+        } else {
+            Helper.SSLerr(Constants.SSL_F_SSL3_GET_CERT_VERIFY,
+                    Constants.SSL_AD_UNEXPECTED_MESSAGE);
+            al = Constants.SSL_AD_UNEXPECTED_MESSAGE;
+            Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+            return ret;
+        }
+
+        ret = 1;
+        return ret;
+    }
+
+    private static byte[] slice(byte[] array, int offset) {
+        byte[] result = new byte[array.length - offset];
+        System.arraycopy(array, offset, result, 0, result.length);
+        return result;
+    }
+}

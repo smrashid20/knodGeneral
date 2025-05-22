@@ -1,0 +1,5 @@
+        saslFeatureReceived.checkIfSuccessOrWaitOrThrow();
+
+        // Make note of the fact that we're now connected.
+        connected = true;
+        callConnectionConnectedListener();

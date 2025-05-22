@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB18",
+    "project_name": "SB18",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/CertificateVerifier.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 161,
+    "vul_code_block_start_line": 61,
+    "vul_code_block_end_line": 69,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 180,
+    "vul_code_block_fixed_start_line": 61,
+    "vul_code_block_fixed_end_line": 82,
+    "vul_code_initial_block_start": 61,
+    "vul_code_initial_block_end": 61,
+    "vul_code_context_lines": ["5-21"],
+    "context_lines": [{
+        "src/main/CertificateVerifier.java": ["5-21"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "CertificateVerifier.java",
+    "vul_code_lines":  ["62"],
+    "vul_code_line": 62,
+    "rem_start": 62,
+    "rem_end": 62,
+    "add_start": 62,
+    "add_end": 76
+}

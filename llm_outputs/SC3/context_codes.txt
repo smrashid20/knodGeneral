@@ -1,0 +1,8 @@
+### src/master/Security_Default.java ###
+    public static MosqErr mosquittoAclCheckDefault(
+            MosquittoDb db,
+            MosquittoContext context,
+            String topic,
+            Access access
+
+............

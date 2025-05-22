@@ -1,0 +1,12 @@
+A resolver implementation MUST match responses to all of the following attributes of the query:
+
+* Source address against query destination address
+* Destination address against query source address
+* Destination port against query source port
+* Query ID
+* Query name
+* Query class and type
+
+before applying DNS trustworthiness rules.
+
+A mismatch and the response MUST be considered invalid.

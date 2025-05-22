@@ -1,0 +1,19 @@
+The vulnerability in the given code lies in the way it handles the validation of incoming zone data in a mirror zone setup. The mirror zone feature in BIND allows recursive servers to pre-cache zone data provided by other servers, subject to DNSSEC validation. However, the buggy code does not properly validate the zone data, allowing an on-path attacker to replace validated data with forged data.
+
+The issue arises from the fact that the code does not properly check the validity of the keynode before detaching it from the keytable and setting the trust level to secure. This allows an attacker to manipulate the keynode and inject forged data into the zone.
+
+The repair addresses this vulnerability by introducing additional checks to ensure the keynode is valid before detaching it from the keytable and setting the trust level. Here's a step-by-step explanation of the repair:
+
+1. The repair first checks if the result of the key validation is not ISC_R_SUCCESS. If it's not, the code checks if the result is DNS_R_PARTIALMATCH or ISC_R_NOTFOUND, and if so, sets the result to ISC_R_SUCCESS. This ensures that the code handles partial matches and not-found cases correctly.
+
+2. If the result is ISC_R_SUCCESS, the code enters a while loop that continues until it finds a matching keynode or the result becomes non-ISC_R_SUCCESS. Inside the loop, the code compares the key with the key of the current keynode using the dst_key_compare function.
+
+3. If the keys match, the code detaches the keynode from the keytable, sets the trust level of the keyset and keysigs to secure, and sets the goodkey flag to true. This ensures that the validated keynode is properly detached and the trust level is set correctly.
+
+4. If the keys do not match, the code finds the next keynode in the keytable using the dns_keytable_findnextkeynode function and detaches the current keynode from the keytable. This ensures that the code properly iterates through the keytable and detaches each keynode.
+
+5. After the loop, the code checks if there is a remaining keynode and detaches it from the keytable if necessary. This ensures that all keynodes are properly detached, regardless of whether a match was found.
+
+6. Finally, the code frees the keyOut using the dst_key_free function and returns ISC_R_SUCCESS.
+
+In summary, the repair introduces additional checks to ensure the keynode is valid before detaching it from the keytable and setting the trust level. This prevents an on-path attacker from replacing validated data with forged data, thereby fixing the vulnerability.

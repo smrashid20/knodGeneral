@@ -1,0 +1,9 @@
+The vulnerability in the OpenSSL code is related to the processing of ChangeCipherSpec messages in TLS handshakes. The issue arises when an attacker, acting as a man-in-the-middle, sends a crafted TLS handshake that triggers the use of a zero-length master key. This allows the attacker to hijack sessions or obtain sensitive information.
+
+The root cause of the vulnerability lies in the fact that the OpenSSL code does not properly restrict the processing of ChangeCipherSpec messages. Specifically, the code does not check if a ChangeCipherSpec message has already been received before processing a new one. This allows an attacker to send multiple ChangeCipherSpec messages, potentially causing the use of a zero-length master key.
+
+The repair addresses this issue by introducing a new flag, SSL3_FLAGS_CCS_OK, which is used to track whether a ChangeCipherSpec message has already been received. Before processing a ChangeCipherSpec message, the code checks if this flag is set. If it is, the code returns an error, indicating that a ChangeCipherSpec message has already been received. This prevents an attacker from sending multiple ChangeCipherSpec messages and triggering the use of a zero-length master key.
+
+Additionally, the repair clears the SSL3_FLAGS_CCS_OK flag after processing a ChangeCipherSpec message, ensuring that subsequent ChangeCipherSpec messages will be rejected. This provides an additional layer of protection against attacks that attempt to exploit this vulnerability.
+
+By introducing this flag and checking it before processing ChangeCipherSpec messages, the repair ensures that OpenSSL properly restricts the processing of these messages, preventing the use of a zero-length master key and protecting against man-in-the-middle attacks.

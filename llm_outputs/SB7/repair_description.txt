@@ -1,0 +1,13 @@
+The repair of the vulnerability in the x509_verify_ctx_add_chain function involves several key steps. 
+
+First, the order of operations is rearranged to prioritize the verification of the leaf certificate. This is done to ensure that any errors that occur during this verification process are properly captured and stored.
+
+Next, the function checks if the current depth is zero and if the error code is not X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY. If both conditions are met, the error code is stored in the cert_errors array of the chain structure. This is a crucial step in addressing the vulnerability, as it ensures that errors that occur during leaf certificate verification are properly stored and not overwritten.
+
+The function then proceeds to check if the maximum number of chains has been reached. If not, it attempts to duplicate the chain using the x509_verify_chain_dup function. If this operation fails due to a memory error, the function returns an error code indicating that the operation was unsuccessful.
+
+After successfully duplicating the chain, the function increments the chains_count variable to reflect the addition of the new chain. It then resets the error code to X509_V_OK, indicating that the operation was successful.
+
+Finally, the function stores the error code in the cert_errors array of the chain structure at the current depth. This ensures that any errors that occurred during the verification process are properly stored and can be retrieved later.
+
+Overall, the repair involves a combination of rearranging the order of operations, storing error codes in the cert_errors array, and properly handling memory errors. By addressing the vulnerability in this way, the function is able to accurately return error codes and prevent incorrect errors from being returned.

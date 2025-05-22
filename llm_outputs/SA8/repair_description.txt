@@ -1,0 +1,15 @@
+The repair of the vulnerability involves several steps to ensure the integrity of the SSH connection and prevent the Terrapin attack. Here are the steps to repair the vulnerability:
+
+1. **Identify the SSH Session Type**: The first step is to identify whether the current SSH session is a client or a server. This is crucial in determining the correct extension to look for in the SSH protocol negotiation.
+
+2. **Check for Client-Specific Extension**: If the session is identified as a client, the next step is to check for the presence of the client-specific extension in the SSH protocol negotiation. This is done by searching for the KEX_EXTENSION_CLIENT string in the client methods.
+
+3. **Truncate the Extension**: If the client-specific extension is found, the next step is to truncate the extension from the client methods. This is done to prevent the extension from being used in the SSH protocol negotiation, thereby preventing the Terrapin attack.
+
+4. **Check for Server-Specific Extension**: If the session is identified as a server, the next step is to check for the presence of the server-specific extension in the SSH protocol negotiation. This is done by searching for the KEX_STRICT_SERVER string in the server methods.
+
+5. **Truncate the Extension**: If the server-specific extension is found, the next step is to truncate the extension from the server methods. This is done to prevent the extension from being used in the SSH protocol negotiation, thereby preventing the Terrapin attack.
+
+6. **Verify the Integrity of the SSH Connection**: After truncating the extensions, the final step is to verify the integrity of the SSH connection. This involves ensuring that the SSH protocol negotiation is completed successfully and that the connection is secure.
+
+By following these steps, the repair ensures that the SSH connection is secure and prevents the Terrapin attack from occurring. The repair also ensures that the SSH protocol negotiation is completed successfully, and the connection is established with the required security features enabled.

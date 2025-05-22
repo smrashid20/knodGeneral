@@ -1,0 +1,13 @@
+    public static X11ConnectionResult channel_handle_x11_open_request(SshOptions options, String originator_info) {
+        if (!options.forwardX11) {
+            return X11ConnectionResult.REFUSED_DISABLED;
+        }
+
+        if (!options.forwardX11Trusted) {
+            if (x11_refuse_time_client_internal != 0 && TimeUtil.monotime() >= x11_refuse_time_client_internal) {
+                return X11ConnectionResult.REFUSED_TIMEOUT;
+            }
+        }
+        
+        return X11ConnectionResult.ACCEPTED;
+    }

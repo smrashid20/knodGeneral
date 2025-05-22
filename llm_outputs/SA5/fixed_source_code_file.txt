@@ -1,0 +1,61 @@
+package main;
+
+import commons.*;
+
+public class OCSPVerifier {
+
+    public static int ocsp_verify_signer(X509 signer, int response,
+                                         X509Store store, long flags,
+                                         X509Stack untrusted, X509Stack[] chain) {
+        X509StoreContext ctx = X509StoreContext.newContext();
+        X509VerifyParam vp;
+        int ret = -1;
+
+        if (ctx == null) {
+            ERR.raise("ERR_R_MALLOC_FAILURE");
+            return ret;
+        }
+
+        if (!ctx.init(store, signer, untrusted)) {
+            ERR.raise("ERR_R_X509_LIB");
+            ctx.free();
+            return ret;
+        }
+
+        vp = ctx.getParam();
+        if (vp == null) {
+            ctx.free();
+            return ret;
+        }
+
+        if ((flags & OCSPFlags.OCSP_PARTIAL_CHAIN) != 0) {
+            vp.setFlags(X509Flags.V_FLAG_PARTIAL_CHAIN);
+        }
+
+        if (response == 1 && signer.hasNoCheckExtension()) {
+            vp.clearFlags(X509Flags.V_FLAG_CRL_CHECK);
+        }
+
+        ctx.setPurpose(X509Purpose.OCSP_HELPER);
+        ctx.setTrust(X509Trust.OCSP_REQUEST);
+
+        ret = ctx.verify();
+
+        if (ret <= 0) {
+            int err = ctx.getError();
+            ERR.raiseData(
+                    "OCSP_R_CERTIFICATE_VERIFY_ERROR",
+                    String.format("Verify error (%d): %s", err, ctx.getErrorString())
+            );
+            ctx.free();
+            return ret;
+        }
+
+        if (chain != null) {
+            chain[0] = ctx.getVerifiedChain();
+        }
+
+        ctx.free();
+        return ret;
+    }
+}

@@ -1,0 +1,9 @@
+The vulnerability in the wpa_supplicant implementation of PEAP allows an attacker to bypass authentication by sending an EAP-TLV Success packet instead of starting Phase 2 authentication. This is possible when the network's TLS certificate is not verified during Phase 1 authentication, and the eap_peap_decrypt vulnerability is exploited.
+
+The root cause of this issue lies in the way the code handles the EAP-TLV status. When the status is EAP_TLV_RESULT_SUCCESS, the code checks if a forced failure is required, and if not, it immediately returns a success decision without verifying if Phase 2 authentication has been completed. This allows an attacker to send a fake EAP-TLV Success packet and bypass Phase 2 authentication.
+
+The repair addresses this issue by adding an additional check when the EAP-TLV status is EAP_TLV_RESULT_SUCCESS. It calls the function peapPhase2Sufficient to verify if Phase 2 authentication has been completed successfully. If not, it returns a failure decision, preventing the attacker from bypassing Phase 2 authentication.
+
+In essence, the repair ensures that even if an attacker sends a fake EAP-TLV Success packet, the code will not immediately return a success decision without verifying the completion of Phase 2 authentication. This prevents the authentication bypass vulnerability and ensures that the authentication process is completed securely.
+
+The key change in the repair is the addition of the peapPhase2Sufficient check, which provides an additional layer of security to prevent the authentication bypass attack. By verifying the completion of Phase 2 authentication, the repair ensures that the wpa_supplicant implementation of PEAP is more secure and resilient to attacks.

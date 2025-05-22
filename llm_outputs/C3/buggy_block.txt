@@ -1,0 +1,3 @@
+	if(!security_opts->acl_list && !security_opts->acl_patterns){
+			return MOSQ_ERR_PLUGIN_DEFER;
+	}

@@ -1,0 +1,8 @@
+	    if (err >= limit)
+		{
+			/* We should perhaps error loudly, but I can't make sense of that */
+			/* code... */
+			if( nrows == 256 )
+				break;
+			rows[nrows++] = br + bpr*sy;
+		}

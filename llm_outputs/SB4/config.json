@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB4",
+    "project_name": "SB4",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/OcspRespChecker.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 61,
+    "vul_code_block_start_line": 37,
+    "vul_code_block_end_line": 44,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 62,
+    "vul_code_block_fixed_start_line": 37,
+    "vul_code_block_fixed_end_line": 45,
+    "vul_code_initial_block_start": 37,
+    "vul_code_initial_block_end": 37,
+    "vul_code_context_lines": ["5-16"],
+    "context_lines": [{
+        "src/main/OcspRespChecker.java": ["5-16"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "OcspRespChecker.java",
+    "vul_code_lines":  ["41"],
+    "vul_code_line": 41,
+    "rem_start": 41,
+    "rem_end": 41,
+    "add_start": 41,
+    "add_end": 42
+}

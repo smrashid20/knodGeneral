@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA11",
+    "project_name": "SA11",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/X509CrtRevocationChecker.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 18,
+    "vul_code_block_start_line": 10,
+    "vul_code_block_end_line": 14,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 17,
+    "vul_code_block_fixed_start_line": 10,
+    "vul_code_block_fixed_end_line": 13,
+    "vul_code_initial_block_start": 10,
+    "vul_code_initial_block_end": 11,
+    "vul_code_context_lines": ["5-8"],
+    "context_lines": [{
+        "src/main/X509CrtRevocationChecker.java": ["5-8"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "X509CrtRevocationChecker.java",
+    "vul_code_lines":  ["12"],
+    "vul_code_line": 12,
+    "rem_start": 12,
+    "rem_end": 13,
+    "add_start": 12,
+    "add_end": 13
+}

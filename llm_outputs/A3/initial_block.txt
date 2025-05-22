@@ -1,0 +1,3 @@
+         /* Ask if an ENGINE is reserved for this job */
+        tmpimpl = ENGINE_get_cipher_engine(cipher->nid);
+    }

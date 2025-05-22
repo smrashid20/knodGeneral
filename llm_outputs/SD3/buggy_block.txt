@@ -1,0 +1,7 @@
+    public static X11ConnectionResult channel_handle_x11_open_request(SshOptions options, String originator_info) {
+        if (!options.forwardX11) {
+            return X11ConnectionResult.REFUSED_DISABLED;
+        }
+
+        return X11ConnectionResult.ACCEPTED;
+    }

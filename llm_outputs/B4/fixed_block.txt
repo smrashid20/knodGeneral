@@ -1,0 +1,13 @@
+	ret = gnutls_x509_crt_get_serial(crt, cserial.data, &t);
+	if (ret < 0) {
+		gnutls_assert();
+		goto cleanup;
+	}
+	cserial.size = t;
+
+	if (rserial.size != cserial.size
+	    || memcmp(cserial.data, rserial.data, rserial.size) != 0) {
+		ret = GNUTLS_E_OCSP_RESPONSE_ERROR;
+		gnutls_assert();
+		goto cleanup;
+	}

@@ -1,0 +1,9 @@
+The subject alternative name extension allows identities to be bound to the subject of the certificate. These identities may be included in addition to or in place of the identity in the subject field of the certificate. Defined options include an Internet electronic mail address, a DNS name, an IP address, and a Uniform Resource Identifier (URI). Other options exist, including completely local definitions. Multiple name forms, and multiple instances of each name form, MAY be included.
+
+Because the subject alternative name is considered to be definitively bound to the public key, all parts of the subject alternative name MUST be verified by the CA.
+
+When the subjectAltName extension contains a domain name system label, the domain name MUST be stored in the dNSName (an IA5String). The name MUST be in the "preferred name syntax", as specified by Section 3.5 of \[RFC1034] and as modified by Section 2.1 of \[RFC1123]. Note that while uppercase and lowercase letters are allowed in domain names, no significance is attached to the case.
+
+Subject alternative names MAY be constrained in the same manner as subject distinguished names using the name constraints extension as described in Section 4.2.1.10.
+
+If the subjectAltName extension is present, the sequence MUST contain at least one entry. Unlike the subject field, conforming CAs MUST NOT issue certificates with subjectAltNames containing empty GeneralName fields.

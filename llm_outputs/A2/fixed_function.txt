@@ -1,0 +1,73 @@
+static int check_policy(X509_STORE_CTX *ctx)
+{
+    int ret;
+
+    if (ctx->parent)
+        return 1;
+    /*
+     * With DANE, the trust anchor might be a bare public key, not a
+     * certificate!  In that case our chain does not have the trust anchor
+     * certificate as a top-most element.  This comports well with RFC5280
+     * chain verification, since there too, the trust anchor is not part of the
+     * chain to be verified.  In particular, X509_policy_check() does not look
+     * at the TA cert, but assumes that it is present as the top-most chain
+     * element.  We therefore temporarily push a NULL cert onto the chain if it
+     * was verified via a bare public key, and pop it off right after the
+     * X509_policy_check() call.
+     */
+    if (ctx->bare_ta_signed && !sk_X509_push(ctx->chain, NULL)) {
+        ERR_raise(ERR_LIB_X509, ERR_R_CRYPTO_LIB);
+        goto memerr;
+    }
+    ret = X509_policy_check(&ctx->tree, &ctx->explicit_policy, ctx->chain,
+                            ctx->param->policies, ctx->param->flags);
+    if (ctx->bare_ta_signed)
+        (void)sk_X509_pop(ctx->chain);
+
+    if (ret == X509_PCY_TREE_INTERNAL) {
+        ERR_raise(ERR_LIB_X509, ERR_R_X509_LIB);
+        goto memerr;
+    }
+    /* Invalid or inconsistent extensions */
+    if (ret == X509_PCY_TREE_INVALID) {
+        int i;
+
+        /* Locate certificates with bad extensions and notify callback. */
+        for (i = 0; i < sk_X509_num(ctx->chain); i++) {
+            X509 *x = sk_X509_value(ctx->chain, i);
+
+            CB_FAIL_IF((x->ex_flags & EXFLAG_INVALID_POLICY) != 0,
+                       ctx, x, i, X509_V_ERR_INVALID_POLICY_EXTENSION);
+        }
+        /* Should not be able to get here */
+        ERR_raise(ERR_LIB_X509, ERR_R_INTERNAL_ERROR);
+        return 0;
+    }
+    if (ret == X509_PCY_TREE_FAILURE) {
+        ctx->current_cert = NULL;
+        ctx->error = X509_V_ERR_NO_EXPLICIT_POLICY;
+        return ctx->verify_cb(0, ctx);
+    }
+    if (ret != X509_PCY_TREE_VALID) {
+        ERR_raise(ERR_LIB_X509, ERR_R_INTERNAL_ERROR);
+        return 0;
+    }
+
+    if ((ctx->param->flags & X509_V_FLAG_NOTIFY_POLICY) != 0) {
+        ctx->current_cert = NULL;
+        /*
+         * Verification errors need to be "sticky", a callback may have allowed
+         * an SSL handshake to continue despite an error, and we must then
+         * remain in an error state.  Therefore, we MUST NOT clear earlier
+         * verification errors by setting the error to X509_V_OK.
+         */
+        if (!ctx->verify_cb(2, ctx))
+            return 0;
+    }
+
+    return 1;
+
+ memerr:
+    ctx->error = X509_V_ERR_OUT_OF_MEM;
+    return -1;
+}

@@ -1,0 +1,11 @@
+### src/main/OCSPVerifier.java ###
+public class OCSPVerifier {
+
+    public static int ocsp_verify_signer(X509 signer, int response,
+                                         X509Store store, long flags,
+                                         X509Stack untrusted, X509Stack[] chain) {
+        X509StoreContext ctx = X509StoreContext.newContext();
+        X509VerifyParam vp;
+        int ret = -1;
+
+............

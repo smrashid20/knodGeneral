@@ -1,0 +1,24 @@
+{
+    "vul_id": "A7",
+    "project_name": "openssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "crypto/x509/x509_vfy.c",
+    "vul_code_func_start_line": 183,
+    "vul_code_func_end_line": 501,
+    "vul_code_block_start_line": 381,
+    "vul_code_block_end_line": 399,
+    "vul_code_func_fixed_start_line": 183,
+    "vul_code_func_fixed_end_line": 501,
+    "vul_code_block_fixed_start_line": 381,
+    "vul_code_block_fixed_end_line": 399,
+    "vul_code_initial_block_start": 381,
+    "vul_code_initial_block_end": 381,
+    "vul_code_context_lines": ["183-191", "78-141"],
+    "context_lines": [{
+        "crypto/x509/x509_vfy.c": ["183-191", "78-141"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "x509_vfy.c",
+    "vul_code_lines":  ["395"],
+    "vul_code_line": 395
+}

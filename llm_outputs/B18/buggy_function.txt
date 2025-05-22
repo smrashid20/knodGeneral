@@ -1,0 +1,252 @@
+int x509_check_signature(struct x509_certificate *issuer,
+			 struct x509_algorithm_identifier *signature,
+			 const u8 *sign_value, size_t sign_value_len,
+			 const u8 *signed_data, size_t signed_data_len)
+{
+	struct crypto_public_key *pk;
+	u8 *data;
+	const u8 *pos, *end, *next, *da_end;
+	size_t data_len;
+	struct asn1_hdr hdr;
+	struct asn1_oid oid;
+	u8 hash[64];
+	size_t hash_len;
+	const u8 *addr[1] = { signed_data };
+	size_t len[1] = { signed_data_len };
+
+	if (!x509_pkcs_oid(&signature->oid) ||
+	    signature->oid.len != 7 ||
+	    signature->oid.oid[5] != 1 /* pkcs-1 */) {
+		wpa_printf(MSG_DEBUG, "X509: Unrecognized signature "
+			   "algorithm");
+		return -1;
+	}
+
+	pk = crypto_public_key_import(issuer->public_key,
+				      issuer->public_key_len);
+	if (pk == NULL)
+		return -1;
+
+	data_len = sign_value_len;
+	data = os_malloc(data_len);
+	if (data == NULL) {
+		crypto_public_key_free(pk);
+		return -1;
+	}
+
+	if (crypto_public_key_decrypt_pkcs1(pk, sign_value,
+					    sign_value_len, data,
+					    &data_len) < 0) {
+		wpa_printf(MSG_DEBUG, "X509: Failed to decrypt signature");
+		crypto_public_key_free(pk);
+		os_free(data);
+		return -1;
+	}
+	crypto_public_key_free(pk);
+
+	wpa_hexdump(MSG_MSGDUMP, "X509: Signature data D", data, data_len);
+
+	/*
+	 * PKCS #1 v1.5, 10.1.2:
+	 *
+	 * DigestInfo ::= SEQUENCE {
+	 *     digestAlgorithm DigestAlgorithmIdentifier,
+	 *     digest Digest
+	 * }
+	 *
+	 * DigestAlgorithmIdentifier ::= AlgorithmIdentifier
+	 *
+	 * Digest ::= OCTET STRING
+	 *
+	 */
+	if (asn1_get_next(data, data_len, &hdr) < 0 ||
+	    hdr.class != ASN1_CLASS_UNIVERSAL ||
+	    hdr.tag != ASN1_TAG_SEQUENCE) {
+		wpa_printf(MSG_DEBUG, "X509: Expected SEQUENCE "
+			   "(DigestInfo) - found class %d tag 0x%x",
+			   hdr.class, hdr.tag);
+		os_free(data);
+		return -1;
+	}
+
+	pos = hdr.payload;
+	end = pos + hdr.length;
+
+	/*
+	 * X.509:
+	 * AlgorithmIdentifier ::= SEQUENCE {
+	 *     algorithm            OBJECT IDENTIFIER,
+	 *     parameters           ANY DEFINED BY algorithm OPTIONAL
+	 * }
+	 */
+
+	if (asn1_get_next(pos, end - pos, &hdr) < 0 ||
+	    hdr.class != ASN1_CLASS_UNIVERSAL ||
+	    hdr.tag != ASN1_TAG_SEQUENCE) {
+		wpa_printf(MSG_DEBUG, "X509: Expected SEQUENCE "
+			   "(AlgorithmIdentifier) - found class %d tag 0x%x",
+			   hdr.class, hdr.tag);
+		os_free(data);
+		return -1;
+	}
+	da_end = hdr.payload + hdr.length;
+
+	if (asn1_get_oid(hdr.payload, hdr.length, &oid, &next)) {
+		wpa_printf(MSG_DEBUG, "X509: Failed to parse digestAlgorithm");
+		os_free(data);
+		return -1;
+	}
+
+	if (x509_sha1_oid(&oid)) {
+		if (signature->oid.oid[6] != 5 /* sha-1WithRSAEncryption */) {
+			wpa_printf(MSG_DEBUG, "X509: digestAlgorithm SHA1 "
+				   "does not match with certificate "
+				   "signatureAlgorithm (%lu)",
+				   signature->oid.oid[6]);
+			os_free(data);
+			return -1;
+		}
+		goto skip_digest_oid;
+	}
+
+	if (x509_sha256_oid(&oid)) {
+		if (signature->oid.oid[6] !=
+		    11 /* sha2561WithRSAEncryption */) {
+			wpa_printf(MSG_DEBUG, "X509: digestAlgorithm SHA256 "
+				   "does not match with certificate "
+				   "signatureAlgorithm (%lu)",
+				   signature->oid.oid[6]);
+			os_free(data);
+			return -1;
+		}
+		goto skip_digest_oid;
+	}
+
+	if (x509_sha384_oid(&oid)) {
+		if (signature->oid.oid[6] != 12 /* sha384WithRSAEncryption */) {
+			wpa_printf(MSG_DEBUG, "X509: digestAlgorithm SHA384 "
+				   "does not match with certificate "
+				   "signatureAlgorithm (%lu)",
+				   signature->oid.oid[6]);
+			os_free(data);
+			return -1;
+		}
+		goto skip_digest_oid;
+	}
+
+	if (x509_sha512_oid(&oid)) {
+		if (signature->oid.oid[6] != 13 /* sha512WithRSAEncryption */) {
+			wpa_printf(MSG_DEBUG, "X509: digestAlgorithm SHA512 "
+				   "does not match with certificate "
+				   "signatureAlgorithm (%lu)",
+				   signature->oid.oid[6]);
+			os_free(data);
+			return -1;
+		}
+		goto skip_digest_oid;
+	}
+
+	if (!x509_digest_oid(&oid)) {
+		wpa_printf(MSG_DEBUG, "X509: Unrecognized digestAlgorithm");
+		os_free(data);
+		return -1;
+	}
+	switch (oid.oid[5]) {
+	case 5: /* md5 */
+		if (signature->oid.oid[6] != 4 /* md5WithRSAEncryption */) {
+			wpa_printf(MSG_DEBUG, "X509: digestAlgorithm MD5 does "
+				   "not match with certificate "
+				   "signatureAlgorithm (%lu)",
+				   signature->oid.oid[6]);
+			os_free(data);
+			return -1;
+		}
+		break;
+	case 2: /* md2 */
+	case 4: /* md4 */
+	default:
+		wpa_printf(MSG_DEBUG, "X509: Unsupported digestAlgorithm "
+			   "(%lu)", oid.oid[5]);
+		os_free(data);
+		return -1;
+	}
+
+skip_digest_oid:
+	/* Digest ::= OCTET STRING */
+	pos = da_end;
+
+	if (asn1_get_next(pos, end - pos, &hdr) < 0 ||
+	    hdr.class != ASN1_CLASS_UNIVERSAL ||
+	    hdr.tag != ASN1_TAG_OCTETSTRING) {
+		wpa_printf(MSG_DEBUG, "X509: Expected OCTETSTRING "
+			   "(Digest) - found class %d tag 0x%x",
+			   hdr.class, hdr.tag);
+		os_free(data);
+		return -1;
+	}
+	wpa_hexdump(MSG_MSGDUMP, "X509: Decrypted Digest",
+		    hdr.payload, hdr.length);
+
+	switch (signature->oid.oid[6]) {
+	case 4: /* md5WithRSAEncryption */
+		md5_vector(1, addr, len, hash);
+		hash_len = 16;
+		wpa_hexdump(MSG_MSGDUMP, "X509: Certificate hash (MD5)",
+			    hash, hash_len);
+		break;
+	case 5: /* sha-1WithRSAEncryption */
+		sha1_vector(1, addr, len, hash);
+		hash_len = 20;
+		wpa_hexdump(MSG_MSGDUMP, "X509: Certificate hash (SHA1)",
+			    hash, hash_len);
+		break;
+	case 11: /* sha256WithRSAEncryption */
+		sha256_vector(1, addr, len, hash);
+		hash_len = 32;
+		wpa_hexdump(MSG_MSGDUMP, "X509: Certificate hash (SHA256)",
+			    hash, hash_len);
+		break;
+	case 12: /* sha384WithRSAEncryption */
+		sha384_vector(1, addr, len, hash);
+		hash_len = 48;
+		wpa_hexdump(MSG_MSGDUMP, "X509: Certificate hash (SHA384)",
+			    hash, hash_len);
+		break;
+	case 13: /* sha512WithRSAEncryption */
+		sha512_vector(1, addr, len, hash);
+		hash_len = 64;
+		wpa_hexdump(MSG_MSGDUMP, "X509: Certificate hash (SHA512)",
+			    hash, hash_len);
+		break;
+	case 2: /* md2WithRSAEncryption */
+	default:
+		wpa_printf(MSG_INFO, "X509: Unsupported certificate signature "
+			   "algorithm (%lu)", signature->oid.oid[6]);
+		os_free(data);
+		return -1;
+	}
+
+	if (hdr.length != hash_len ||
+	    os_memcmp_const(hdr.payload, hash, hdr.length) != 0) {
+		wpa_printf(MSG_INFO, "X509: Certificate Digest does not match "
+			   "with calculated tbsCertificate hash");
+		os_free(data);
+		return -1;
+	}
+
+	if (hdr.payload + hdr.length < data + data_len) {
+		wpa_hexdump(MSG_INFO,
+			    "X509: Extra data after certificate signature hash",
+			    hdr.payload + hdr.length,
+			    data + data_len - hdr.payload - hdr.length);
+		os_free(data);
+		return -1;
+	}
+
+	os_free(data);
+
+	wpa_printf(MSG_DEBUG, "X509: Certificate Digest matches with "
+		   "calculated tbsCertificate hash");
+
+	return 0;
+}

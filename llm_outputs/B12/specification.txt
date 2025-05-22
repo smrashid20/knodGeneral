@@ -1,0 +1,17 @@
+Certificate Verify
+This message is used to provide explicit proof that an endpoint possesses the private key corresponding to its certificate. The CertificateVerify message also provides integrity for the handshake up to this point. Servers MUST send this message when authenticating via a certificate. Clients MUST send this message whenever authenticating via a certificate (i.e., when the Certificate message is non-empty).
+
+The context string for a server signature is "TLS 1.3, server CertificateVerify". The context string for a client signature is "TLS 1.3, client CertificateVerify". It is used to provide separation between signatures made in different contexts, helping against potential cross-protocol attacks.
+
+On the sender side, the process for computing the signature field of the CertificateVerify message takes as input:
+
+* The content covered by the digital signature
+* The private signing key corresponding to the certificate sent in the previous message
+
+The receiver of a CertificateVerify message MUST verify the signature field. The verification process takes as input:
+
+* The content covered by the digital signature
+* The public key contained in the end-entity certificate found in the associated Certificate message
+* The digital signature received in the signature field of the CertificateVerify message
+
+If the verification fails, the receiver MUST terminate the handshake with a "decrypt\_error" alert.

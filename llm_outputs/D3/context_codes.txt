@@ -1,0 +1,150 @@
+### channels.c ###
+static int
+x11_open_helper(Buffer *b)
+{
+	u_char *ucp;
+	u_int proto_len, data_len;
+
+............
+static Channel **channels = NULL;
+
+/*
+ * Size of the channel array.  All slots of the array must always be
+ * initialized (at least the type field); unused slots set to NULL
+ */
+static u_int channels_alloc = 0;
+
+/*
+ * Maximum file descriptor value used in any of the channels.  This is
+ * updated in channel_new.
+ */
+static int channel_max_fd = 0;
+
+
+/* -- tcp forwarding */
+
+/*
+ * Data structure for storing which hosts are permitted for forward requests.
+ * The local sides of any remote forwards are stored in this array to prevent
+ * a corrupt remote server from accessing arbitrary TCP/IP ports on our local
+ * network (which might be behind a firewall).
+ */
+/* XXX: streamlocal wants a path instead of host:port */
+/*      Overload host_to_connect; we could just make this match Forward */
+/*	XXX - can we use listen_host instead of listen_path? */
+typedef struct {
+	char *host_to_connect;		/* Connect to 'host'. */
+	int port_to_connect;		/* Connect to 'port'. */
+	char *listen_host;		/* Remote side should listen address. */
+	char *listen_path;		/* Remote side should listen path. */
+	int listen_port;		/* Remote side should listen port. */
+} ForwardPermission;
+
+/* List of all permitted host/port pairs to connect by the user. */
+static ForwardPermission *permitted_opens = NULL;
+
+/* List of all permitted host/port pairs to connect by the admin. */
+static ForwardPermission *permitted_adm_opens = NULL;
+
+/* Number of permitted host/port pairs in the array permitted by the user. */
+static int num_permitted_opens = 0;
+
+/* Number of permitted host/port pair in the array permitted by the admin. */
+static int num_adm_permitted_opens = 0;
+
+/* special-case port number meaning allow any port */
+#define FWD_PERMIT_ANY_PORT	0
+
+/*
+ * If this is true, all opens are permitted.  This is the case on the server
+ * on which we have to trust the client anyway, and the user could do
+ * anything after logging in anyway.
+ */
+static int all_opens_permitted = 0;
+
+
+/* -- X11 forwarding */
+
+/* Maximum number of fake X11 displays to try. */
+#define MAX_DISPLAYS  1000
+
+/* Saved X11 local (client) display. */
+static char *x11_saved_display = NULL;
+
+/* Saved X11 authentication protocol name. */
+static char *x11_saved_proto = NULL;
+
+/* Saved X11 authentication data.  This is the real data. */
+static char *x11_saved_data = NULL;
+static u_int x11_saved_data_len = 0;
+
+/*
+ * Fake X11 authentication data.  This is what the server will be sending us;
+ * we should replace any occurrences of this by the real data.
+ */
+static u_char *x11_fake_data = NULL;
+static u_int x11_fake_data_len;
+
+
+/* -- agent forwarding */
+
+#define	NUM_SOCKS	10
+
+/* AF_UNSPEC or AF_INET or AF_INET6 */
+static int IPv4or6 = AF_UNSPEC;
+
+/* helper */
+static void port_open_helper(Channel *c, char *rtype);
+
+/* non-blocking connect helpers */
+static int connect_next(struct channel_connect *);
+static void channel_connect_ctx_free(struct channel_connect *);
+
+/* -- channel core */
+
+Channel *
+channel_by_id(int id)
+{
+	Channel *c;
+
+	if (id < 0 || (u_int)id >= channels_alloc) {
+		logit("channel_by_id: %d: bad id", id);
+		return NULL;
+	}
+	c = channels[id];
+	if (c == NULL) {
+		logit("channel_by_id: %d: bad id: channel free", id);
+		return NULL;
+	}
+	return c;
+}
+
+/*
+ * Returns the channel if it is allowed to receive protocol messages.
+ * Private channels, like listening sockets, may not receive messages.
+ */
+Channel *
+channel_lookup(int id)
+{
+	Channel *c;
+
+	if ((c = channel_by_id(id)) == NULL)
+		return (NULL);
+
+	switch (c->type) {
+	case SSH_CHANNEL_X11_OPEN:
+	case SSH_CHANNEL_LARVAL:
+	case SSH_CHANNEL_CONNECTING:
+	case SSH_CHANNEL_DYNAMIC:
+	case SSH_CHANNEL_OPENING:
+	case SSH_CHANNEL_OPEN:
+	case SSH_CHANNEL_INPUT_DRAINING:
+	case SSH_CHANNEL_OUTPUT_DRAINING:
+	case SSH_CHANNEL_ABANDONED:
+		return (c);
+	}
+	logit("Non-public channel %d, type %d.", id, c->type);
+	return (NULL);
+}
+
+............

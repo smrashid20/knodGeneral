@@ -1,0 +1,25 @@
+	sp->stream.avail_out = (uInt) (nsamples * sizeof(uint16));
+	if (sp->stream.avail_out != nsamples * sizeof(uint16))
+	{
+		TIFFErrorExt(tif->tif_clientdata, module, "ZLib cannot deal with buffers this size");
+		return (0);
+	}
+	do {
+		int state = inflate(&sp->stream, Z_PARTIAL_FLUSH);
+		if (state == Z_STREAM_END) {
+			break;			/* XXX */
+		}
+		if (state == Z_DATA_ERROR) {
+			TIFFErrorExt(tif->tif_clientdata, module,
+			    "Decoding error at scanline %lu, %s",
+			    (unsigned long) tif->tif_row, sp->stream.msg ? sp->stream.msg : "(null)");
+			if (inflateSync(&sp->stream) != Z_OK)
+				return (0);
+			continue;
+		}
+		if (state != Z_OK) {
+			TIFFErrorExt(tif->tif_clientdata, module, "ZLib error: %s",
+			    sp->stream.msg ? sp->stream.msg : "(null)");
+			return (0);
+		}
+	} while (sp->stream.avail_out > 0);

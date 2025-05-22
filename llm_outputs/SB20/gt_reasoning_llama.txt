@@ -1,0 +1,9 @@
+The vulnerability in question allows a man-in-the-middle attacker to bypass Transport Layer Security (TLS) protections by stripping the "starttls" feature from a server response. This enables the attacker to force the client to use cleartext for authentication, compromising the security of the connection.
+
+The root cause of this vulnerability lies in the fact that the client does not verify whether the connection is secure before proceeding with authentication. In the buggy code, the client connects to the server, initializes the connection, and checks for the SASL (Simple Authentication and Security Layer) feature. However, it does not check whether the connection is secure before calling the `login()` method.
+
+The repair addresses this vulnerability by adding a crucial security check after the SASL feature has been received. It verifies whether the connection is secure by calling the `isSecureConnection()` method. If the connection is not secure and the client configuration requires a secure connection (i.e., `config.getSecurityMode() == SecurityMode.required`), the client shuts down the connection and throws a `SecurityRequiredByClientException`.
+
+This additional check ensures that the client does not proceed with authentication over an insecure connection, thereby preventing the man-in-the-middle attacker from stripping the "starttls" feature and forcing the client to use cleartext for authentication. By throwing an exception, the client also notifies the application that a secure connection could not be established, allowing it to take alternative measures to ensure the security of the connection.
+
+In summary, the repair fixes the vulnerability by adding a security check that verifies whether the connection is secure before proceeding with authentication. This prevents man-in-the-middle attackers from bypassing TLS protections and ensures that the client only authenticates over a secure connection.

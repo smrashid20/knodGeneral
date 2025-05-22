@@ -1,0 +1,7 @@
+	result =
+	    asn1_der_decoding(&cert->cert, cert->der.data, cert->der.size, NULL);
+	if (result != ASN1_SUCCESS) {
+		result = _gnutls_asn2err(result);
+		gnutls_assert();
+		goto cleanup;
+	}

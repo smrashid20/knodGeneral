@@ -1,0 +1,9 @@
+The vulnerability in question arises from an error in the implementation of a security check for certificates in a certificate chain. Specifically, when the X509_V_FLAG_X509_STRICT flag is set, the code is supposed to perform additional checks to ensure the certificates are valid. One of these checks is to verify that certificates in the chain do not have explicitly encoded elliptic curve parameters. However, the implementation of this check overwrites the result of a previous check that confirms whether the certificates in the chain are valid CA certificates.
+
+The issue is that the check for explicit elliptic curve parameters is performed without considering the result of the previous check. As a result, if a non-CA certificate is present in the chain, it may be allowed to issue other certificates, which is a security risk.
+
+The repair addresses this issue by ensuring that the result of the previous check is taken into account before performing the check for explicit elliptic curve parameters. Specifically, the code now checks if the return value `ret` is greater than 0 before performing the additional checks. This ensures that if the previous check has already failed, the additional checks are not performed, and the error is not overwritten.
+
+Additionally, the repair also ensures that the return value `ret` is set to 0 when an error is encountered, which prevents the function from returning a success value when an error has occurred.
+
+By making these changes, the repair ensures that the security checks are performed correctly, and the vulnerability is fixed. The fix is particularly important for applications that explicitly set the X509_V_FLAG_X509_STRICT verification flag and do not set a purpose for the certificate verification, or override the default purpose in TLS client or server applications.

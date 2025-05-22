@@ -1,0 +1,1 @@
+        if (crt.sigOid.len != sig_oid2.len

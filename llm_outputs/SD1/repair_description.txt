@@ -1,0 +1,13 @@
+To repair the vulnerability in the PJSIP code, several steps need to be taken. 
+
+First, the order of operations when handling certain packet processing errors needs to be corrected. Specifically, when the SRTP probation count is greater than zero and a replay error occurs, the current code stops the SRTP transport and then starts it again with the same policies. However, this can lead to a switch from SRTP to basic RTP, causing media to be sent insecurely.
+
+To fix this, the order of stopping and starting the SRTP transport needs to be adjusted. Instead of stopping the SRTP transport before starting it again, the policies for the SRTP transport should be retrieved first. This ensures that the correct policies are used when restarting the SRTP transport.
+
+Next, the SRTP transport should be stopped after retrieving the policies. This ensures that the transport is properly shut down before attempting to restart it.
+
+After stopping the SRTP transport, it should be started again with the retrieved policies. This ensures that the SRTP transport is restarted with the correct policies, preventing a switch to basic RTP.
+
+Finally, if the SRTP transport is successfully started and SRTP bypass is not enabled, the packet should be unprotected using the SRTP unprotect function. This ensures that the packet is properly decrypted and processed.
+
+By following these steps, the vulnerability in the PJSIP code can be repaired, preventing a switch from SRTP to basic RTP and ensuring that media is sent securely.

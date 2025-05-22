@@ -1,0 +1,29 @@
+        Keynode keynode = knOut[0];
+        if (result != Commons.ISC_R_SUCCESS) {
+            if (result == Commons.DNS_R_PARTIALMATCH
+                    || result == Commons.ISC_R_NOTFOUND)
+            {
+                result = Commons.ISC_R_SUCCESS;
+            }
+            Dst.dst_key_free(keyOut);
+            return Commons.ISC_R_SUCCESS;
+        }
+        while (result == Commons.ISC_R_SUCCESS && keynode != null) {
+            if (Dst.dst_key_compare(key, Keytable.keyOfNode(keynode))) {
+                Keytable.dns_keytable_detachkeynode(vctx.secroots, new Keynode[]{keynode});
+                Rdataset.dns_rdataset_settrust(vctx.keyset,  Commons.dns_trust_secure);
+                Rdataset.dns_rdataset_settrust(vctx.keysigs,  Commons.dns_trust_secure);
+                goodkey[0] = true;
+                break;
+            }
+            Keynode[] nextOut = new Keynode[1];
+            result = Keytable.dns_keytable_findnextkeynode(
+                    vctx.secroots, keynode, nextOut);
+            Keytable.dns_keytable_detachkeynode(vctx.secroots, new Keynode[]{keynode});
+            keynode = nextOut[0];
+        }
+        if (keynode != null) {
+            Keytable.dns_keytable_detachkeynode(vctx.secroots, new Keynode[]{keynode});
+        }
+        Dst.dst_key_free(keyOut);
+        return Commons.ISC_R_SUCCESS;

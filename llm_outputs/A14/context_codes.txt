@@ -1,0 +1,14 @@
+### ssl/s3_pkt.c ###
+int ssl3_read_bytes(SSL *s, int type, unsigned char *buf, int len, int peek)
+	{
+	int al,i,j,ret;
+	unsigned int n;
+	SSL3_RECORD *rr;
+	void (*cb)(const SSL *ssl,int type2,int val)=NULL;
+
+............
+static int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
+			 unsigned int len, int create_empty_fragment);
+static int ssl3_get_record(SSL *s);
+
+............

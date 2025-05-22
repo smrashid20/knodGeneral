@@ -1,0 +1,19 @@
+        if (ret == X509PolicyChecker.X509_PCY_TREE_INVALID) {
+            int cbCalled = 0;
+
+            for (int i = 0; i < ctx.chain.size(); i++) {
+                X509Certificate x = ctx.chain.get(i);
+
+                if (x == null || (x.hashCode() & EXFLAG_INVALID_POLICY) != 0) {
+                    cbCalled = 1;
+                }
+                cbFailIf(x == null || (x.hashCode() & EXFLAG_INVALID_POLICY) != 0
+                        , ctx, x, i, X509Error.X509_V_ERR_INVALID_POLICY_EXTENSION);
+            }
+
+            if (cbCalled == 0) {
+                raiseError(X509Error.ERR_R_INTERNAL_ERROR);
+                return 0;
+            }
+            return 1;
+        }

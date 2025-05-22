@@ -1,0 +1,9 @@
+### src/main/X509Verifier.java ###
+public class X509Verifier {
+    public static int x509_verify_ctx_add_chain(X509VerifyCtx ctx, X509VerifyChain chain, String name) {
+        int depth;
+        X509 last = X509Utils.x509_verify_chain_last(chain);
+        X509 leaf = X509Utils.x509_verify_chain_leaf(chain);
+        depth = X509Utils.sk_X509_num(chain.certs);
+
+............

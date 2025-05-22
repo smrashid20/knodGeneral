@@ -1,0 +1,15 @@
+The repair steps for the buffer overflow vulnerability in the PixarLogDecode function involve adding a crucial check to prevent the overflow. Here's a step-by-step explanation of the repair:
+
+1. **Identify the vulnerability**: The vulnerability occurs when the `sp->stream.avail_out` value exceeds the allocated buffer size, causing a buffer overflow. This can lead to a denial of service or potentially allow an attacker to execute arbitrary code.
+
+2. **Add a bounds check**: To fix this vulnerability, a check is added to ensure that `sp->stream.avail_out` does not exceed the allocated buffer size `sp->tbuf_size`. This check is performed before the `do-while` loop that inflates the data.
+
+3. **Verify the buffer size**: The added check compares `sp->stream.avail_out` with `sp->tbuf_size` to ensure that the available output buffer size does not exceed the allocated buffer size. If it does, an error is reported, and the function returns.
+
+4. **Prevent buffer overflow**: By adding this check, the repair prevents the buffer overflow vulnerability. If the available output buffer size exceeds the allocated buffer size, the function will not attempt to write beyond the allocated buffer, thus preventing the overflow.
+
+5. **Maintain existing functionality**: The repair does not alter the existing functionality of the code. The `do-while` loop and error handling remain unchanged, ensuring that the function continues to work as intended.
+
+6. **Error handling**: If the buffer size check fails, an error message is reported using `TIFFErrorExt`, indicating that `sp->stream.avail_out` exceeds `sp->tbuf_size`. This provides a clear indication of the issue and allows for further debugging or error handling.
+
+By adding this simple yet crucial check, the repair effectively prevents the buffer overflow vulnerability, ensuring the stability and security of the PixarLogDecode function.

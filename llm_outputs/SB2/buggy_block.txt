@@ -1,0 +1,50 @@
+        if ((alg_k & Constants.SSL_kRSA) != 0) {
+            rsa = new RSA();
+            int paramLen = 2;
+            if (paramLen > n) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_LENGTH_TOO_SHORT);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+
+            int[] iHolder = new int[1];
+            Helper.n2s(p, iHolder);
+            int i = iHolder[0];
+            if (i > n - paramLen) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_BAD_RSA_MODULUS_LENGTH);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+            rsa.n = Helper.BN_bin2bn(p, i, null);
+
+            p = slice(p, i);
+            n -= paramLen + i;
+
+            if (2 > n) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_LENGTH_TOO_SHORT);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+
+            Helper.n2s(p, iHolder);
+            i = iHolder[0];
+
+            if (i > n - 2) {
+                Helper.SSLerr(Constants.SSL_F_SSL3_GET_KEY_EXCHANGE,
+                        Constants.SSL_R_BAD_RSA_E_LENGTH);
+                al = Constants.SSL_AD_DECODE_ERROR;
+                Helper.ssl3_send_alert(s, Constants.SSL3_AL_FATAL, al);
+                return -1;
+            }
+            rsa.e = Helper.BN_bin2bn(p, i, null);
+            p = slice(p, i);
+            n -= 2 + i;
+
+            sessCert.peer_rsa_tmp = rsa;
+        }

@@ -1,0 +1,24 @@
+{
+    "vul_id": "M1",
+    "project_name": "myBug",
+    "language": "java",
+    "vul_code_file_rel_path": "src/BuggyBuffer.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 10,
+    "vul_code_block_start_line": 7,
+    "vul_code_block_end_line": 9,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 12,
+    "vul_code_block_fixed_start_line": 7,
+    "vul_code_block_fixed_end_line": 11,
+    "vul_code_initial_block_start": 7,
+    "vul_code_initial_block_end": 7,
+    "vul_code_context_lines": ["3-7"],
+    "context_lines": [{
+        "src/BuggyBuffer.java": ["3-7"]
+    }],
+    "vul_description":  "Buffer Overflow",
+    "vul_code_file":  "BuggyBuffer.java",
+    "vul_code_lines":  ["7"],
+    "vul_code_line": 7
+}

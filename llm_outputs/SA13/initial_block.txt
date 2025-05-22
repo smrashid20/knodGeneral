@@ -1,0 +1,1 @@
+        if (result != DnsResult.ISC_R_SUCCESS || zone.zoneType == ZoneType.DNS_ZONE_DLZ) {

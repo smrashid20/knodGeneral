@@ -1,0 +1,6 @@
+            if (msg.tsigstatus != Commons.dns_rcode_noerror)
+                result = Commons.DNS_R_TSIGVERIFYFAILURE;
+            else if (tsig.error != Commons.dns_rcode_noerror)
+                result = Commons.DNS_R_TSIGERRORSET;
+            else
+                result = Commons.ISC_R_SUCCESS;

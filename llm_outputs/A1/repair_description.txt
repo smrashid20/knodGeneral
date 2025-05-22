@@ -1,0 +1,19 @@
+The repair for the vulnerability in the wpa_supplicant code involves several steps to address the authentication bypass issue. Here's a breakdown of the steps:
+
+1. **Identify the root cause**: The vulnerability arises from the fact that wpa_supplicant does not verify the network's TLS certificate during Phase 1 authentication, allowing an attacker to send an EAP-TLV Success packet instead of starting Phase 2 authentication. This enables the attacker to impersonate Enterprise Wi-Fi networks.
+
+2. **Understand the role of EVP**: The vulnerable code is part of the EVP (Envelope) module, which is responsible for handling encryption and decryption operations. The EVP module is used to set up and manage the encryption context.
+
+3. **Address the padding issue**: The repair code first checks if the encryption context has been set up for no padding. If so, it ensures that the new cipher is informed about this setting to maintain consistency.
+
+4. **Fix the initialization issue**: The repair code introduces a fix for CVE-2023-5363, which involves passing the key length and IV length as part of the initialization call. This fix is necessary because the FIPS provider's internal library context is used in a way that makes this issue irrelevant.
+
+5. **Set parameters before initialization**: The repair code sets the key length and IV length parameters before initializing the encryption context. This ensures that these parameters take effect before the initialization process.
+
+6. **Check for invalid lengths**: If the parameters are set, the repair code checks if the lengths are valid. If not, it raises an error and returns.
+
+7. **Proceed with initialization**: If all checks pass, the repair code proceeds with the initialization of the encryption context using the provided key, IV, and parameters.
+
+8. **Maintain compatibility**: The repair code includes a conditional compilation directive to ensure that the fix is only applied when the FIPS module is not being used. This maintains compatibility with existing systems that rely on the FIPS provider.
+
+By following these steps, the repair code addresses the vulnerability in the wpa_supplicant code, ensuring that the encryption context is properly set up and initialized, and that the authentication process is secure.

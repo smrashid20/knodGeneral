@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB17",
+    "project_name": "SB17",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/TlsCrlVerifier.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 105,
+    "vul_code_block_start_line": 72,
+    "vul_code_block_end_line": 77,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 105,
+    "vul_code_block_fixed_start_line": 72,
+    "vul_code_block_fixed_end_line": 77,
+    "vul_code_initial_block_start": 72,
+    "vul_code_initial_block_end": 72,
+    "vul_code_context_lines": ["5-12"],
+    "context_lines": [{
+        "src/main/TlsCrlVerifier.java": ["5-12"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "TlsCrlVerifier.java",
+    "vul_code_lines":  ["73"],
+    "vul_code_line": 73,
+    "rem_start": 72,
+    "rem_end": 78,
+    "add_start": 72,
+    "add_end": 78
+}

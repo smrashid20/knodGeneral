@@ -1,0 +1,2 @@
+            if (crt.serial.len == cur.serial.len
+                    && MemUtil.memcmp(crt.serial.p, cur.serial.p, crt.serial.len) == 0) {

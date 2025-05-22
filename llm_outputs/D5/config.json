@@ -1,0 +1,24 @@
+{
+    "vul_id": "D5",
+    "project_name": "openfire",
+    "language": "java",
+    "vul_code_file_rel_path": "xmppserver/src/main/java/org/jivesoftware/openfire/admin/AdminManager.java",
+    "vul_code_func_start_line": 85,
+    "vul_code_func_end_line": 88,
+    "vul_code_block_start_line": 85,
+    "vul_code_block_end_line": 88,
+    "vul_code_func_fixed_start_line": 89,
+    "vul_code_func_fixed_end_line": 103,
+    "vul_code_block_fixed_start_line": 89,
+    "vul_code_block_fixed_end_line": 103,
+    "vul_code_initial_block_start": 85,
+    "vul_code_initial_block_end": 85,
+    "vul_code_context_lines": ["40-50"],
+    "context_lines": [{
+        "xmppserver/src/main/java/org/jivesoftware/openfire/admin/AdminManager.java": ["40-50"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "AdminManager.java",
+    "vul_code_lines":  ["87"],
+    "vul_code_line": 87
+}

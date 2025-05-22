@@ -1,0 +1,18 @@
+int mbedtls_x509_crt_is_revoked( const mbedtls_x509_crt *crt, const mbedtls_x509_crl *crl )
+{
+    const mbedtls_x509_crl_entry *cur = &crl->entry;
+
+    while( cur != NULL && cur->serial.len != 0 )
+    {
+        if( crt->serial.len == cur->serial.len &&
+            memcmp( crt->serial.p, cur->serial.p, crt->serial.len ) == 0 )
+        {
+            if( mbedtls_x509_time_is_past( &cur->revocation_date ) )
+                return( 1 );
+        }
+
+        cur = cur->next;
+    }
+
+    return( 0 );
+}

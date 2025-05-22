@@ -1,0 +1,281 @@
+SSH_PACKET_CALLBACK(ssh_packet_kexinit)
+{
+    int i, ok;
+    struct ssh_crypto_struct *crypto = session->next_crypto;
+    int server_kex = session->server;
+    ssh_string str = NULL;
+    char *strings[SSH_KEX_METHODS] = {0};
+    char *rsa_sig_ext = NULL;
+    int rc = SSH_ERROR;
+    size_t len;
+
+    uint8_t first_kex_packet_follows = 0;
+    uint32_t kexinit_reserved = 0;
+
+    (void)type;
+    (void)user;
+
+    SSH_LOG(SSH_LOG_TRACE, "KEXINIT received");
+
+    if (session->session_state == SSH_SESSION_STATE_AUTHENTICATED) {
+        if (session->dh_handshake_state == DH_STATE_FINISHED) {
+            SSH_LOG(SSH_LOG_DEBUG, "Peer initiated key re-exchange");
+            /* Reset the sent flag if the re-kex was initiated by the peer */
+            session->flags &= ~SSH_SESSION_FLAG_KEXINIT_SENT;
+        } else if (session->flags & SSH_SESSION_FLAG_KEXINIT_SENT &&
+                   session->dh_handshake_state == DH_STATE_INIT_SENT) {
+            /* This happens only when we are sending our-guessed first kex
+             * packet right after our KEXINIT packet. */
+            SSH_LOG(SSH_LOG_DEBUG, "Received peer kexinit answer.");
+        } else if (session->session_state != SSH_SESSION_STATE_INITIAL_KEX) {
+            ssh_set_error(session, SSH_FATAL,
+                          "SSH_KEXINIT received in wrong state");
+            goto error;
+        }
+    } else if (session->session_state != SSH_SESSION_STATE_INITIAL_KEX) {
+        ssh_set_error(session, SSH_FATAL,
+                      "SSH_KEXINIT received in wrong state");
+        goto error;
+    }
+
+    if (server_kex) {
+#ifdef WITH_SERVER
+        len = ssh_buffer_get_data(packet, crypto->client_kex.cookie, 16);
+        if (len != 16) {
+            ssh_set_error(session, SSH_FATAL,
+                          "ssh_packet_kexinit: no cookie in packet");
+            goto error;
+        }
+
+        ok = ssh_hashbufin_add_cookie(session, crypto->client_kex.cookie);
+        if (ok < 0) {
+            ssh_set_error(session, SSH_FATAL,
+                          "ssh_packet_kexinit: adding cookie failed");
+            goto error;
+        }
+
+        ok = server_set_kex(session);
+        if (ok == SSH_ERROR) {
+            goto error;
+        }
+#endif /* WITH_SERVER */
+    } else {
+        len = ssh_buffer_get_data(packet, crypto->server_kex.cookie, 16);
+        if (len != 16) {
+            ssh_set_error(session, SSH_FATAL,
+                          "ssh_packet_kexinit: no cookie in packet");
+            goto error;
+        }
+
+        ok = ssh_hashbufin_add_cookie(session, crypto->server_kex.cookie);
+        if (ok < 0) {
+            ssh_set_error(session, SSH_FATAL,
+                          "ssh_packet_kexinit: adding cookie failed");
+            goto error;
+        }
+
+        ok = ssh_set_client_kex(session);
+        if (ok == SSH_ERROR) {
+            goto error;
+        }
+    }
+
+    for (i = 0; i < SSH_KEX_METHODS; i++) {
+        str = ssh_buffer_get_ssh_string(packet);
+        if (str == NULL) {
+          goto error;
+        }
+
+        rc = ssh_buffer_add_ssh_string(session->in_hashbuf, str);
+        if (rc < 0) {
+            ssh_set_error(session, SSH_FATAL,
+                          "Error adding string in hash buffer");
+            goto error;
+        }
+
+        strings[i] = ssh_string_to_char(str);
+        if (strings[i] == NULL) {
+            ssh_set_error_oom(session);
+            goto error;
+        }
+        SSH_STRING_FREE(str);
+        str = NULL;
+    }
+
+    /* copy the peer kex info into an array of strings */
+    if (server_kex) {
+#ifdef WITH_SERVER
+        for (i = 0; i < SSH_KEX_METHODS; i++) {
+            crypto->client_kex.methods[i] = strings[i];
+        }
+#endif /* WITH_SERVER */
+    } else { /* client */
+        for (i = 0; i < SSH_KEX_METHODS; i++) {
+            crypto->server_kex.methods[i] = strings[i];
+        }
+    }
+
+    /*
+     * Handle the two final fields for the KEXINIT message (RFC 4253 7.1):
+     *
+     *      boolean      first_kex_packet_follows
+     *      uint32       0 (reserved for future extension)
+     *
+     * Notably if clients set 'first_kex_packet_follows', it is expected
+     * that its value is included when computing the session ID (see
+     * 'make_sessionid').
+     */
+
+    rc = ssh_buffer_get_u8(packet, &first_kex_packet_follows);
+    if (rc != 1) {
+        goto error;
+    }
+
+    rc = ssh_buffer_add_u8(session->in_hashbuf, first_kex_packet_follows);
+    if (rc < 0) {
+        goto error;
+    }
+
+    rc = ssh_buffer_add_u32(session->in_hashbuf, kexinit_reserved);
+    if (rc < 0) {
+        goto error;
+    }
+
+    /*
+     * Remember whether 'first_kex_packet_follows' was set and the client
+     * guess was wrong: in this case the next SSH_MSG_KEXDH_INIT message
+     * must be ignored on the server side.
+     * Client needs to start the Key exchange over with the correct method
+     */
+    if (first_kex_packet_follows || session->send_first_kex_follows) {
+        char **client_methods = crypto->client_kex.methods;
+        char **server_methods = crypto->server_kex.methods;
+        session->first_kex_follows_guess_wrong =
+            cmp_first_kex_algo(client_methods[SSH_KEX],
+                               server_methods[SSH_KEX]) ||
+            cmp_first_kex_algo(client_methods[SSH_HOSTKEYS],
+                               server_methods[SSH_HOSTKEYS]);
+            SSH_LOG(SSH_LOG_DEBUG, "The initial guess was %s.",
+                    session->first_kex_follows_guess_wrong ? "wrong" : "right");
+    }
+
+#ifdef WITH_SERVER
+    if (server_kex) {
+        /*
+         * If client sent a ext-info-c message in the kex list, it supports
+         * RFC 8308 extension negotiation.
+         */
+        ok = ssh_match_group(crypto->client_kex.methods[SSH_KEX],
+                             KEX_EXTENSION_CLIENT);
+        if (ok) {
+            const char *hostkeys = NULL, *wanted_hostkeys = NULL;
+
+            /* The client supports extension negotiation */
+            session->extensions |= SSH_EXT_NEGOTIATION;
+            /*
+             * RFC 8332 Section 3.1: Use for Server Authentication
+             * Check what algorithms were provided in the SSH_HOSTKEYS list
+             * by the client and enable the respective extensions to provide
+             * correct signature in the next packet if RSA is negotiated
+             */
+            hostkeys = crypto->client_kex.methods[SSH_HOSTKEYS];
+            wanted_hostkeys = session->opts.wanted_methods[SSH_HOSTKEYS];
+            ok = ssh_match_group(hostkeys, "rsa-sha2-512");
+            if (ok) {
+                /* Check if rsa-sha2-512 is allowed by config */
+                if (wanted_hostkeys != NULL) {
+                    char *is_allowed = ssh_find_matching(wanted_hostkeys,
+                                                         "rsa-sha2-512");
+                    if (is_allowed != NULL) {
+                        session->extensions |= SSH_EXT_SIG_RSA_SHA512;
+                    }
+                    SAFE_FREE(is_allowed);
+                }
+            }
+            ok = ssh_match_group(hostkeys, "rsa-sha2-256");
+            if (ok) {
+                /* Check if rsa-sha2-256 is allowed by config */
+                if (wanted_hostkeys != NULL) {
+                    char *is_allowed = ssh_find_matching(wanted_hostkeys,
+                                                         "rsa-sha2-256");
+                    if (is_allowed != NULL) {
+                        session->extensions |= SSH_EXT_SIG_RSA_SHA256;
+                    }
+                    SAFE_FREE(is_allowed);
+                }
+            }
+
+            /*
+             * Ensure that the client preference is honored for the case
+             * both signature types are enabled.
+             */
+            if ((session->extensions & SSH_EXT_SIG_RSA_SHA256) &&
+                (session->extensions & SSH_EXT_SIG_RSA_SHA512)) {
+                session->extensions &= ~(SSH_EXT_SIG_RSA_SHA256 | SSH_EXT_SIG_RSA_SHA512);
+                rsa_sig_ext = ssh_find_matching("rsa-sha2-512,rsa-sha2-256",
+                                                hostkeys);
+                if (rsa_sig_ext == NULL) {
+                    goto error; /* should never happen */
+                } else if (strcmp(rsa_sig_ext, "rsa-sha2-512") == 0) {
+                    session->extensions |= SSH_EXT_SIG_RSA_SHA512;
+                } else if (strcmp(rsa_sig_ext, "rsa-sha2-256") == 0) {
+                    session->extensions |= SSH_EXT_SIG_RSA_SHA256;
+                } else {
+                    SAFE_FREE(rsa_sig_ext);
+                    goto error; /* should never happen */
+                }
+                SAFE_FREE(rsa_sig_ext);
+            }
+
+            SSH_LOG(SSH_LOG_DEBUG, "The client supports extension "
+                    "negotiation. Enabled signature algorithms: %s%s",
+                    session->extensions & SSH_EXT_SIG_RSA_SHA256 ? "SHA256" : "",
+                    session->extensions & SSH_EXT_SIG_RSA_SHA512 ? " SHA512" : "");
+        }
+    }
+#endif /* WITH_SERVER */
+
+    /* Note, that his overwrites authenticated state in case of rekeying */
+    session->session_state = SSH_SESSION_STATE_KEXINIT_RECEIVED;
+    /* if we already sent our initial key exchange packet, do not reset the
+     * DH state. We will know if we were right with our guess only in
+     * dh_handshake_state() */
+    if (session->send_first_kex_follows == false) {
+        session->dh_handshake_state = DH_STATE_INIT;
+    }
+    session->ssh_connection_callback(session);
+    return SSH_PACKET_USED;
+
+error:
+    SSH_STRING_FREE(str);
+    for (i = 0; i < SSH_KEX_METHODS; i++) {
+        if (server_kex) {
+#ifdef WITH_SERVER
+            session->next_crypto->client_kex.methods[i] = NULL;
+#endif /* WITH_SERVER */
+        } else { /* client */
+            session->next_crypto->server_kex.methods[i] = NULL;
+        }
+        SAFE_FREE(strings[i]);
+    }
+
+    session->session_state = SSH_SESSION_STATE_ERROR;
+
+    return SSH_PACKET_USED;
+}
+
+void ssh_list_kex(struct ssh_kex_struct *kex) {
+  int i = 0;
+
+#ifdef DEBUG_CRYPTO
+  ssh_log_hexdump("session cookie", kex->cookie, 16);
+#endif
+
+  for(i = 0; i < SSH_KEX_METHODS; i++) {
+    if (kex->methods[i] == NULL) {
+      continue;
+    }
+    SSH_LOG(SSH_LOG_FUNCTIONS, "%s: %s",
+        ssh_kex_descriptions[i], kex->methods[i]);
+  }
+}

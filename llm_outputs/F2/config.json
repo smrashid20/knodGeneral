@@ -1,0 +1,24 @@
+{
+    "vul_id": "F2",
+    "project_name": "libtiff",
+    "language": "cpp",
+    "vul_code_file_rel_path": "tools/thumbnail.c",
+    "vul_code_func_start_line": 532,
+    "vul_code_func_end_line": 557,
+    "vul_code_block_start_line": 551,
+    "vul_code_block_end_line": 552,
+    "vul_code_func_fixed_start_line": 551,
+    "vul_code_func_fixed_end_line": 582,
+    "vul_code_block_fixed_start_line": 570,
+    "vul_code_block_fixed_end_line": 577,
+    "vul_code_initial_block_start": 551,
+    "vul_code_initial_block_end": 551,
+    "vul_code_context_lines": ["532-541", "44-75"],
+    "context_lines": [{
+        "tools/thumbnail.c": ["532-541", "44-75"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "thumbnail.c",
+    "vul_code_lines":  ["571"],
+    "vul_code_line": 571
+}

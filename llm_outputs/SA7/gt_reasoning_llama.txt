@@ -1,0 +1,9 @@
+The vulnerability in the X509_verify_cert function in OpenSSL is caused by the improper processing of X.509 Basic Constraints cA values during the identification of alternative certificate chains. This allows remote attackers to spoof a Certification Authority role and trigger unintended certificate verifications via a valid leaf certificate.
+
+The issue arises from the fact that the function does not correctly update the last_untrusted variable when an alternative certificate chain is found. The last_untrusted variable is used to keep track of the number of untrusted certificates in the chain. When an alternative chain is found, the function removes the untrusted certificates from the chain, but it does not update the last_untrusted variable accordingly.
+
+The repair fixes this issue by updating the last_untrusted variable to the current size of the chain after an alternative chain is found. This ensures that the function correctly keeps track of the number of untrusted certificates in the chain.
+
+Additionally, the repair also updates the last_untrusted variable to the current size of the chain at the end of the function, regardless of whether an alternative chain was found or not. This ensures that the function always returns the correct number of untrusted certificates in the chain.
+
+By making these changes, the repair fixes the vulnerability in the X509_verify_cert function and prevents remote attackers from spoofing a Certification Authority role and triggering unintended certificate verifications. The function now correctly processes X.509 Basic Constraints cA values and identifies alternative certificate chains, ensuring the security and integrity of the certificate verification process.

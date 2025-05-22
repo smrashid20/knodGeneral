@@ -1,0 +1,96 @@
+### monitor.c ###
+#ifdef GSSAPI
+static Gssctxt *gsscontext = NULL;
+#endif
+
+/* Imports */
+extern ServerOptions options;
+extern u_int utmp_len;
+extern u_char session_id[];
+extern Buffer auth_debug;
+extern int auth_debug_init;
+extern Buffer loginmsg;
+
+/* State exported from the child */
+static struct sshbuf *child_state;
+
+/* Functions on the monitor that answer unprivileged requests */
+
+int mm_answer_moduli(int, Buffer *);
+int mm_answer_sign(int, Buffer *);
+int mm_answer_pwnamallow(int, Buffer *);
+int mm_answer_auth2_read_banner(int, Buffer *);
+int mm_answer_authserv(int, Buffer *);
+int mm_answer_authpassword(int, Buffer *);
+int mm_answer_bsdauthquery(int, Buffer *);
+int mm_answer_bsdauthrespond(int, Buffer *);
+int mm_answer_skeyquery(int, Buffer *);
+int mm_answer_skeyrespond(int, Buffer *);
+int mm_answer_keyallowed(int, Buffer *);
+int mm_answer_keyverify(int, Buffer *);
+int mm_answer_pty(int, Buffer *);
+int mm_answer_pty_cleanup(int, Buffer *);
+int mm_answer_term(int, Buffer *);
+int mm_answer_rsa_keyallowed(int, Buffer *);
+int mm_answer_rsa_challenge(int, Buffer *);
+int mm_answer_rsa_response(int, Buffer *);
+int mm_answer_sesskey(int, Buffer *);
+int mm_answer_sessid(int, Buffer *);
+
+#ifdef USE_PAM
+int mm_answer_pam_start(int, Buffer *);
+int mm_answer_pam_account(int, Buffer *);
+int mm_answer_pam_init_ctx(int, Buffer *);
+int mm_answer_pam_query(int, Buffer *);
+int mm_answer_pam_respond(int, Buffer *);
+int mm_answer_pam_free_ctx(int, Buffer *);
+#endif
+
+#ifdef GSSAPI
+int mm_answer_gss_setup_ctx(int, Buffer *);
+int mm_answer_gss_accept_ctx(int, Buffer *);
+int mm_answer_gss_userok(int, Buffer *);
+int mm_answer_gss_checkmic(int, Buffer *);
+#endif
+
+#ifdef SSH_AUDIT_EVENTS
+int mm_answer_audit_event(int, Buffer *);
+int mm_answer_audit_command(int, Buffer *);
+#endif
+
+static int monitor_read_log(struct monitor *);
+
+static Authctxt *authctxt;
+
+#ifdef WITH_SSH1
+static BIGNUM *ssh1_challenge = NULL;	/* used for ssh1 rsa auth */
+#endif
+
+/* local state for key verify */
+static u_char *key_blob = NULL;
+static u_int key_bloblen = 0;
+static int key_blobtype = MM_NOKEY;
+static char *hostbased_cuser = NULL;
+static char *hostbased_chost = NULL;
+static char *auth_method = "unknown";
+static char *auth_submethod = NULL;
+static u_int session_id2_len = 0;
+static u_char *session_id2 = NULL;
+static pid_t monitor_child_pid;
+
+struct mon_table {
+	enum monitor_reqtype type;
+	int flags;
+	int (*f)(int, Buffer *);
+};
+
+#define MON_ISAUTH	0x0004	/* Required for Authentication */
+#define MON_AUTHDECIDE	0x0008	/* Decides Authentication */
+#define MON_ONCE	0x0010	/* Disable after calling */
+#define MON_ALOG	0x0020	/* Log auth attempt without authenticating */
+
+#define MON_AUTH	(MON_ISAUTH|MON_AUTHDECIDE)
+
+#define MON_PERMIT	0x1000	/* Request is permitted */
+
+............

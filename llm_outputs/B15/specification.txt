@@ -1,0 +1,10 @@
+Dynamic Trust Anchor Management
+BIND is able to maintain DNSSEC trust anchors using RFC 5011 key management. This feature allows named to keep track of changes to critical DNSSEC keys without any need for the operator to make changes to configuration files.
+
+Validating Resolver
+To configure a validating resolver to use RFC 5011 to maintain a trust anchor, configure the trust anchor using a trust-anchors statement and the initial-key keyword. Information about this can be found in the trust-anchors statement description.
+
+Authoritative Server
+To set up an authoritative zone for RFC 5011 trust anchor maintenance, generate two (or more) key signing keys (KSKs) for the zone. Sign the zone with one of them; this is the “active” KSK. All KSKs which do not sign the zone are “stand-by” keys.
+
+Any validating resolver which is configured to use the active KSK as an RFC 5011-managed trust anchor takes note of the stand-by KSKs in the zone’s DNSKEY RRset, and stores them for future reference. The resolver rechecks the zone periodically; after 30 days, if the new key is still there, the key is accepted by the resolver as a valid trust anchor for the zone. Anytime after this 30-day acceptance timer has completed, the active KSK can be revoked, and the zone can be “rolled over” to the newly accepted key.

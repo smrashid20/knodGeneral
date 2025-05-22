@@ -1,0 +1,17 @@
+The repair steps for the provided code patch involve addressing a vulnerability in the certificate verification process. Here's a step-by-step explanation of the repair:
+
+1. **Initialization of a flag variable**: The first step is to introduce a new variable, `cbCalled`, to track whether the callback function `cbFailIf` has been called during the certificate verification process. This variable is initialized to 0, indicating that the callback function has not been called yet.
+
+2. **Modification of the loop iteration**: The loop that iterates over the certificate chain is modified to start from index 0 instead of 1. This ensures that the entire certificate chain is checked, including the first certificate.
+
+3. **Conditional check for invalid policy**: Inside the loop, a conditional check is added to verify if the current certificate is null or has an invalid policy. If either condition is true, the `cbCalled` flag is set to 1.
+
+4. **Callback function call**: The `cbFailIf` function is called with the same parameters as before, but now it's conditional on the certificate being null or having an invalid policy.
+
+5. **Post-loop check**: After the loop completes, a check is performed to see if the `cbCalled` flag is still 0. If it is, it means that no invalid policies were found in the certificate chain, but the initial policy check returned an error.
+
+6. **Error handling**: If the `cbCalled` flag is 0, an internal error is raised using the `raiseError` function with the error code `ERR_R_INTERNAL_ERROR`. This indicates that an unexpected condition occurred during the verification process.
+
+7. **Return value**: Finally, the function returns 1 if the `cbCalled` flag is 1 (indicating that an invalid policy was found and handled), or 0 if an internal error occurred.
+
+These steps ensure that the certificate verification process correctly handles invalid policies and provides a more robust defense against malicious certificate authorities.

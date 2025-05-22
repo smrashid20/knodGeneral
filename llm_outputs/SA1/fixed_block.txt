@@ -1,0 +1,27 @@
+        if (ctx.hasNoPadding()) {
+            if (!ctx.setPadding(0)) {
+                return false;
+            }
+        }
+        
+        if (!FIPS_MODULE && params != null) {
+            CipherParams paramLens = new CipherParams();
+            if (params.contains("keylen")) {
+                paramLens.set("keylen", params.get("keylen"));
+            }
+            if (params.contains("ivlen")) {
+                paramLens.set("ivlen", params.get("ivlen"));
+            }
+            if (!paramLens.isEmpty() && !ctx.setParams(paramLens)) {
+                throw new IllegalStateException("Invalid length parameter in initialization");
+            }
+        }
+
+        if (enc == 1) {
+            if (!cipher.hasEncryptInit()) {
+                throw new IllegalStateException("Initialization error: encryption function missing");
+            }
+            return cipher.encryptInit(ctx.getAlgCtx(), key,
+                    key == null ? 0 : ctx.getKeyLength(),
+                    iv, iv == null ? 0 : ctx.getIvLength(), params);
+        }

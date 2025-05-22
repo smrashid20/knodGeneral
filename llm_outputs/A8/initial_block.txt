@@ -1,0 +1,11 @@
+     * must be ignored on the server side.
+     * Client needs to start the Key exchange over with the correct method
+     */
+    if (first_kex_packet_follows || session->send_first_kex_follows) {
+        char **client_methods = crypto->client_kex.methods;
+        char **server_methods = crypto->server_kex.methods;
+        session->first_kex_follows_guess_wrong =
+            cmp_first_kex_algo(client_methods[SSH_KEX],
+                               server_methods[SSH_KEX]) ||
+            cmp_first_kex_algo(client_methods[SSH_HOSTKEYS],
+                               server_methods[SSH_HOSTKEYS]);

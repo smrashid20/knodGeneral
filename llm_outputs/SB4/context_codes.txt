@@ -1,0 +1,15 @@
+### src/main/OcspRespChecker.java ###
+public class OcspRespChecker {
+    public static int gnutls_ocsp_resp_check_crt(Object resp, int indx, Object crt) {
+        int ret;
+        DigestAlgorithm digest;
+        Datum rdn_hash = new Datum();
+        Datum rserial = new Datum();
+        Datum cserial = new Datum();
+        Datum dn = new Datum();
+        byte[] cdn_hash = new byte[Helper.MAX_HASH_SIZE];
+        long[] tHolder;
+        int hash_len;
+        DigestAlgorithm[] digestHolder = new DigestAlgorithm[1];
+
+............

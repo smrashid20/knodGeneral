@@ -1,0 +1,24 @@
+{
+    "vul_id": "B14",
+    "project_name": "BIND",
+    "language": "cpp",
+    "vul_code_file_rel_path": "lib/isc/netmgr/netmgr.c",
+    "vul_code_func_start_line": 1723,
+    "vul_code_func_end_line": 1749,
+    "vul_code_block_start_line": 1734,
+    "vul_code_block_end_line": 1748,
+    "vul_code_func_fixed_start_line": 1723,
+    "vul_code_func_fixed_end_line": 1753,
+    "vul_code_block_fixed_start_line": 1738,
+    "vul_code_block_fixed_end_line": 1752,
+    "vul_code_initial_block_start": 1734,
+    "vul_code_initial_block_end": 1734,
+    "vul_code_context_lines": ["1723-1732", "60-104", "132-182"],
+    "context_lines": [{
+        "lib/isc/netmgr/netmgr.c": ["1723-1732", "60-104", "132-182"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "netmgr.c",
+    "vul_code_lines":  ["1735"],
+    "vul_code_line": 1735
+}

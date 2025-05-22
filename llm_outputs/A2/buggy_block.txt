@@ -1,0 +1,12 @@
+    if (ret == X509_PCY_TREE_INVALID) {
+        int i;
+
+        /* Locate certificates with bad extensions and notify callback. */
+        for (i = 1; i < sk_X509_num(ctx->chain); i++) {
+            X509 *x = sk_X509_value(ctx->chain, i);
+
+            CB_FAIL_IF((x->ex_flags & EXFLAG_INVALID_POLICY) != 0,
+                       ctx, x, i, X509_V_ERR_INVALID_POLICY_EXTENSION);
+        }
+        return 1;
+    }

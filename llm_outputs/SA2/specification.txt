@@ -1,0 +1,4 @@
+If the certificate policies extension is present in the certificate and the valid_policy_tree is not NULL, process the policy information by performing the following steps in order:
+(1) For each policy P not equal to anyPolicy in the certificate policies extension, let P-OID denote the OID for policy P and P-Q denote the qualifier set for policy P. Perform the following steps in order:
+(i) For each node of depth i-1 in the valid_policy_tree where P-OID is in the expected_policy_set, create a child node as follows: set the valid_policy to P-OID, set the qualifier_set to P-Q, and set the expected_policy_set to {P-OID}.
+(ii) If there was no match in step (i) and the valid_policy_tree includes a node of depth i-1 with the valid_policy anyPolicy, generate a child node with the following values: set the valid_policy to P-OID, set the qualifier_set to P-Q, and set the expected_policy_set to {P-OID}.

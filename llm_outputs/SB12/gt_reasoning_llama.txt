@@ -1,0 +1,11 @@
+The vulnerability in earlier versions of wolfSSL allows a malicious attacker with a privileged network position to impersonate TLS 1.3 servers and bypass authentication. This is due to the way the code handles signature algorithms and peer key presence during the TLS handshake.
+
+In the buggy code, when the peer sends a signature algorithm that does not match the expected key type, the code only logs a message but does not take any further action. For example, if the peer sends an ED25519 signature algorithm but does not provide an ED25519 key, the code logs a message saying "Oops, peer sent ED25519 key but not in verify" but continues with the handshake.
+
+The problem with this approach is that it allows an attacker to send a signature algorithm that is not supported by the peer's key, effectively bypassing authentication. This is because the code does not enforce a strict match between the signature algorithm and the peer's key type.
+
+The repair addresses this vulnerability by introducing a stricter check between the signature algorithm and the peer's key type. If the peer sends a signature algorithm that does not match the expected key type, the code now returns an error, specifically `SIG_VERIFY_E` or `INVALID_PARAMETER`, depending on the signature algorithm.
+
+For instance, if the peer sends an ED25519 signature algorithm but does not provide an ED25519 key, the code now returns `SIG_VERIFY_E` with a message saying "Peer sent ED25519 sig but not ED25519 cert". This ensures that the handshake is terminated immediately, preventing the attacker from bypassing authentication.
+
+By introducing this stricter check, the repair ensures that the TLS handshake is more secure and resistant to man-in-the-middle attacks. The code now enforces a strict match between the signature algorithm and the peer's key type, preventing an attacker from sending a signature algorithm that is not supported by the peer's key.

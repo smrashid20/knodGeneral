@@ -1,0 +1,9 @@
+        if (ret <= 0) {
+            int err = ctx.getError();
+            ERR.raiseData(
+                    "OCSP_R_CERTIFICATE_VERIFY_ERROR",
+                    String.format("Verify error (%d): %s", err, ctx.getErrorString())
+            );
+            ctx.free();
+            return ret;
+        }

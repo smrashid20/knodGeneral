@@ -1,0 +1,13 @@
+        if (session.isClient()) {
+            extStart = findSubstring(clientMethods[SSHConstants.SSH_KEX], "," + SSHConstants.KEX_EXTENSION_CLIENT);
+            if (extStart != null) {
+                clientMethods[SSHConstants.SSH_KEX] = truncateString(clientMethods[SSHConstants.SSH_KEX], extStart);
+            }
+        }
+
+        if (session.isServer()) {
+            extStart = findSubstring(serverMethods[SSHConstants.SSH_KEX], "," + SSHConstants.KEX_STRICT_SERVER);
+            if (extStart != null) {
+                serverMethods[SSHConstants.SSH_KEX] = truncateString(serverMethods[SSHConstants.SSH_KEX], extStart);
+            }
+        }

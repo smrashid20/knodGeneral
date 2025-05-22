@@ -1,0 +1,24 @@
+{
+    "vul_id": "B16",
+    "project_name": "dnsmasq",
+    "language": "cpp",
+    "vul_code_file_rel_path": "src/forward.c",
+    "vul_code_func_start_line": 2342,
+    "vul_code_func_end_line": 2352,
+    "vul_code_block_start_line": 2347,
+    "vul_code_block_end_line": 2349,
+    "vul_code_func_fixed_start_line": 2342,
+    "vul_code_func_fixed_end_line": 2363,
+    "vul_code_block_fixed_start_line": 2347,
+    "vul_code_block_fixed_end_line": 2360,
+    "vul_code_initial_block_start": 2347,
+    "vul_code_initial_block_end": 2348,
+    "vul_code_context_lines": ["2342-2344", "19-24"],
+    "context_lines": [{
+        "src/forward.c": ["1502-1514", "54-96"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "forward.c",
+    "vul_code_lines":  ["2349"],
+    "vul_code_line": 2349
+}

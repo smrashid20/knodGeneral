@@ -1,0 +1,13 @@
+The repair of the vulnerability in the X.509 certificate verification process involves several key steps. 
+
+First, the code checks if the certificate contains a Subject Alternative Name (SAN) extension. If it does, the code calls a function to check if the expected common name matches any of the names in the SAN extension. This is a more secure approach than the original code, which compared the expected name to any name in the SAN extension regardless of its type.
+
+If the certificate does not contain a SAN extension, the code falls back to the traditional method of checking the subject field of the certificate. In this case, it iterates through the names in the subject field and checks if any of them match the expected common name. 
+
+A significant change in the repair is the removal of the loop that checked all names in the SAN extension. This loop was the root cause of the vulnerability, as it allowed an attacker to impersonate a domain by getting a certificate for the corresponding IP address. By removing this loop and instead calling a function to check the SAN extension, the code ensures that only the expected name type is matched.
+
+Another important change is the reordering of the logic. In the original code, the function would break out of the loop as soon as it found a match, regardless of whether it was the correct type. In the repaired code, the function returns immediately if a match is found in the SAN extension or the subject field, ensuring that the correct name type is matched.
+
+Finally, if no match is found in either the SAN extension or the subject field, the code sets a flag to indicate that the certificate name does not match the expected name. This flag can then be used to reject the certificate and prevent an attacker from impersonating a domain.
+
+Overall, the repair involves a more secure and targeted approach to verifying the common name in X.509 certificates, ensuring that only the correct name type is matched and preventing potential impersonation attacks.

@@ -1,0 +1,63 @@
+### src/eap_peer/eap_peap.c ###
+static int eap_tlv_process(struct eap_sm *sm, struct eap_peap_data *data,
+			   struct eap_method_ret *ret,
+			   const struct wpabuf *req, struct wpabuf **resp,
+			   int force_failure)
+{
+	size_t left, tlv_len;
+	const u8 *pos;
+	const u8 *result_tlv = NULL, *crypto_tlv = NULL;
+	size_t result_tlv_len = 0, crypto_tlv_len = 0;
+	int tlv_type, mandatory;
+
+	/* Parse TLVs */
+	pos = eap_hdr_validate(EAP_VENDOR_IETF, EAP_TYPE_TLV, req, &left);
+
+............
+#define EAP_PEAP_VERSION 1
+
+
+static void eap_peap_deinit(struct eap_sm *sm, void *priv);
+
+
+struct eap_peap_data {
+	struct eap_ssl_data ssl;
+
+	int peap_version, force_peap_version, force_new_label;
+
+	const struct eap_method *phase2_method;
+	void *phase2_priv;
+	int phase2_success;
+	int phase2_eap_success;
+	int phase2_eap_started;
+
+	struct eap_method_type phase2_type;
+	struct eap_method_type *phase2_types;
+	size_t num_phase2_types;
+
+	int peap_outer_success; /* 0 = PEAP terminated on Phase 2 inner
+				 * EAP-Success
+				 * 1 = reply with tunneled EAP-Success to inner
+				 * EAP-Success and expect AS to send outer
+				 * (unencrypted) EAP-Success after this
+				 * 2 = reply with PEAP/TLS ACK to inner
+				 * EAP-Success and expect AS to send outer
+				 * (unencrypted) EAP-Success after this */
+	int resuming; /* starting a resumed session */
+	int reauth; /* reauthentication */
+	u8 *key_data;
+	u8 *session_id;
+	size_t id_len;
+
+	struct wpabuf *pending_phase2_req;
+	struct wpabuf *pending_resp;
+	enum { NO_BINDING, OPTIONAL_BINDING, REQUIRE_BINDING } crypto_binding;
+	int crypto_binding_used;
+	u8 binding_nonce[32];
+	u8 ipmk[40];
+	u8 cmk[20];
+	int soh; /* Whether IF-TNCCS-SOH (Statement of Health; Microsoft NAP)
+		  * is enabled. */
+};
+
+............

@@ -1,0 +1,17 @@
+The repair steps for the given vulnerability involve a series of modifications to the code to ensure that the TLS v1.3 client properly authenticates the TLS v1.3 server by verifying the certificate. Here's a step-by-step explanation of the repair:
+
+1. **Separate the signature algorithm check**: The original code checks the signature algorithm and the corresponding key presence in a single if-statement. The repair separates these checks into two distinct steps. First, it checks the signature algorithm sent by the peer and sets a flag (validSigAlgo) based on the corresponding key presence.
+
+2. **Remove the incorrect error messages**: The original code prints error messages that are not accurate in the context of TLS v1.3. The repair removes these messages and instead focuses on setting the validSigAlgo flag.
+
+3. **Add a flag to track valid signature algorithms**: A new flag, validSigAlgo, is introduced to track whether the signature algorithm sent by the peer matches the expected key presence. This flag is set to true if the signature algorithm corresponds to the expected key presence.
+
+4. **Check for RSA signature algorithms**: The repair adds a specific check for RSA signature algorithms (PKCS#1.5 and RSA-PSS). If the peer sends an RSA signature algorithm, the code checks if the RSA key is present and sets the validSigAlgo flag accordingly.
+
+5. **Introduce a final check for valid signature algorithms**: After checking all possible signature algorithms, the repair adds a final check to ensure that the validSigAlgo flag is set. If the flag is not set, it means that the signature algorithm sent by the peer does not correspond to the expected key presence, and the code returns an error (SIG_VERIFY_E).
+
+6. **Improve error handling**: The repair improves error handling by introducing a more accurate error message when the signature algorithm does not correspond to the expected key presence. This helps in debugging and identifying the root cause of the issue.
+
+7. **Maintain consistency with TLS v1.3 specifications**: The repair ensures that the code is consistent with the TLS v1.3 specifications, which require the client to verify the server's certificate by checking the signature algorithm and corresponding key presence.
+
+By following these steps, the repair ensures that the TLS v1.3 client properly authenticates the TLS v1.3 server by verifying the certificate, thereby preventing the certificate check bypass vulnerability.

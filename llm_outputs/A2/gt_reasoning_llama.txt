@@ -1,0 +1,9 @@
+The vulnerability in question arises from the way certificate policies are handled in the verification process. Specifically, when a certificate has an invalid policy, OpenSSL silently ignores it and skips further policy checks for that certificate. A malicious Certificate Authority (CA) could exploit this by deliberately including invalid policies in a certificate, effectively bypassing policy checks.
+
+The buggy code attempts to address this issue by iterating over the certificates in the chain and checking for invalid policies. However, it starts the iteration from the second certificate (index 1) and returns immediately after the loop, potentially allowing certificates with invalid policies to go unchecked.
+
+The repair addresses this vulnerability by making two key changes. Firstly, it starts the iteration from the first certificate (index 0), ensuring that all certificates in the chain are checked for invalid policies. This prevents a malicious CA from bypassing policy checks by placing an invalid policy in the first certificate.
+
+Secondly, the repair adds an error handling mechanism after the loop. If the function reaches this point, it means that an internal error has occurred, and the verification process should not continue. By raising an internal error and returning 0, the repair ensures that the verification process is terminated and an error is reported, preventing the potential exploitation of the vulnerability.
+
+In essence, the repair ensures that all certificates in the chain are thoroughly checked for invalid policies, and any errors or inconsistencies are properly handled and reported. This effectively closes the vulnerability and prevents a malicious CA from circumventing policy checks.

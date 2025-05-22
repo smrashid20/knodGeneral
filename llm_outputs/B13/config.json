@@ -1,0 +1,24 @@
+{
+    "vul_id": "B13",
+    "project_name": "BIND",
+    "language": "cpp",
+    "vul_code_file_rel_path": "lib/dns/message.c",
+    "vul_code_func_start_line": 3067,
+    "vul_code_func_end_line": 3146,
+    "vul_code_block_start_line": 3116,
+    "vul_code_block_end_line": 3123,
+    "vul_code_func_fixed_start_line": 3067,
+    "vul_code_func_fixed_end_line": 3153,
+    "vul_code_block_fixed_start_line": 3116,
+    "vul_code_block_fixed_end_line": 3130,
+    "vul_code_initial_block_start": 3116,
+    "vul_code_initial_block_end": 3117,
+    "vul_code_context_lines": ["3067-3074", "69-172"],
+    "context_lines": [{
+        "lib/dns/message.c": ["3067-3074", "69-172"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "message.c",
+    "vul_code_lines":  ["3118"],
+    "vul_code_line": 3118
+}

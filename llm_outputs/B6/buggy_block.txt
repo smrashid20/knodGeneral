@@ -1,0 +1,25 @@
+    if( crt->ext_types & MBEDTLS_X509_EXT_SUBJECT_ALT_NAME )
+    {
+        for( cur = &crt->subject_alt_names; cur != NULL; cur = cur->next )
+        {
+            if( x509_crt_check_cn( &cur->buf, cn, cn_len ) == 0 )
+                break;
+        }
+
+        if( cur == NULL )
+            *flags |= MBEDTLS_X509_BADCERT_CN_MISMATCH;
+    }
+    else
+    {
+        for( name = &crt->subject; name != NULL; name = name->next )
+        {
+            if( MBEDTLS_OID_CMP( MBEDTLS_OID_AT_CN, &name->oid ) == 0 &&
+                x509_crt_check_cn( &name->val, cn, cn_len ) == 0 )
+            {
+                break;
+            }
+        }
+
+        if( name == NULL )
+            *flags |= MBEDTLS_X509_BADCERT_CN_MISMATCH;
+    }

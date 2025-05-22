@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB20",
+    "project_name": "SB20",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/XMPPConnection.java",
+    "vul_code_func_start_line": 15,
+    "vul_code_func_end_line": 27,
+    "vul_code_block_start_line": 17,
+    "vul_code_block_end_line": 26,
+    "vul_code_func_fixed_start_line": 15,
+    "vul_code_func_fixed_end_line": 32,
+    "vul_code_block_fixed_start_line": 17,
+    "vul_code_block_fixed_end_line": 31,
+    "vul_code_initial_block_start": 17,
+    "vul_code_initial_block_end": 17,
+    "vul_code_context_lines": ["8-16"],
+    "context_lines": [{
+        "src/main/XMPPConnection.java": ["8-16"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "XMPPConnection.java",
+    "vul_code_lines":  ["20"],
+    "vul_code_line": 20,
+    "rem_start": 20,
+    "rem_end": 20,
+    "add_start": 20,
+    "add_end": 25
+}

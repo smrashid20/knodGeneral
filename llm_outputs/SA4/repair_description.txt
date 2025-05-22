@@ -1,0 +1,15 @@
+To repair the vulnerability in the OpenSSL 3.0 implementation of the RC4-MD5 ciphersuite, several steps need to be taken. 
+
+First, identify the root cause of the issue, which is the incorrect use of the AAD (Additional Authenticated Data) as the MAC (Message Authentication Code) key. This makes the MAC key predictable and vulnerable to man-in-the-middle attacks.
+
+Next, locate the specific line of code that is causing the problem. In this case, it is the line where the OSSL_PARAM_locate_const function is called with the OSSL_CIPHER_PARAM.AEAD_TLS1_AAD parameter.
+
+Then, understand the correct parameter that should be used instead of OSSL_CIPHER_PARAM.AEAD_TLS1_AAD. The correct parameter is OSSL_CIPHER_PARAM.AEAD_MAC_KEY, which is used to specify the MAC key for AEAD (Authenticated Encryption with Associated Data) ciphersuites.
+
+After identifying the correct parameter, replace the incorrect parameter with the correct one in the code. This involves changing the OSSL_PARAM_locate_const function call to use OSSL_CIPHER_PARAM.AEAD_MAC_KEY instead of OSSL_CIPHER_PARAM.AEAD_TLS1_AAD.
+
+Finally, verify that the change fixes the vulnerability by testing the code with various inputs and scenarios. This includes testing the code with different ciphersuites, AAD data, and MAC keys to ensure that the MAC key is no longer predictable and that the code is secure against man-in-the-middle attacks.
+
+Additionally, it is recommended to review the surrounding code to ensure that there are no other instances of the same vulnerability. This includes checking other parts of the code that may be using the AAD data as the MAC key and updating them to use the correct parameter.
+
+By following these steps, the vulnerability in the OpenSSL 3.0 implementation of the RC4-MD5 ciphersuite can be successfully repaired, and the code can be made secure against man-in-the-middle attacks.

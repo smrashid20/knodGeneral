@@ -1,0 +1,25 @@
+{
+    "vul_id": "A1",
+    "project_name": "openssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "crypto/evp/evp_enc.c",
+    "vul_code_func_start_line": 92,
+    "vul_code_func_end_line": 405,
+    "vul_code_block_start_line": 227,
+    "vul_code_block_end_line": 250,
+    "vul_code_func_fixed_start_line": 92,
+    "vul_code_func_fixed_end_line": 441,
+    "vul_code_block_fixed_start_line": 227,
+    "vul_code_block_fixed_end_line": 286,
+    "vul_code_initial_block_start": 92,
+    "vul_code_initial_block_end": 97,
+    "vul_code_context_lines": ["3-10"],
+    "context_lines": [{
+        "crypto/evp/evp_enc.c": ["92-138"],
+        "include/openssl/evp.h": ["876-893"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "evp_enc.c",
+    "vul_code_lines":  ["235"],
+    "vul_code_line": 235
+}

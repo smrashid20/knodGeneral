@@ -1,0 +1,21 @@
+### src/main/Ssl3GetCertVerify.java ###
+public class Ssl3GetCertVerify {
+    public static int ssl3_get_cert_verify(SSL s) {
+        EVP_PKEY pkey = null;
+        byte[] p;
+        int al, ret = 0;
+        long n;
+        int type = 0, i = 0, j = 0;
+        X509 peer;
+        EVP_MD_CTX mctx = new EVP_MD_CTX();
+        Helper.EVP_MD_CTX_init(mctx);
+
+        boolean[] okHolder = new boolean[1];
+        n = s.method.ssl_get_message(s,
+                Constants.SSL3_ST_SR_CERT_VRFY_A,
+                Constants.SSL3_ST_SR_CERT_VRFY_B,
+                -1,
+                Constants.SSL3_RT_MAX_PLAIN_LENGTH,
+                okHolder);
+
+............

@@ -1,0 +1,7 @@
+The basic constraints extension identifies whether the subject of the certificate is a CA and the maximum depth of valid certification paths that include this certificate.
+
+The `cA` boolean indicates whether the certified public key may be used to verify certificate signatures. If the `cA` boolean is not asserted, then the `keyCertSign` bit in the key usage extension **MUST NOT** be asserted. If the basic constraints extension is not present in a version 3 certificate, or the extension is present but the `cA` boolean is not asserted, then the certified public key **MUST NOT** be used to verify certificate signatures.
+
+The `pathLenConstraint` field is meaningful only if the `cA` boolean is asserted and the key usage extension, if present, asserts the `keyCertSign` bit. In this case, it gives the maximum number of non-self-issued intermediate certificates that may follow this certificate in a valid certification path. (Note: The last certificate in the certification path is not an intermediate certificate, and is not included in this limit. Usually, the last certificate is an end entity certificate, but it can be a CA certificate.)
+
+A `pathLenConstraint` of zero indicates that no non-self-issued intermediate CA certificates may follow in a valid certification path. Where it appears, the `pathLenConstraint` field **MUST** be greater than or equal to zero. Where `pathLenConstraint` does not appear, no limit is imposed.

@@ -1,0 +1,7 @@
+### src/main/CertParser.java ###
+public class CertParser {
+    public static int ParseCertRelative(DecodedCert cert, int type, int verify, Object cm) {
+        int ret = 0;
+        int confirmOID = 0;
+
+............

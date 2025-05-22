@@ -1,0 +1,24 @@
+{
+    "vul_id": "D1",
+    "project_name": "pjproject",
+    "language": "cpp",
+    "vul_code_file_rel_path": "pjmedia/src/pjmedia/transport_srtp.c",
+    "vul_code_func_start_line": 1427,
+    "vul_code_func_end_line": 1604,
+    "vul_code_block_start_line": 1521,
+    "vul_code_block_end_line": 1549,
+    "vul_code_func_fixed_start_line": 1427,
+    "vul_code_func_fixed_end_line": 1605,
+    "vul_code_block_fixed_start_line": 1521,
+    "vul_code_block_fixed_end_line": 1550,
+    "vul_code_initial_block_start": 1521,
+    "vul_code_initial_block_end": 1524,
+    "vul_code_context_lines": ["1427-1436", "33-422"],
+    "context_lines": [{
+        "pjmedia/src/pjmedia/transport_srtp.c": ["1427-1436", "33-422"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "transport_srtp.c",
+    "vul_code_lines":  ["1539"],
+    "vul_code_line": 1539
+}

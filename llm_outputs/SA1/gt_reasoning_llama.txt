@@ -1,0 +1,9 @@
+The vulnerability in the wpa_supplicant implementation of PEAP (Protected EAP) allows an attacker to bypass authentication by sending an EAP-TLV Success packet instead of starting Phase 2 authentication. This is possible when wpa_supplicant is configured to not verify the network's TLS certificate during Phase 1 authentication, and an eap_peap_decrypt vulnerability is exploited to skip Phase 2 authentication.
+
+The root cause of this vulnerability lies in the lack of proper validation and parameter checking in the encryption initialization process. Specifically, the buggy code does not verify the length of the key and initialization vector (IV) used for encryption, which can lead to an attacker manipulating these parameters to bypass authentication.
+
+The repair addresses this vulnerability by adding an additional check for the length of the key and IV parameters. Before initializing the encryption, the code checks if the parameters contain "keylen" and "ivlen" values, and if so, sets these values in the CipherParams object. It then checks if the CipherParams object is not empty and if the context can be set with these parameters. If any of these checks fail, an exception is thrown.
+
+This additional validation ensures that the encryption initialization process is properly configured with valid key and IV lengths, preventing an attacker from manipulating these parameters to bypass authentication. By verifying the length of these parameters, the repair prevents the eap_peap_decrypt vulnerability from being exploited, thereby preventing an attacker from impersonating Enterprise Wi-Fi networks.
+
+In essence, the repair adds an extra layer of validation to the encryption initialization process, ensuring that the parameters used for encryption are valid and cannot be manipulated by an attacker. This fix prevents the authentication bypass vulnerability and ensures the security of the wpa_supplicant implementation of PEAP.

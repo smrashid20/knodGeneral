@@ -1,0 +1,9 @@
+The vulnerability in the given code lies in the way it handles errors during the verification of a certificate chain. Specifically, when an installed verification callback instructs the verifier to continue upon detecting an invalid certificate, the error that occurs during leaf certificate verification is not stored. As a result, an incorrect error is returned.
+
+The buggy code does not properly handle the error that occurs during the verification of the leaf certificate. It checks if the certificate is valid and if the hostname matches, but it does not store the error that occurs during this process. Instead, it only checks if the certificate is valid and if the hostname matches, and if either of these checks fails, it returns 0 without storing the error.
+
+The repair addresses this issue by storing the error that occurs during the verification of the leaf certificate. It does this by adding a check to see if the current depth is 0 (i.e., if it is the leaf certificate) and if the error is not X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY. If both conditions are true, it stores the error in the cert_errors array of the chain. This ensures that the error that occurs during the verification of the leaf certificate is properly stored and can be returned later.
+
+Additionally, the repair also stores the error in the cert_errors array of the chain after the certificate chain has been successfully duplicated and added to the context. This ensures that the error is stored even if the certificate chain is successfully verified.
+
+Overall, the repair ensures that errors that occur during the verification of a certificate chain are properly stored and can be returned later, which fixes the vulnerability in the original code.

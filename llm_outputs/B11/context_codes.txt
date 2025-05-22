@@ -1,0 +1,50 @@
+### wolfcrypt/src/asn.c ###
+int ParseCertRelative(DecodedCert* cert, int type, int verify, void* cm)
+{
+    int    ret = 0;
+    int    checkPathLen = 0;
+    int    decrementMaxPathLen = 0;
+    word32 confirmOID = 0;
+#if defined(WOLFSSL_RENESAS_TSIP)
+    int    idx = 0;
+#endif
+    byte*  tsip_encRsaKeyIdx;
+#ifdef WOLFSSL_CERT_REQ
+    int    len = 0;
+#endif
+
+............
+#ifdef _MSC_VER
+    /* 4996 warning to use MS extensions e.g., strcpy_s instead of XSTRNCPY */
+    #pragma warning(disable: 4996)
+#endif
+
+#define ERROR_OUT(err, eLabel) { ret = (err); goto eLabel; }
+
+#if !defined(NO_SKID) && (!defined(HAVE_FIPS) || !defined(HAVE_FIPS_VERSION))
+    #if !defined(HAVE_SELFTEST) || (defined(HAVE_SELFTEST) && \
+                                   (!defined(HAVE_SELFTEST_VERSION) || \
+                                    HAVE_SELFTEST_VERSION < 2))
+    #ifndef WOLFSSL_AES_KEY_SIZE_ENUM
+    #define WOLFSSL_AES_KEY_SIZE_ENUM
+    enum Asn_Misc {
+        AES_IV_SIZE         = 16,
+        AES_128_KEY_SIZE    = 16,
+        AES_192_KEY_SIZE    = 24,
+        AES_256_KEY_SIZE    = 32
+    };
+    #endif
+    #endif /* HAVE_SELFTEST */
+#endif
+#ifdef WOLFSSL_RENESAS_TSIP_TLS
+void tsip_inform_key_position(const word32 key_n_start,
+                const word32 key_n_len, const word32 key_e_start,
+                const word32 key_e_len);
+int tsip_tls_CertVerify(const byte *cert, word32 certSz,
+                        const byte *signature, word32 sigSz,
+                        word32 key_n_start, word32 key_n_len,
+                        word32 key_e_start, word32 key_e_len,
+                        byte *tsip_encRsaKeyIdx);
+#endif
+
+............

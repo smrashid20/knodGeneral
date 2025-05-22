@@ -1,0 +1,15 @@
+The repair steps for the given vulnerability in the dnsmasq code involve a series of checks to ensure that the reply destination address and port match the pending forwarded query. Here's a step-by-step explanation of the repair:
+
+1. **Initial Check**: The repair starts with the same initial check as the buggy code, verifying that the sentto field is not null, the new_id matches the id, and the hash values are equal (or hash is null). This ensures that the basic conditions for a match are met.
+
+2. **Family-Based Checks**: After passing the initial check, the repair code performs family-based checks to verify the reply destination address and port. This is done separately for IPv4 and IPv6 addresses.
+
+3. **IPv4 Check**: For IPv4 addresses, the code checks if the family is AF_INET and if the rfd4 field is not null. It then verifies that the file descriptor (fd) of the rfd4 field matches the provided fd. This ensures that the reply destination address and port match the pending forwarded query for IPv4 addresses.
+
+4. **IPv6 Check**: Similarly, for IPv6 addresses, the code checks if the family is AF_INET6 and if the rfd6 field is not null. It then verifies that the file descriptor (fd) of the rfd6 field matches the provided fd. This ensures that the reply destination address and port match the pending forwarded query for IPv6 addresses.
+
+5. **Socket File Descriptor Check**: Finally, the code checks if the sentto field has a socket file descriptor (sfd) that is not null and if its file descriptor (fd) matches the provided fd. This provides an additional layer of verification to ensure that the reply destination address and port match the pending forwarded query.
+
+6. **Return the Matched Query**: If any of the family-based checks or the socket file descriptor check pass, the code returns the matched forwarded query (f). This ensures that only replies with matching destination addresses and ports are accepted by dnsmasq, preventing DNS Cache Poisoning attacks.
+
+By adding these additional checks, the repair code ensures that dnsmasq follows the guidelines specified in RFC5452, which requires that all attributes of a query be used to match a reply. This significantly reduces the chances of an attacker successfully forging a reply and getting it accepted by dnsmasq.

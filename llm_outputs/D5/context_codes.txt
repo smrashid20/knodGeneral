@@ -1,0 +1,14 @@
+### xmppserver/src/main/java/org/jivesoftware/openfire/admin/AdminManager.java ###
+public class AdminManager {
+
+    public static final SystemProperty<Class> ADMIN_PROVIDER = SystemProperty.Builder.ofType(Class.class)
+        .setKey("provider.admin.className")
+        .setBaseClass(AdminProvider.class)
+        .setDefaultValue(DefaultAdminProvider.class)
+        .addListener(AdminManager::initProvider)
+        .setDynamic(true)
+        .build();
+
+    private static final Logger Log = LoggerFactory.getLogger(AdminManager.class);
+
+............

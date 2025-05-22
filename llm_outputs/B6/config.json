@@ -1,0 +1,24 @@
+{
+    "vul_id": "B6",
+    "project_name": "mbedtls",
+    "language": "cpp",
+    "vul_code_file_rel_path": "library/x509_crt.c",
+    "vul_code_func_start_line": 3013,
+    "vul_code_func_end_line": 3046,
+    "vul_code_block_start_line": 3021,
+    "vul_code_block_end_line": 3045,
+    "vul_code_func_fixed_start_line": 2951,
+    "vul_code_func_fixed_end_line": 2973,
+    "vul_code_block_fixed_start_line": 2958,
+    "vul_code_block_fixed_end_line": 2972,
+    "vul_code_initial_block_start": 3021,
+    "vul_code_initial_block_end": 3021,
+    "vul_code_context_lines": ["3013-3019", "86-159"],
+    "context_lines": [{
+        "library/x509_crt.c": ["3013-3019", "86-159"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "x509_crt.c",
+    "vul_code_lines":  ["3025"],
+    "vul_code_line": 3025
+}

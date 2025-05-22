@@ -1,0 +1,13 @@
+        Tls13Helper.WOLFSSL_ENTER("DoTls13Finished");
+
+        if (ssl.options.side == Constants.WOLFSSL_SERVER_END
+                && (ssl.options.mutualAuth || ssl.options.failNoCert)) {
+            if (!ssl.options.havePeerVerify && !ssl.options.resuming) {
+                ret = Constants.NO_PEER_CERT;
+                Tls13Helper.DoCertFatalAlert(ssl, ret);
+                return ret;
+            }
+        }
+
+        if (inOutIdx[0] + size + ssl.keys.padSz > totalSz)
+            return Constants.BUFFER_E;

@@ -1,0 +1,15 @@
+The repair steps for the vulnerability in the ssl3_get_key_exchange function involve several key changes to prevent RSA-to-EXPORT_RSA downgrade attacks and brute-force decryption. Here are the steps:
+
+1. **Check for Export Ciphersuite**: The first step is to check if the current ciphersuite is an export ciphersuite. This is done to ensure that temporary RSA keys are only allowed in export ciphersuites, which is a security requirement.
+
+2. **Prevent Non-Compliant RSA Key Exchange**: If the ciphersuite is not an export ciphersuite, the function should immediately return an error. This prevents a non-compliant RSA key exchange from occurring, which could lead to a security vulnerability.
+
+3. **Maintain Existing Error Handling**: The rest of the function remains the same, with the existing error handling mechanisms in place. This ensures that any errors that occur during the RSA key exchange process are properly handled and reported.
+
+4. **Verify RSA Key Parameters**: The function continues to verify the RSA key parameters, including the modulus and exponent, to ensure they are valid and correctly formatted.
+
+5. **Retrieve Peer's Public Key**: If the RSA key exchange is successful, the function retrieves the peer's public key from the session certificate.
+
+6. **Assign Temporary RSA Key**: Finally, the function assigns the temporary RSA key to the session certificate, replacing any existing key.
+
+By implementing these steps, the repair prevents an attacker from exploiting the vulnerability by ensuring that temporary RSA keys are only used in export ciphersuites and that non-compliant RSA key exchanges are not allowed. This helps to prevent RSA-to-EXPORT_RSA downgrade attacks and brute-force decryption, thereby improving the security of the SSL/TLS protocol.

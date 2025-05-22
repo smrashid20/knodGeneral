@@ -1,0 +1,1 @@
+        if (extMsgType[0] == CommonsConstants.server_hello) {

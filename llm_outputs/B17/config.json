@@ -1,0 +1,24 @@
+{
+    "vul_id": "B17",
+    "project_name": "dnsmasq",
+    "language": "cpp",
+    "vul_code_file_rel_path": "contrib/mod_tls.c",
+    "vul_code_func_start_line": 9605,
+    "vul_code_func_end_line": 9831,
+    "vul_code_block_start_line": 9778,
+    "vul_code_block_end_line": 9787,
+    "vul_code_func_fixed_start_line": 9605,
+    "vul_code_func_fixed_end_line": 9834,
+    "vul_code_block_fixed_start_line": 9778,
+    "vul_code_block_fixed_end_line": 9787,
+    "vul_code_initial_block_start": 9778,
+    "vul_code_initial_block_end": 9779,
+    "vul_code_context_lines": ["9605-9611", "85-114"],
+    "context_lines": [{
+        "contrib/mod_tls.c": ["9605-9611", "85-114"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "mod_tls.c",
+    "vul_code_lines":  ["9780"],
+    "vul_code_line": 9780
+}

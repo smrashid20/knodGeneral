@@ -1,0 +1,14 @@
+        if (ctx.hasNoPadding()) {
+            if (!ctx.setPadding(0)) {
+                return false;
+            }
+        }
+
+        if (enc == 1) {
+            if (!cipher.hasEncryptInit()) {
+                throw new IllegalStateException("Initialization error: encryption function missing");
+            }
+            return cipher.encryptInit(ctx.getAlgCtx(), key,
+                    key == null ? 0 : ctx.getKeyLength(),
+                    iv, iv == null ? 0 : ctx.getIvLength(), params);
+        }

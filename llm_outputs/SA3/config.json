@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA3",
+    "project_name": "SA3",
+    "language": "java",
+    "vul_code_file_rel_path": "src/CipherInitializer.java",
+    "vul_code_func_start_line": 3,
+    "vul_code_func_end_line": 131,
+    "vul_code_block_start_line": 39,
+    "vul_code_block_end_line": 48,
+    "vul_code_func_fixed_start_line": 3,
+    "vul_code_func_fixed_end_line": 132,
+    "vul_code_block_fixed_start_line": 39,
+    "vul_code_block_fixed_end_line": 49,
+    "vul_code_initial_block_start": 39,
+    "vul_code_initial_block_end": 39,
+    "vul_code_context_lines": ["3-36"],
+    "context_lines": [{
+        "src/CipherInitializer.java": ["3-36"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "CipherInitializer.java",
+    "vul_code_lines":  ["39"],
+    "vul_code_line": 39,
+    "rem_start": 39,
+    "rem_end": 39,
+    "add_start": 39,
+    "add_end": 42
+}

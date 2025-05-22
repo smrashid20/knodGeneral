@@ -1,0 +1,11 @@
+To repair the vulnerability in the OpenSSL code, several steps need to be taken. 
+
+First, the root cause of the issue needs to be identified, which is the mishandling of a negative return value from the X509_verify_cert function. This function is used to verify a certificate supplied by a server, and a negative return value indicates an internal error, such as running out of memory.
+
+Next, the conditions under which this error occurs need to be understood. The error happens when the application has not set a custom verification callback using the SSL_CTX_set_cert_verify_callback function. In this case, the SSL_ERROR_WANT_RETRY_VERIFY return value from the SSL_get_error function is unexpected and may cause the application to behave incorrectly.
+
+To fix this issue, a check needs to be added to handle the negative return value from the X509_verify_cert function. This check should be performed when the application has not set a custom verification callback.
+
+The repair involves adding a conditional statement to check if the return value from the X509_verify_cert function is negative. If it is, the return value should be set to 0, indicating that the verification was successful. This ensures that the SSL_ERROR_WANT_RETRY_VERIFY return value is not returned unexpectedly, preventing potential issues with the application's behavior.
+
+By adding this simple check, the vulnerability in the OpenSSL code can be fixed, and the code can be made more robust and reliable. This repair is a straightforward solution that addresses the root cause of the issue and prevents potential problems with the application's behavior.

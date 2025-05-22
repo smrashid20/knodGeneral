@@ -1,0 +1,8 @@
+### src/main/Tls13ServerHello.java ###
+public class Tls13ServerHello {
+    public static int DoTls13ServerHello(TlsContext ssl, byte[] input, int[] inOutIdx, int helloSz, byte[] extMsgType) {
+        int ret;
+        byte[] suite = new byte[2];
+        byte tls12minor = CommonsConstants.TLSv1_2_MINOR;
+
+............

@@ -1,0 +1,29 @@
+### lib/x509/ocsp.c ###
+int
+gnutls_ocsp_resp_check_crt(gnutls_ocsp_resp_t resp,
+			   unsigned int indx, gnutls_x509_crt_t crt)
+{
+	int ret;
+	gnutls_digest_algorithm_t digest;
+	gnutls_datum_t rdn_hash = { NULL, 0 }, rserial = {
+	NULL, 0};
+	gnutls_datum_t cserial = { NULL, 0 };
+	gnutls_datum_t dn = { NULL, 0 };
+	uint8_t cdn_hash[MAX_HASH_SIZE];
+	size_t t, hash_len;
+
+............
+typedef struct gnutls_ocsp_req_int {
+	ASN1_TYPE req;
+	unsigned init;
+} gnutls_ocsp_req_int;
+
+typedef struct gnutls_ocsp_resp_int {
+	ASN1_TYPE resp;
+	gnutls_datum_t response_type_oid;
+	ASN1_TYPE basicresp;
+	gnutls_datum_t der;
+	unsigned init;
+} gnutls_ocsp_resp_int;
+
+............

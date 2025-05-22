@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB19",
+    "project_name": "SB19",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/TlsDriver.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 175,
+    "vul_code_block_start_line": 28,
+    "vul_code_block_end_line": 53,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 181,
+    "vul_code_block_fixed_start_line": 28,
+    "vul_code_block_fixed_end_line": 57,
+    "vul_code_initial_block_start": 28,
+    "vul_code_initial_block_end": 28,
+    "vul_code_context_lines": ["5-22"],
+    "context_lines": [{
+        "src/main/TlsDriver.java": ["5-22"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "TlsDriver.java",
+    "vul_code_lines":  ["44"],
+    "vul_code_line": 44,
+    "rem_start": 44,
+    "rem_end": 45,
+    "add_start": 44,
+    "add_end": 47
+}

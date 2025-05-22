@@ -1,0 +1,13 @@
+### src/main/Tls13CertificateVerify.java ###
+public class Tls13CertificateVerify {
+    public static int DoTls13CertificateVerify(TlsContext ssl, byte[] input, int[] inOutIdx, int totalSz) {
+        int ret = 0;
+        Buffer sig = ssl.buffers.sig;
+        Dcv13Args args = new Dcv13Args();
+        ssl.options.asyncState = CommonsConstants.TLS_ASYNC_BEGIN;
+        args.hashAlgo = CommonsConstants.sha_mac;
+        args.sigAlgo = CommonsConstants.anonymous_sa_algo;
+        args.idx   = inOutIdx[0];
+        args.begin = inOutIdx[0];
+
+............

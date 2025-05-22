@@ -1,0 +1,1 @@
+        result = GnutlsUtils.asn1_der_decoding(cert.cert, cert.der.data, cert.der.size, null);

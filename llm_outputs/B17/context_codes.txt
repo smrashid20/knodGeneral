@@ -1,0 +1,42 @@
+### contrib/mod_tls.c ###
+static int tls_verify_crl(int ok, X509_STORE_CTX *ctx) {
+  register int i = 0;
+  X509_NAME *subject = NULL, *issuer = NULL;
+  X509 *xs = NULL;
+  STACK_OF(X509_CRL) *crls = NULL;
+  X509_STORE_CTX *store_ctx = NULL;
+  int n, res;
+
+............
+extern pr_response_t *resp_list, *resp_err_list;
+extern session_t session;
+extern xaset_t *server_list;
+extern int ServerUseReverseDNS;
+
+static const char *trace_channel = "tls";
+
+static DH *get_dh(BIGNUM *p, BIGNUM *g) {
+  DH *dh;
+
+  dh = DH_new();
+  if (dh == NULL) {
+    return NULL;
+  }
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+    !defined(HAVE_LIBRESSL)
+  if (DH_set0_pqg(dh, p, NULL, g) != 1) {
+    pr_trace_msg(trace_channel, 3, "error setting DH p/q parameters: %s",
+      ERR_error_string(ERR_get_error(), NULL));
+    DH_free(dh);
+    return NULL;
+  }
+#else
+  dh->p = p;
+  dh->g = g;
+#endif /* OpenSSL 1.1.x and later */
+
+  return dh;
+}
+
+............

@@ -1,0 +1,13 @@
+    protected void connectInternal()
+            throws SmackException, IOException, XMPPException {
+        Connections.connectUsingConfiguration();
+        socketClosed = false;
+        initConnection();
+        saslFeatureReceived.checkIfSuccessOrWaitOrThrow();
+        connected = true;
+        callConnectionConnectedListener();
+        if (wasAuthenticated) {
+            login();
+            notifyReconnection();
+        }
+    }

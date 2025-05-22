@@ -1,0 +1,12 @@
+        initProvider(ADMIN_PROVIDER.getValue());
+        UserEventDispatcher.addListener(new UserEventListener() {
+            @Override
+            public void userDeleting(final User user, final Map<String, Object> params) {
+                if (user != null) {
+                    removeAdminAccount(user.getUsername());
+                }
+            }
+
+            @Override public void userCreated(final User user, final Map<String, Object> params) {}
+            @Override public void userModified(final User user, final Map<String, Object> params) {}
+        });

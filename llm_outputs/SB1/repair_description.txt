@@ -1,0 +1,15 @@
+The repair of the vulnerability in the ssl3_get_cert_verify function involves a crucial modification to ensure that the function correctly handles client authentication with a Diffie-Hellman (DH) certificate. Here are the steps to repair the vulnerability:
+
+1. **Identify the root cause**: The vulnerability arises from the function not requiring a CertificateVerify message when a client presents a DH certificate. This allows an attacker to gain access without knowledge of the private key.
+
+2. **Analyze the existing code**: The existing code checks if the message type is not a CertificateVerify message and then checks if the peer is not null and if the type includes EVP_PKT_SIGN. If both conditions are met, it sends an alert and returns.
+
+3. **Modify the condition**: The repair involves modifying the condition to remove the check for EVP_PKT_SIGN. This ensures that the function will always send an alert and return if the peer is not null and the message type is not a CertificateVerify message, regardless of the type.
+
+4. **Ensure CertificateVerify message is required**: By removing the EVP_PKT_SIGN check, the function now requires a CertificateVerify message for all client authentications, including those with DH certificates. This prevents an attacker from gaining access without knowledge of the private key.
+
+5. **Test the repair**: The modified function should be thoroughly tested to ensure that it correctly handles client authentication with DH certificates and requires a CertificateVerify message. The function should also be tested with other types of certificates to ensure that the repair does not introduce any new vulnerabilities.
+
+6. **Verify the fix**: The repair should be verified to ensure that it addresses the vulnerability and does not introduce any new issues. This can be done by testing the function with various inputs and scenarios, including those that previously exploited the vulnerability.
+
+By following these steps, the vulnerability in the ssl3_get_cert_verify function can be effectively repaired, ensuring that the function correctly handles client authentication with DH certificates and requires a CertificateVerify message.

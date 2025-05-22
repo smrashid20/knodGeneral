@@ -1,0 +1,14 @@
+An OCSP request contains the following data:
+
+- Protocol version
+- Service request
+- Target certificate identifier
+- Optional extensions, which may be processed by the OCSP responder
+
+Upon receipt of a request, an OCSP responder determines if:
+
+1. The message is well formed
+2. The responder is configured to provide the requested service
+3. The request contains the information needed by the responder
+
+If any one of these conditions is not met, the OCSP responder produces an error message; otherwise, it returns a definitive response.

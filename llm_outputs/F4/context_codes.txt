@@ -1,0 +1,26 @@
+### libtiff/tif_pixarlog.c ###
+static int
+PixarLogDecode(TIFF* tif, uint8* op, tmsize_t occ, uint16 s)
+{
+	static const char module[] = "PixarLogDecode";
+	TIFFDirectory *td = &tif->tif_dir;
+	PixarLogState* sp = DecoderState(tif);
+	tmsize_t i;
+	tmsize_t nsamples;
+	int llen;
+	uint16 *up;
+
+............
+#define  TSIZE	 2048		/* decode table size (11-bit tokens) */
+#define  TSIZEP1 2049		/* Plus one for slop */
+#define  ONE	 1250		/* token value of 1.0 exactly */
+#define  RATIO	 1.004		/* nominal ratio for log part */
+
+#define CODE_MASK 0x7ff         /* 11 bits. */
+
+static float  Fltsize;
+static float  LogK1, LogK2;
+
+#define REPEAT(n, op)   { int i; i=n; do { i--; op; } while (i>0); }
+
+............

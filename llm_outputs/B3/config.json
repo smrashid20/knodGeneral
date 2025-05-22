@@ -1,0 +1,24 @@
+{
+    "vul_id": "B3",
+    "project_name": "dropbear",
+    "language": "cpp",
+    "vul_code_file_rel_path": "cli-auth.c",
+    "vul_code_func_start_line": 259,
+    "vul_code_func_end_line": 273,
+    "vul_code_block_start_line": 263,
+    "vul_code_block_end_line": 269,
+    "vul_code_func_fixed_start_line": 259,
+    "vul_code_func_fixed_end_line": 276,
+    "vul_code_block_fixed_start_line": 263,
+    "vul_code_block_fixed_end_line": 271,
+    "vul_code_initial_block_start": 263,
+    "vul_code_initial_block_end": 263,
+    "vul_code_context_lines": ["259-261"],
+    "context_lines": [{
+        "cli-auth.c": ["259-261"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "cli-auth.c",
+    "vul_code_lines":  ["263"],
+    "vul_code_line": 263
+}

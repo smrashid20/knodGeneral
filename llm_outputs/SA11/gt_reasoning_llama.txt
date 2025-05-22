@@ -1,0 +1,9 @@
+The vulnerability in question arises from an incorrect implementation of certificate revocation via a Certificate Revocation List (CRL). The buggy code checks if the current time is past the revocation date of a certificate, and if so, it returns 1, indicating that the certificate is revoked. However, this approach is flawed because it relies on the local system clock, which can be manipulated by an attacker.
+
+An attacker could exploit this vulnerability by changing the local clock to a time before the revocation date, effectively bypassing the revocation check. This would allow the attacker to use a revoked certificate, potentially leading to security breaches.
+
+The repair addresses this issue by removing the time-based check altogether. Instead, it simply checks if the serial numbers of the certificates match, and if so, returns 1, indicating that the certificate is revoked. This approach is more secure because it does not rely on the local system clock, making it more difficult for an attacker to manipulate the revocation check.
+
+By removing the time-based check, the repair ensures that the revocation status of a certificate is determined solely by the presence of its serial number in the CRL, rather than by the current time. This makes the system more resilient to attacks that rely on manipulating the local clock.
+
+In essence, the repair shifts the focus from a time-based check to a more deterministic check based on the certificate's serial number. This change makes the system more secure and less vulnerable to attacks that exploit the local clock. By doing so, the repair ensures that revoked certificates are properly identified and rejected, even if an attacker attempts to manipulate the local clock.

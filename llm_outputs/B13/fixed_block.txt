@@ -1,0 +1,15 @@
+		result = dns_rdata_tostruct(&rdata, &tsig, NULL);
+		INSIST(result == ISC_R_SUCCESS);
+		if (msg->verified_sig &&
+		    msg->tsigstatus == dns_rcode_noerror &&
+		    tsig.error == dns_rcode_noerror)
+		{
+			result = ISC_R_SUCCESS;
+		} else if ((!msg->verified_sig) ||
+			   (msg->tsigstatus != dns_rcode_noerror))
+		{
+			result = DNS_R_TSIGVERIFYFAILURE;
+		} else {
+			INSIST(tsig.error != dns_rcode_noerror);
+			result = DNS_R_TSIGERRORSET;
+		}

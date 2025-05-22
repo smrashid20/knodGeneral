@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA4",
+    "project_name": "SA4",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/RC4_HMAC_MD5.java",
+    "vul_code_func_start_line": 9,
+    "vul_code_func_end_line": 77,
+    "vul_code_block_start_line": 58,
+    "vul_code_block_end_line": 58,
+    "vul_code_func_fixed_start_line": 7,
+    "vul_code_func_fixed_end_line": 75,
+    "vul_code_block_fixed_start_line": 56,
+    "vul_code_block_fixed_end_line": 56,
+    "vul_code_initial_block_start": 56,
+    "vul_code_initial_block_end": 56,
+    "vul_code_context_lines": ["7-12"],
+    "context_lines": [{
+        "src/main/RC4_HMAC_MD5.java": ["7-12"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "RC4_HMAC_MD5.java",
+    "vul_code_lines":  ["58"],
+    "vul_code_line": 58,
+    "rem_start": 58,
+    "rem_end": 59,
+    "add_start": 58,
+    "add_end": 59
+}

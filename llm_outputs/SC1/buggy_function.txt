@@ -1,0 +1,21 @@
+    public static int ssl_verify_cert_chain(OpenSslSsl s, List<X509> sk) {
+        X509_STORE_CTX ctxStore = new X509_STORE_CTX();
+        int i;
+        if (s.verify_callback != null)
+            ctxStore.set_verify_cb(s.verify_callback);
+        if (s.ctx.app_verify_callback != null)
+            i = s.ctx.app_verify_callback.verify(ctxStore, s.ctx.app_verify_arg);
+        else
+            i = X509_STORE_CTX.verify_cert(ctxStore);
+        s.verify_result = ctxStore.get_error();
+        s.verified_chain.clear();
+        if (ctxStore.get0_chain() != null) {
+            s.verified_chain = ctxStore.get1_chain();
+            if (s.verified_chain == null) {
+                Err.raise(Err.LIB_SSL, Err.R_MALLOC_FAILURE);
+                i = 0;
+            }
+        }
+        ctxStore.free();
+        return i;
+    }

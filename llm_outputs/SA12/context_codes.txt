@@ -1,0 +1,12 @@
+### src/main/Tls13FinishedHandler.java ###
+public class Tls13FinishedHandler {
+    public static int DoTls13Finished(WOLFSSL ssl, byte[] input, int[] inOutIdx,
+                                      int size, int totalSz, int sniff) {
+        int ret;
+        int finishedSz = 0;
+        byte[] secret;
+        byte[] mac = new byte[32];
+
+        Tls13Helper.WOLFSSL_START(Constants.WC_FUNC_FINISHED_DO);
+
+............

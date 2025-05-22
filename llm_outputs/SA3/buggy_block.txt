@@ -1,0 +1,10 @@
+        if (ctx.getEngine() != null || (!OPENSSL_NO_ENGINE && !FIPS_MODULE && tmpImpl != null)
+                || impl != null) {
+
+            if (ctx.getCipher() == ctx.getFetchedCipher()) {
+                ctx.setCipher(null);
+            }
+            EvpCipher.free(ctx.getFetchedCipher());
+            ctx.setFetchedCipher(null);
+            return legacyHandling(ctx, cipher, impl, tmpImpl, enc);
+        }

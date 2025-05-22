@@ -1,0 +1,28 @@
+{
+    "vul_id": "SD2",
+    "project_name": "SD2",
+    "language": "java",
+    "vul_code_file_rel_path": "src/SshPamContextHandler.java",
+    "vul_code_func_start_line": 14,
+    "vul_code_func_end_line": 28,
+    "vul_code_block_start_line": 14,
+    "vul_code_block_end_line": 28,
+    "vul_code_func_fixed_start_line": 14,
+    "vul_code_func_fixed_end_line": 27,
+    "vul_code_block_fixed_start_line": 14,
+    "vul_code_block_fixed_end_line": 27,
+    "vul_code_initial_block_start": 14,
+    "vul_code_initial_block_end": 14,
+    "vul_code_context_lines": ["3-14"],
+    "context_lines": [{
+        "src/SshPamContextHandler.java": ["3-14"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "SshPamContextHandler.java",
+    "vul_code_lines":  ["16"],
+    "vul_code_line": 16,
+    "rem_start": 16,
+    "rem_end": 16,
+    "add_start": 16,
+    "add_end": 17
+}

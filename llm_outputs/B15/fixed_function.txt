@@ -1,0 +1,95 @@
+static isc_result_t
+check_dnskey_sigs(vctx_t *vctx, const dns_rdata_dnskey_t *dnskey,
+		  dns_rdata_t *rdata, bool is_ksk)
+{
+	unsigned char *active_keys = NULL, *standby_keys = NULL;
+	dns_keynode_t *keynode = NULL;
+	bool *goodkey = NULL;
+	dst_key_t *key = NULL;
+	isc_result_t result;
+
+	active_keys = (is_ksk ? vctx->ksk_algorithms : vctx->zsk_algorithms);
+	standby_keys = (is_ksk ? vctx->standby_ksk : vctx->standby_zsk);
+	goodkey = (is_ksk ? &vctx->goodksk : &vctx->goodzsk);
+
+	if (dns_dnssec_selfsigns(rdata, vctx->origin, &vctx->keyset,
+				 &vctx->keysigs, false, vctx->mctx))
+	{
+		if (active_keys[dnskey->algorithm] != 255) {
+			active_keys[dnskey->algorithm]++;
+		}
+	} else if (!is_ksk &&
+		   dns_dnssec_signs(rdata, vctx->origin, &vctx->soaset,
+				    &vctx->soasigs, false, vctx->mctx))
+	{
+		if (active_keys[dnskey->algorithm] != 255) {
+			active_keys[dnskey->algorithm]++;
+		}
+		return (ISC_R_SUCCESS);
+	} else {
+		if (standby_keys[dnskey->algorithm] != 255) {
+			standby_keys[dnskey->algorithm]++;
+		}
+		return (ISC_R_SUCCESS);
+	}
+
+	/*
+	 * If a trust anchor table was not supplied, a correctly self-signed
+	 * DNSKEY RRset is good enough.
+	 */
+	if (vctx->secroots == NULL) {
+		*goodkey = true;
+		return (ISC_R_SUCCESS);
+	}
+
+	/*
+	 * Look up the supplied key in the trust anchor table.
+	 */
+	result = dns_dnssec_keyfromrdata(vctx->origin, rdata, vctx->mctx,
+					 &key);
+	if (result != ISC_R_SUCCESS) {
+		return (result);
+	}
+
+	result = dns_keytable_findkeynode(vctx->secroots, vctx->origin,
+					  dst_key_alg(key), dst_key_id(key),
+					  &keynode);
+
+	/*
+	 * No such trust anchor.
+	 */
+	if (result != ISC_R_SUCCESS) {
+		if (result == DNS_R_PARTIALMATCH || result == ISC_R_NOTFOUND) {
+			result = ISC_R_SUCCESS;
+		}
+
+		goto cleanup;
+	}
+
+	while (result == ISC_R_SUCCESS) {
+		dns_keynode_t *nextnode = NULL;
+
+		if (dst_key_compare(key, dns_keynode_key(keynode))) {
+			dns_keytable_detachkeynode(vctx->secroots, &keynode);
+			dns_rdataset_settrust(&vctx->keyset, dns_trust_secure);
+			dns_rdataset_settrust(&vctx->keysigs, dns_trust_secure);
+			*goodkey = true;
+
+			goto cleanup;
+		}
+
+		result = dns_keytable_findnextkeynode(vctx->secroots,
+						      keynode, &nextnode);
+		dns_keytable_detachkeynode(vctx->secroots, &keynode);
+		keynode = nextnode;
+	}
+
+ cleanup:
+	if (keynode != NULL) {
+		dns_keytable_detachkeynode(vctx->secroots, &keynode);
+	}
+	if (key != NULL) {
+		dst_key_free(&key);
+	}
+	return (ISC_R_SUCCESS);
+}

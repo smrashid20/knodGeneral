@@ -1,0 +1,15 @@
+The repair of the vulnerability in the ssl3_get_cert_verify function involves a crucial modification to ensure that the CertificateVerify message is always required for client authentication with a Diffie-Hellman (DH) certificate. Here are the steps to achieve this:
+
+1. **Identify the vulnerability**: The first step is to understand the vulnerability, which allows remote attackers to obtain access without knowledge of a private key by sending crafted TLS Handshake Protocol traffic to a server that recognizes a Certification Authority with DH support.
+
+2. **Locate the vulnerable code**: The next step is to locate the code that is responsible for the vulnerability. In this case, it is the ssl3_get_cert_verify function, specifically the part that checks for the message type.
+
+3. **Analyze the condition**: Analyze the condition that checks if the message type is not SSL3_MT_CERTIFICATE_VERIFY. This condition is the root cause of the vulnerability, as it allows the function to proceed without a CertificateVerify message.
+
+4. **Modify the condition**: To fix the vulnerability, the condition needs to be modified to always require a CertificateVerify message for client authentication with a DH certificate. This can be achieved by removing the check for the EVP_PKT_SIGN flag, which is not necessary in this context.
+
+5. **Enforce the CertificateVerify message**: By removing the EVP_PKT_SIGN flag check, the function will now always require a CertificateVerify message, even if the peer is not null. This ensures that the function will not proceed without a valid CertificateVerify message.
+
+6. **Test the repair**: Finally, the modified code should be thoroughly tested to ensure that it correctly requires a CertificateVerify message for client authentication with a DH certificate and that it does not introduce any new vulnerabilities.
+
+By following these steps, the vulnerability in the ssl3_get_cert_verify function can be effectively repaired, ensuring that the function requires a CertificateVerify message for client authentication with a DH certificate, and preventing remote attackers from obtaining access without knowledge of a private key.

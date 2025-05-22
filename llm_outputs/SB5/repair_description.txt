@@ -1,0 +1,15 @@
+The repair steps for the given vulnerability involve validating the signature algorithms when importing a certificate. Here's a step-by-step explanation of the repair:
+
+1. **Initial Error Handling**: The repair starts by maintaining the existing error handling mechanism. If the initial result is not successful, it converts the result to a GnuTLS error code, asserts the error, frees the certificate data, and returns the error.
+
+2. **Get Signature Algorithm**: After the initial error handling, the repair retrieves the signature algorithm from the certificate using the `_gnutls_x509_get_signature_algorithm` function. This function is called with the certificate and the OID "signatureAlgorithm.algorithm" to obtain the signature algorithm used in the certificate.
+
+3. **Error Handling for Signature Algorithm Retrieval**: If the retrieval of the signature algorithm fails, the repair asserts the error, frees the certificate data, and returns the error. This ensures that the function handles any errors that may occur during the retrieval process.
+
+4. **Get Signature Algorithm from TBSCertificate**: The repair then retrieves the signature algorithm from the TBSCertificate (To Be Signed Certificate) structure within the certificate. This is done using the same `_gnutls_x509_get_signature_algorithm` function but with the OID "tbsCertificate.signature.algorithm".
+
+5. **Comparison of Signature Algorithms**: The repair then compares the signature algorithm retrieved from the certificate with the one retrieved from the TBSCertificate. If the two algorithms do not match, it logs a debug message indicating the mismatch, asserts the error, frees the certificate data, and returns a specific error code (`GNUTLS_E_X509_CERTIFICATE_ERROR`).
+
+6. **Proceed with Certificate Import**: If the signature algorithms match, the repair proceeds with the original functionality of importing the certificate by retrieving the raw field "tbsCertificate.issuer.rdnSequence" using the `_gnutls_x509_get_raw_field2` function.
+
+In summary, the repair adds an additional validation step to ensure that the signature algorithms match when importing a certificate. This prevents potential security vulnerabilities that may arise from mismatched signature algorithms.

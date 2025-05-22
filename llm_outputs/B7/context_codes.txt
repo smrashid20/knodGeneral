@@ -1,0 +1,23 @@
+### lib/libcrypto/x509/x509_verify.c ###
+static int
+x509_verify_ctx_add_chain(struct x509_verify_ctx *ctx,
+    struct x509_verify_chain *chain, char *name)
+{
+	size_t depth;
+	X509 *last = x509_verify_chain_last(chain);
+	X509 *leaf = x509_verify_chain_leaf(chain);
+
+	depth = sk_X509_num(chain->certs);
+
+............
+static int x509_verify_cert_valid(struct x509_verify_ctx *ctx, X509 *cert,
+    struct x509_verify_chain *current_chain);
+static int x509_verify_cert_hostname(struct x509_verify_ctx *ctx, X509 *cert,
+    char *name);
+static void x509_verify_build_chains(struct x509_verify_ctx *ctx, X509 *cert,
+    struct x509_verify_chain *current_chain, int full_chain, char *name);
+static int x509_verify_cert_error(struct x509_verify_ctx *ctx, X509 *cert,
+    size_t depth, int error, int ok);
+static void x509_verify_chain_free(struct x509_verify_chain *chain);
+
+............

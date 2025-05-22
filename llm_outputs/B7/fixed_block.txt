@@ -1,0 +1,32 @@
+	if (!x509_verify_ctx_validate_legacy_chain(ctx, chain, depth))
+		return 0;
+
+	/* Verify the leaf certificate and store any resulting error. */
+	if (!x509_verify_cert_valid(ctx, leaf, NULL))
+		return 0;
+	if (!x509_verify_cert_hostname(ctx, leaf, name))
+		return 0;
+	if (ctx->error_depth == 0 &&
+	    ctx->error != X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY)
+		chain->cert_errors[0] = ctx->error;
+
+	/*
+	 * In the non-legacy code, extensions and purpose are dealt
+	 * with as the chain is built.
+	 *
+	 * The non-legacy api returns multiple chains but does not do
+	 * any revocation checking (it must be done by the caller on
+	 * any chain they wish to use)
+	 */
+
+	if ((ctx->chains[ctx->chains_count] = x509_verify_chain_dup(chain)) ==
+	    NULL) {
+		return x509_verify_cert_error(ctx, last, depth,
+		    X509_V_ERR_OUT_OF_MEM, 0);
+	}
+	ctx->chains_count++;
+
+	ctx->error = X509_V_OK;
+	ctx->error_depth = depth;
+
+	return 1;

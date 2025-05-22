@@ -1,0 +1,11 @@
+To repair the vulnerability in the OCSP verification process, several steps need to be taken. 
+
+First, the current verification mode needs to be checked to see if it is set to verify the OCSP certificate specifically. This is necessary to ensure that the fix is only applied when the verification is targeted at the certificate level.
+
+Next, if the verification mode is indeed set to verify the OCSP certificate, the code then checks if the "ocspNoCheckSet" flag is set for the certificate in question. This flag indicates whether the NoCheck extension is present in the OCSP response, which could potentially disable verification for the certificate.
+
+If the "ocspNoCheckSet" flag is set, the verification mode is changed to a more general verification mode, rather than the specific OCSP verification mode. This prevents the NoCheck extension from disabling all verification for the certificate.
+
+On the other hand, if the "ocspNoCheckSet" flag is not set, the verification mode is left as is, which means the OCSP verification will proceed as normal. This ensures that certificates without the NoCheck extension are still properly verified.
+
+By making these changes, the vulnerability is addressed by preventing the NoCheck extension from being used to bypass verification for unrelated certificates. The fix ensures that the OCSP verification process is more robust and secure, and that certificates are properly verified even in the presence of the NoCheck extension.

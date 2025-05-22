@@ -1,0 +1,4 @@
+    if (srtp->probation_cnt > 0 &&
+	(err == srtp_err_status_replay_old ||
+	 err == srtp_err_status_replay_fail))
+    {

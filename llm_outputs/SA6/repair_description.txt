@@ -1,0 +1,11 @@
+To repair the vulnerability in the ChaCha20-Poly1305 cipher implementation, several steps need to be taken. 
+
+First, the issue with the nonce length needs to be addressed. The current implementation allows a variable nonce length and incorrectly permits a nonce to be set up to 16 bytes, while only the last 12 bytes are significant. This can lead to reused nonce values, which can result in serious confidentiality and integrity attacks.
+
+The first step in the repair is to identify the correct maximum nonce length. According to the RFC 7539 specification, the nonce value should be 96 bits (12 bytes). However, the repair code introduces a new constant, CHACHA20_POLY1305_MAX_IVLEN, which should be set to 12 to reflect the correct maximum nonce length.
+
+The next step is to update the validation of the nonce length. The buggy code checks if the nonce length is less than or equal to 0 or greater than CHACHA_CTR_SIZE. However, this check is not sufficient, as it does not take into account the maximum allowed nonce length. The repair code updates this check to use the new constant CHACHA20_POLY1305_MAX_IVLEN, ensuring that the nonce length is within the allowed range.
+
+By making this change, the implementation ensures that the nonce length is correctly validated, preventing the use of reused nonce values and mitigating the risk of confidentiality and integrity attacks. Additionally, this change ensures that the implementation is compliant with the RFC 7539 specification, which is essential for maintaining the security and integrity of the cipher.
+
+Overall, the repair involves updating the validation of the nonce length to ensure that it is within the allowed range, preventing the use of reused nonce values and maintaining compliance with the relevant specification.

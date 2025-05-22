@@ -1,0 +1,28 @@
+                if (args.sigAlgo == CommonsConstants.ed25519_sa_algo && !ssl.peerEd25519KeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ED25519 sig but not ED25519 cert");
+                    return CommonsConstants.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == CommonsConstants.ed448_sa_algo && !ssl.peerEd448KeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ED448 sig but not ED448 cert");
+                    return CommonsConstants.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == CommonsConstants.ecc_dsa_sa_algo && !ssl.peerEccDsaKeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ECC sig but not ECC cert");
+                    return CommonsConstants.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == CommonsConstants.falcon_level1_sa_algo && !ssl.peerFalconKeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent Falcon Level 1 sig but different cert");
+                    return CommonsConstants.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == CommonsConstants.falcon_level5_sa_algo && !ssl.peerFalconKeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent Falcon Level 5 sig but different cert");
+                    return CommonsConstants.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == CommonsConstants.rsa_sa_algo) {
+                    Wslib.WOLFSSL_MSG("Peer sent PKCS#1.5 algo but not in certificate");
+                    return CommonsConstants.INVALID_PARAMETER;
+                }
+                if (args.sigAlgo == CommonsConstants.rsa_pss_sa_algo && (ssl.peerRsaKey == null || !ssl.peerRsaKeyPresent)) {
+                    Wslib.WOLFSSL_MSG("Peer sent RSA sig but not RSA cert");
+                    return CommonsConstants.SIG_VERIFY_E;
+                }

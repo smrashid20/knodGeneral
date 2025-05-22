@@ -1,0 +1,28 @@
+{
+    "vul_id": "SC1",
+    "project_name": "SC1",
+    "language": "java",
+    "vul_code_file_rel_path": "src/OpenSslSsl.java",
+    "vul_code_func_start_line": 19,
+    "vul_code_func_end_line": 39,
+    "vul_code_block_start_line": 24,
+    "vul_code_block_end_line": 27,
+    "vul_code_func_fixed_start_line": 19,
+    "vul_code_func_fixed_end_line": 42,
+    "vul_code_block_fixed_start_line": 24,
+    "vul_code_block_fixed_end_line": 30,
+    "vul_code_initial_block_start": 24,
+    "vul_code_initial_block_end": 24,
+    "vul_code_context_lines": ["4-21"],
+    "context_lines": [{
+        "src/OpenSslSsl.java": ["4-21"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "OpenSslSsl.java",
+    "vul_code_lines":  ["24-27"],
+    "vul_code_line": 27,
+    "rem_start": 26,
+    "rem_end": 28,
+    "add_start": 26,
+    "add_end": 31
+}

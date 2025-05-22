@@ -1,0 +1,13 @@
+The repair steps for the given vulnerability involve modifying the condition that checks if the DTLS client should generate a client random value. The original code has a flaw in the condition, which causes the DTLS client to always use 32 '\0' bytes instead of a random value. Here's a step-by-step explanation of the repair:
+
+1. **Identify the root cause**: The vulnerability arises from the incorrect condition in the if statement. The condition checks if the DTLS client has received a HelloVerifyRequest (HRR) message from the server. However, the condition is incorrectly checking if the number of HRR messages is zero, which is not the correct criteria for generating a client random value.
+
+2. **Understand the correct condition**: In DTLS, the client should generate a random value if it has not received an HRR message from the server or if the number of HRR messages is zero. This ensures that the client contributes randomness to the DTLS negotiation.
+
+3. **Modify the condition**: The repair involves changing the condition to correctly check if the number of HRR messages is not zero. This ensures that the client generates a random value only when it has not received an HRR message or when the number of HRR messages is zero.
+
+4. **Ensure correct logic**: The modified condition should ensure that the client generates a random value in the correct scenarios. This involves checking if the session is a DTLS session and if the number of HRR messages is not zero.
+
+5. **Verify the fix**: After modifying the condition, it's essential to verify that the fix addresses the vulnerability. This involves testing the DTLS client with different scenarios, including when an HRR message is received and when it's not received.
+
+By following these steps, the repair ensures that the DTLS client generates a random value correctly, contributing to the randomness of the DTLS negotiation and addressing the vulnerability.

@@ -1,0 +1,9 @@
+The vulnerability in the tls_verify_crl function arises from an incorrect check when verifying Certificate Revocation Lists (CRLs). A CRL is a list of certificates that have been revoked by the issuing Certificate Authority (CA) before their scheduled expiration date. When a client attempts to establish a connection to a server, the server checks the client's certificate against the CRL to ensure it has not been revoked.
+
+The issue lies in the fact that the function is checking the subject field of the CRL entry twice, instead of checking the subject and issuer fields once each. This means that some valid CRLs may not be taken into account, allowing clients with revoked certificates to establish a connection to the server.
+
+The repair addresses this issue by changing the field being checked from the subject to the issuer. This is because the issuer field is the correct field to check when verifying the CRL entry. By making this change, the function will now correctly identify revoked certificates and prevent clients with those certificates from establishing a connection to the server.
+
+In essence, the repair ensures that the tls_verify_crl function accurately checks the CRL entry by verifying the issuer field, rather than incorrectly checking the subject field twice. This fix is crucial in maintaining the security of the connection between the client and server, as it prevents clients with revoked certificates from gaining unauthorized access.
+
+The change is also version-agnostic, as it applies to both OpenSSL versions 1.0 and 1.1, while excluding LibreSSL. This ensures that the fix is compatible with different versions of the OpenSSL library, making it a comprehensive solution to the vulnerability.

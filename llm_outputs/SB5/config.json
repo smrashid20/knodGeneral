@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB5",
+    "project_name": "SB5",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/CertImporter.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 80,
+    "vul_code_block_start_line": 43,
+    "vul_code_block_end_line": 49,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 99,
+    "vul_code_block_fixed_start_line": 44,
+    "vul_code_block_fixed_end_line": 68,
+    "vul_code_initial_block_start": 43,
+    "vul_code_initial_block_end": 43,
+    "vul_code_context_lines": ["5-8"],
+    "context_lines": [{
+        "src/main/CertImporter.java": ["5-8"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "CertImporter.java",
+    "vul_code_lines":  ["49"],
+    "vul_code_line": 49,
+    "rem_start": 49,
+    "rem_end": 49,
+    "add_start": 49,
+    "add_end": 68
+}

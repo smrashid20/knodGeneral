@@ -1,0 +1,11 @@
+The vulnerability in question, also known as the Terrapin attack, allows remote attackers to bypass integrity checks in the SSH transport protocol. This is made possible by the mishandling of the handshake phase and sequence numbers in the SSH Binary Packet Protocol (BPP) implemented by certain OpenSSH extensions. The vulnerability can lead to a downgrade or disablement of security features in the connection.
+
+The buggy code snippet is part of the problem, as it only checks for the presence of the KEX_EXTENSION_CLIENT extension in the client's methods and truncates the string if found. However, this approach is incomplete and does not account for the server's perspective.
+
+The repair addresses this issue by introducing a distinction between the client and server sides of the connection. On the client side, the code remains similar to the buggy version, checking for the KEX_EXTENSION_CLIENT extension and truncating the string if found. However, on the server side, the code now checks for the KEX_STRICT_SERVER extension and truncates the string if present.
+
+This change is crucial because it ensures that both the client and server are aware of the extensions being used and can negotiate the connection accordingly. By truncating the string on both sides, the code prevents an attacker from manipulating the extension negotiation message and bypassing integrity checks.
+
+In essence, the repair introduces symmetry to the extension negotiation process, ensuring that both the client and server have a consistent view of the extensions being used. This symmetry is essential in preventing the Terrapin attack, as it prevents an attacker from exploiting the mismatch between the client and server's understanding of the connection's security features.
+
+By making this change, the repair effectively mitigates the vulnerability and prevents remote attackers from downgrading or disabling security features in the SSH connection.

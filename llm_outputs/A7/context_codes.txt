@@ -1,0 +1,78 @@
+### crypto/x509/x509_vfy.c ###
+int X509_verify_cert(X509_STORE_CTX *ctx)
+{
+    X509 *x, *xtmp, *xtmp2, *chain_ss = NULL;
+    int bad_chain = 0;
+    X509_VERIFY_PARAM *param = ctx->param;
+    int depth, i, ok = 0;
+    int num, j, retry;
+    int (*cb) (int xok, X509_STORE_CTX *xctx);
+    STACK_OF(X509) *sktmp = NULL;
+
+............
+#define CRL_SCORE_NOCRITICAL    0x100
+
+/* certificate is within CRL scope */
+
+#define CRL_SCORE_SCOPE         0x080
+
+/* CRL times valid */
+
+#define CRL_SCORE_TIME          0x040
+
+/* Issuer name matches certificate */
+
+#define CRL_SCORE_ISSUER_NAME   0x020
+
+/* If this score or above CRL is probably valid */
+
+#define CRL_SCORE_VALID (CRL_SCORE_NOCRITICAL|CRL_SCORE_TIME|CRL_SCORE_SCOPE)
+
+/* CRL issuer is certificate issuer */
+
+#define CRL_SCORE_ISSUER_CERT   0x018
+
+/* CRL issuer is on certificate path */
+
+#define CRL_SCORE_SAME_PATH     0x008
+
+/* CRL issuer matches CRL AKID */
+
+#define CRL_SCORE_AKID          0x004
+
+/* Have a delta CRL with valid times */
+
+#define CRL_SCORE_TIME_DELTA    0x002
+
+static int null_callback(int ok, X509_STORE_CTX *e);
+static int check_issued(X509_STORE_CTX *ctx, X509 *x, X509 *issuer);
+static X509 *find_issuer(X509_STORE_CTX *ctx, STACK_OF(X509) *sk, X509 *x);
+static int check_chain_extensions(X509_STORE_CTX *ctx);
+static int check_name_constraints(X509_STORE_CTX *ctx);
+static int check_id(X509_STORE_CTX *ctx);
+static int check_trust(X509_STORE_CTX *ctx);
+static int check_revocation(X509_STORE_CTX *ctx);
+static int check_cert(X509_STORE_CTX *ctx);
+static int check_policy(X509_STORE_CTX *ctx);
+static int get_issuer_sk(X509 **issuer, X509_STORE_CTX *ctx, X509 *x);
+
+static int get_crl_score(X509_STORE_CTX *ctx, X509 **pissuer,
+                         unsigned int *preasons, X509_CRL *crl, X509 *x);
+static int get_crl_delta(X509_STORE_CTX *ctx,
+                         X509_CRL **pcrl, X509_CRL **pdcrl, X509 *x);
+static void get_delta_sk(X509_STORE_CTX *ctx, X509_CRL **dcrl,
+                         int *pcrl_score, X509_CRL *base,
+                         STACK_OF(X509_CRL) *crls);
+static void crl_akid_check(X509_STORE_CTX *ctx, X509_CRL *crl, X509 **pissuer,
+                           int *pcrl_score);
+static int crl_crldp_check(X509 *x, X509_CRL *crl, int crl_score,
+                           unsigned int *preasons);
+static int check_crl_path(X509_STORE_CTX *ctx, X509 *x);
+static int check_crl_chain(X509_STORE_CTX *ctx,
+                           STACK_OF(X509) *cert_path,
+                           STACK_OF(X509) *crl_path);
+
+static int internal_verify(X509_STORE_CTX *ctx);
+const char X509_version[] = "X.509" OPENSSL_VERSION_PTEXT;
+
+............

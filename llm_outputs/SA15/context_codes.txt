@@ -1,0 +1,10 @@
+### src/master/EapPeap.java ###
+public class EapPeap {
+    public static final int EAP_TLV_RESULT_SUCCESS = 1;
+    public static final int EAP_TLV_RESULT_FAILURE = 0;
+
+    public static int WPA_GET_BE16(int x){
+        return x;
+    }
+
+............

@@ -1,0 +1,20 @@
+### src/main/CertificateVerifier.java ###
+public class CertificateVerifier {
+    public static int x509_check_signature(X509Certificate issuer,
+                                           AlgorithmIdentifier signature,
+                                           byte[] signValue,
+                                           int signValueLen,
+                                           byte[] signedData,
+                                           int signedDataLen)
+    {
+        CryptoPublicKey pk;
+        byte[] data;
+        int dataLen;
+        ASN1Hdr hdr = new ASN1Hdr();
+        ASN1Oid oid = new ASN1Oid();
+        byte[] hash = new byte[64];
+        int hashLen;
+        int[] addrLen = new int[] { signedDataLen };
+        byte[][] addr = new byte[][] { signedData };
+
+............

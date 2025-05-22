@@ -1,0 +1,14 @@
+### src/main/Ssl3GetKeyExchange.java ###
+public class Ssl3GetKeyExchange {
+    public static int ssl3_get_key_exchange(SSL s) {
+        int al = 0, ok = 0;
+        long n;
+        int alg_k, alg_a;
+        byte[] p;
+        RSA rsa = null;
+        DH dh = null;
+        ECKey ecdh = null;
+        SSL.Session.SessCert sessCert;
+        CipherSuite cipher = s.s3.tmp.new_cipher;
+
+............

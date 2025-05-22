@@ -1,0 +1,15 @@
+To repair the vulnerability in the OpenSSL 3.0 implementation of the RC4-MD5 ciphersuite, several steps need to be taken. 
+
+First, identify the root cause of the issue, which is the incorrect use of the AAD (Additional Authenticated Data) as the MAC (Message Authentication Code) key. This makes the MAC key predictable, allowing an attacker to perform a man-in-the-middle attack and modify data without being detected.
+
+Next, locate the specific line of code that is causing the issue. In this case, it is the line where the OSSL_PARAM_locate_const function is called with the OSSL_CIPHER_PARAM_AEAD_TLS1_AAD parameter. This line of code is incorrectly using the AAD data as the MAC key.
+
+To fix this issue, the parameter passed to the OSSL_PARAM_locate_const function needs to be changed. Instead of using OSSL_CIPHER_PARAM_AEAD_TLS1_AAD, the correct parameter to use is OSSL_CIPHER_PARAM_AEAD_MAC_KEY. This parameter correctly identifies the MAC key, rather than the AAD data.
+
+By making this change, the MAC key will no longer be predictable, and the vulnerability will be fixed. The corrected code will use the correct MAC key, preventing an attacker from modifying data without being detected.
+
+It is also important to test the repaired code to ensure that it is working correctly and that the vulnerability has been fully addressed. This can be done by running a series of tests that simulate a man-in-the-middle attack and verifying that the MAC integrity check fails when the data is modified.
+
+In addition to fixing the code, it is also important to review the surrounding code to ensure that there are no other instances of this vulnerability. This can involve reviewing the code manually, as well as running automated tests to identify any other potential issues.
+
+Overall, the repair involves identifying the root cause of the issue, locating the specific line of code that is causing the problem, changing the parameter to correctly identify the MAC key, testing the repaired code, and reviewing the surrounding code to ensure that there are no other instances of the vulnerability.

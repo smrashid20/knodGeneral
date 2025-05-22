@@ -1,0 +1,27 @@
+        #ifdef HAVE_ED25519
+            if (args->sigAlgo == ed25519_sa_algo &&
+                                                  !ssl->peerEd25519KeyPresent) {
+                WOLFSSL_MSG("Oops, peer sent ED25519 key but not in verify");
+            }
+        #endif
+        #ifdef HAVE_ED448
+            if (args->sigAlgo == ed448_sa_algo && !ssl->peerEd448KeyPresent) {
+                WOLFSSL_MSG("Oops, peer sent ED448 key but not in verify");
+            }
+        #endif
+        #ifdef HAVE_ECC
+            if (args->sigAlgo == ecc_dsa_sa_algo &&
+                                                   !ssl->peerEccDsaKeyPresent) {
+                WOLFSSL_MSG("Oops, peer sent ECC key but not in verify");
+            }
+        #endif
+        #ifndef NO_RSA
+            if (args->sigAlgo == rsa_sa_algo) {
+                WOLFSSL_MSG("Oops, peer sent PKCS#1.5 signature");
+                ERROR_OUT(INVALID_PARAMETER, exit_dcv);
+            }
+            if (args->sigAlgo == rsa_pss_sa_algo &&
+                         (ssl->peerRsaKey == NULL || !ssl->peerRsaKeyPresent)) {
+                WOLFSSL_MSG("Oops, peer sent RSA key but not in verify");
+            }
+        #endif

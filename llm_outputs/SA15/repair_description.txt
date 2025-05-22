@@ -1,0 +1,13 @@
+The repair of the vulnerability in the wpa_supplicant implementation of PEAP involves several steps. 
+
+First, the condition that allows an attacker to bypass Phase 2 authentication by sending an EAP-TLV Success packet needs to be addressed. This is achieved by adding an additional check to ensure that Phase 2 authentication is sufficient before allowing the authentication to succeed.
+
+Next, the existing logic for handling the EAP-TLV result status is maintained, but an additional condition is introduced to check if Phase 2 authentication is sufficient. If Phase 2 authentication is not sufficient, the authentication is failed, even if the EAP-TLV result status is success.
+
+The new condition is implemented by calling the peapPhase2Sufficient function, which checks if Phase 2 authentication has been completed successfully. If this function returns false, it means that Phase 2 authentication is not sufficient, and the authentication is failed.
+
+By adding this additional check, the vulnerability is addressed, and an attacker can no longer bypass Phase 2 authentication by sending an EAP-TLV Success packet. The repair ensures that both Phase 1 and Phase 2 authentications are completed successfully before allowing the authentication to succeed.
+
+The existing logic for handling the EAP-TLV result status is maintained to ensure that the repair does not introduce any new vulnerabilities or affect the normal functioning of the wpa_supplicant. The repair is targeted specifically at addressing the identified vulnerability and does not modify any other parts of the code.
+
+Overall, the repair involves adding a simple yet effective check to ensure that Phase 2 authentication is sufficient before allowing the authentication to succeed. This check prevents an attacker from bypassing Phase 2 authentication and impersonating Enterprise Wi-Fi networks.

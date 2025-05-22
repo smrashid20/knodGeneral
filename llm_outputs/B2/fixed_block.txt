@@ -1,0 +1,74 @@
+	if (alg_k & SSL_kRSA)
+		{
+		/* Temporary RSA keys only allowed in export ciphersuites */
+		if (!SSL_C_IS_EXPORT(s->s3->tmp.new_cipher))
+			{
+			al=SSL_AD_UNEXPECTED_MESSAGE;
+			SSLerr(SSL_F_SSL3_GET_SERVER_CERTIFICATE,SSL_R_UNEXPECTED_MESSAGE);
+			goto f_err;
+			}
+		if ((rsa=RSA_new()) == NULL)
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,ERR_R_MALLOC_FAILURE);
+			goto err;
+			}
+
+		param_len = 2;
+		if (param_len > n)
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,
+				SSL_R_LENGTH_TOO_SHORT);
+			goto f_err;
+			}
+		n2s(p,i);
+
+		if (i > n - param_len)
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,SSL_R_BAD_RSA_MODULUS_LENGTH);
+			goto f_err;
+			}
+		param_len += i;
+
+		if (!(rsa->n=BN_bin2bn(p,i,rsa->n)))
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,ERR_R_BN_LIB);
+			goto err;
+			}
+		p+=i;
+
+		if (2 > n - param_len)
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,
+				SSL_R_LENGTH_TOO_SHORT);
+			goto f_err;
+			}
+		param_len += 2;
+
+		n2s(p,i);
+
+		if (i > n - param_len)
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,SSL_R_BAD_RSA_E_LENGTH);
+			goto f_err;
+			}
+		param_len += i;
+
+		if (!(rsa->e=BN_bin2bn(p,i,rsa->e)))
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,ERR_R_BN_LIB);
+			goto err;
+			}
+		p+=i;
+		n-=param_len;
+
+		/* this should be because we are using an export cipher */
+		if (alg_a & SSL_aRSA)
+			pkey=X509_get_pubkey(s->session->sess_cert->peer_pkeys[SSL_PKEY_RSA_ENC].x509);
+		else
+			{
+			SSLerr(SSL_F_SSL3_GET_KEY_EXCHANGE,ERR_R_INTERNAL_ERROR);
+			goto err;
+			}
+		s->session->sess_cert->peer_rsa_tmp=rsa;
+		rsa=NULL;
+		}

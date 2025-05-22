@@ -1,0 +1,12 @@
+### src/main/X509CertVerifier.java ###
+public class X509CertVerifier {
+    public static int X509_verify_cert(X509_STORE_CTX ctx) {
+        X509 x, xtmp, xtmp2, chain_ss = null;
+        int bad_chain = 0;
+        X509_VERIFY_PARAM param = ctx.param;
+        int depth, i, ok = 0;
+        int num, j, retry;
+        VerifyCallback cb = ctx.verify_cb;
+        List<X509> sktmp = null;
+
+............

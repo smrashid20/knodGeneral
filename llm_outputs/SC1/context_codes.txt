@@ -1,0 +1,21 @@
+### src/OpenSslSsl.java ###
+public class OpenSslSsl {
+    public VerifyCallback verify_callback;
+    public SslContext ctx;
+    public int verify_result;
+    public List<X509> verified_chain;
+    public VerifyParams param;
+    public Session session;
+    public int verify_mode;
+    public int rwstate;
+    public Tmp tmp;
+
+    public static final int SSL_VERIFY_NONE = 0;
+    public static final int SSL_RETRY_VERIFY = 1;
+    public static final int SSL_R_CERTIFICATE_VERIFY_FAILED = 1001;
+
+    public static int ssl_verify_cert_chain(OpenSslSsl s, List<X509> sk) {
+        X509_STORE_CTX ctxStore = new X509_STORE_CTX();
+        int i;
+
+............

@@ -1,0 +1,7 @@
+### src/main/DNSMessageSigner.java ###
+public class DNSMessageSigner {
+    public static int dns_message_signer(DNSMessage msg, DNSName signer) {
+        int result = Commons.ISC_R_SUCCESS;
+        RData rdata = new RData();
+
+............

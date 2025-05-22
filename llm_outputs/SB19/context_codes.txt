@@ -1,0 +1,21 @@
+### src/main/TlsDriver.java ###
+public class TlsDriver {
+    public static int tls_drv_control(Object handleObj,
+                                      int command,
+                                      byte[] buf,
+                                      int len,
+                                      BinaryHolder rbufHolder,
+                                      int rlen)
+    {
+        TlsData d = (TlsData)handleObj;
+        int res;
+        int size;
+        Binary b;
+        Certificate cert;
+        int flags = command;
+
+        command &= 0xffff;
+
+        ErrUtil.ERR_clear_error();
+
+............

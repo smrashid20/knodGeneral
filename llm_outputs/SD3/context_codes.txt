@@ -1,0 +1,21 @@
+### src/X11Forwarding.java ###
+    public static long x11_refuse_time_client_internal = 0;
+
+    public static void client_x11_get_proto_set_deadline(SshOptions options, String display, int timeout_seconds) {
+        if (options.forwardX11 && !options.forwardX11Trusted) {
+            long now = TimeUtil.monotime();
+            if (timeout_seconds < 0) {
+                timeout_seconds = 0;
+            }
+
+            if (TimeUtil.UINT_MAX_SUBSTITUTE - timeout_seconds < now + 1) {
+                x11_refuse_time_client_internal = TimeUtil.UINT_MAX_SUBSTITUTE;
+            } else {
+                x11_refuse_time_client_internal = now + 1 + timeout_seconds;
+            }
+        } else {
+            x11_refuse_time_client_internal = 0;
+        }
+    }
+
+............

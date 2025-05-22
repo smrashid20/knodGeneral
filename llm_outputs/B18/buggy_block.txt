@@ -1,0 +1,17 @@
+	if (asn1_get_oid(hdr.payload, hdr.length, &oid, &next)) {
+		wpa_printf(MSG_DEBUG, "X509: Failed to parse digestAlgorithm");
+		os_free(data);
+		return -1;
+	}
+
+	if (x509_sha1_oid(&oid)) {
+		if (signature->oid.oid[6] != 5 /* sha-1WithRSAEncryption */) {
+			wpa_printf(MSG_DEBUG, "X509: digestAlgorithm SHA1 "
+				   "does not match with certificate "
+				   "signatureAlgorithm (%lu)",
+				   signature->oid.oid[6]);
+			os_free(data);
+			return -1;
+		}
+		goto skip_digest_oid;
+	}

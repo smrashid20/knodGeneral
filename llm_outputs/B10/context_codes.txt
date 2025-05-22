@@ -1,0 +1,138 @@
+### src/internal.c ###
+int BuildMessage(WOLFSSL* ssl, byte* output, int outSz, const byte* input,
+             int inSz, int type, int hashOutput, int sizeOnly, int asyncOkay,
+             int epochOrder)
+{
+#ifndef WOLFSSL_NO_TLS12
+    int ret;
+    BuildMsgArgs* args;
+    BuildMsgArgs  lcl_args;
+#ifdef WOLFSSL_ASYNC_CRYPT
+    args = &ssl->async.buildArgs;
+#endif
+#endif
+
+............
+#ifdef __sun
+    #include <sys/filio.h>
+#endif
+
+
+#define ERROR_OUT(err, eLabel) { ret = (err); goto eLabel; }
+
+#ifdef _MSC_VER
+    /* disable for while(0) cases at the .c level for now */
+    #pragma warning(disable:4127)
+#endif
+
+#if defined(WOLFSSL_CALLBACKS) && !defined(LARGE_STATIC_BUFFERS)
+    #error \
+WOLFSSL_CALLBACKS needs LARGE_STATIC_BUFFERS, please add LARGE_STATIC_BUFFERS
+#endif
+
+#if defined(HAVE_SECURE_RENEGOTIATION) && defined(HAVE_RENEGOTIATION_INDICATION)
+    #error Cannot use both secure-renegotiation and renegotiation-indication
+#endif
+
+#ifndef WOLFSSL_NO_TLS12
+
+#ifndef NO_WOLFSSL_CLIENT
+    static int DoHelloVerifyRequest(WOLFSSL* ssl, const byte* input, word32*,
+                                                                        word32);
+    static int DoServerKeyExchange(WOLFSSL* ssl, const byte* input, word32*,
+                                                                        word32);
+    #ifndef NO_CERTS
+        static int DoCertificateRequest(WOLFSSL* ssl, const byte* input, word32*,
+                                                                        word32);
+    #endif
+    #ifdef HAVE_SESSION_TICKET
+        static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32*,
+                                                                        word32);
+    #endif
+#endif
+
+
+#ifndef NO_WOLFSSL_SERVER
+    static int DoClientKeyExchange(WOLFSSL* ssl, byte* input, word32*, word32);
+    #if (!defined(NO_RSA) || defined(HAVE_ECC) || defined(HAVE_ED25519) || \
+                        defined(HAVE_ED448)) && !defined(WOLFSSL_NO_CLIENT_AUTH)
+        static int DoCertificateVerify(WOLFSSL* ssl, byte*, word32*, word32);
+    #endif
+    #ifdef WOLFSSL_DTLS
+        static int SendHelloVerifyRequest(WOLFSSL*, const byte*, byte);
+    #endif /* WOLFSSL_DTLS */
+
+#endif /* !NO_WOLFSSL_SERVER */
+
+#endif /* !WOLFSSL_NO_TLS12 */
+
+#ifndef NO_WOLFSSL_SERVER
+    #if defined(HAVE_SESSION_TICKET) && !defined(WOLFSSL_NO_DEF_TICKET_ENC_CB)
+        static int TicketEncCbCtx_Init(WOLFSSL_CTX* ctx,
+                                       TicketEncCbCtx* keyCtx);
+        static void TicketEncCbCtx_Free(TicketEncCbCtx* keyCtx);
+        static int DefTicketEncCb(WOLFSSL* ssl,
+                                  byte key_name[WOLFSSL_TICKET_NAME_SZ],
+                                  byte iv[WOLFSSL_TICKET_IV_SZ],
+                                  byte mac[WOLFSSL_TICKET_MAC_SZ],
+                                  int enc, byte* ticket, int inLen, int* outLen,
+                                  void* userCtx);
+    #endif
+#endif
+
+    static int cipherExtraData(WOLFSSL* ssl);
+
+#ifdef WOLFSSL_DTLS
+    static WC_INLINE int DtlsCheckWindow(WOLFSSL* ssl);
+    static WC_INLINE int DtlsUpdateWindow(WOLFSSL* ssl);
+#endif
+
+
+enum processReply {
+    doProcessInit = 0,
+#ifndef NO_WOLFSSL_SERVER
+    runProcessOldClientHello,
+#endif
+    getRecordLayerHeader,
+    getData,
+    verifyEncryptedMessage,
+    decryptMessage,
+    verifyMessage,
+    runProcessingOneMessage
+};
+
+
+#ifndef WOLFSSL_NO_TLS12
+#if !defined(NO_WOLFSSL_SERVER) || !defined(NO_WOLFSSL_CLIENT)
+
+/* Server random bytes for TLS v1.3 described downgrade protection mechanism. */
+static const byte tls13Downgrade[7] = {
+    0x44, 0x4f, 0x57, 0x4e, 0x47, 0x52, 0x44
+};
+#define TLS13_DOWNGRADE_SZ  sizeof(tls13Downgrade)
+
+#endif /* !NO_WOLFSSL_SERVER || !NO_WOLFSSL_CLIENT */
+
+#if !defined(NO_OLD_TLS) && !defined(WOLFSSL_AEAD_ONLY)
+static int SSL_hmac(WOLFSSL* ssl, byte* digest, const byte* in, word32 sz,
+                    int padSz, int content, int verify, int epochOrder);
+
+#endif
+
+#endif /* !WOLFSSL_NO_TLS12 */
+
+
+#if defined(WOLFSSL_RENESAS_SCEPROTECT) || defined(WOLFSSL_RENESAS_TSIP_TLS)
+#include <wolfssl/wolfcrypt/port/Renesas/renesas_cmn.h>
+#endif
+
+#if defined(OPENSSL_EXTRA) && defined(HAVE_SECRET_CALLBACK)
+
+    static int  SessionSecret_callback(WOLFSSL* ssl, void* secret,
+                                                  int* secretSz, void* ctx);
+#ifdef WOLFSSL_TLS13
+    static int  SessionSecret_callback_Tls13(WOLFSSL* ssl, int id,
+                       const unsigned char* secret, int secretSz, void* ctx);
+#endif
+
+............

@@ -1,0 +1,9 @@
+The vulnerability in the gnutls_ocsp_resp_check_crt function arises from its failure to verify the serial length of an OCSP (Online Certificate Status Protocol) response. This oversight allows a potential attacker to bypass the intended certificate validation mechanism by manipulating the trailing bytes left by the gnutls_malloc function.
+
+The issue lies in the fact that the function does not properly validate the length of the serial number in the OCSP response. Specifically, it does not account for the possibility of extra bytes being present in the response, which could be exploited by an attacker to bypass the validation check.
+
+The repair addresses this vulnerability by explicitly setting the size of the cserial variable to the value stored in tHolder[0]. This ensures that the function accurately verifies the length of the serial number in the OCSP response, preventing an attacker from manipulating the trailing bytes to bypass the validation mechanism.
+
+By setting the size of cserial to the correct value, the function can now correctly compare the serial numbers and detect any discrepancies, including those caused by extra bytes in the response. This prevents an attacker from exploiting the vulnerability to bypass the certificate validation mechanism.
+
+In essence, the repair ensures that the function performs a more thorough and accurate validation of the OCSP response, thereby preventing potential attacks that rely on manipulating the trailing bytes. By doing so, the repair enhances the security of the gnutls_ocsp_resp_check_crt function and prevents potential security breaches.

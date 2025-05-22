@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB14",
+    "project_name": "SB14",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/NmHandleDetach.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 24,
+    "vul_code_block_start_line": 14,
+    "vul_code_block_end_line": 23,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 23,
+    "vul_code_block_fixed_start_line": 12,
+    "vul_code_block_fixed_end_line": 22,
+    "vul_code_initial_block_start": 14,
+    "vul_code_initial_block_end": 14,
+    "vul_code_context_lines": ["5-6"],
+    "context_lines": [{
+        "src/main/NmHandleDetach.java": ["5-6"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "NmHandleDetach.java",
+    "vul_code_lines":  ["14"],
+    "vul_code_line": 14,
+    "rem_start": 14,
+    "rem_end": 15,
+    "add_start": 14,
+    "add_end": 15
+}

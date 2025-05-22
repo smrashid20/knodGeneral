@@ -1,0 +1,2 @@
+                ret.decision = EapMethodRet.DECISION_FAIL;
+            } else if (!peapPhase2Sufficient(sm, data)) {

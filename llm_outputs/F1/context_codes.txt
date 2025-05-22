@@ -1,0 +1,215 @@
+### tools/tiffcrop.c ###
+static int  readSeparateTilesIntoBuffer (TIFF* in, uint8 *obuf, 
+					 uint32 imagelength, uint32 imagewidth, 
+                                         uint32 tw, uint32 tl,
+                                         uint16 spp, uint16 bps)
+  {
+  int     i, status = 1, sample;
+  int     shift_width, bytes_per_pixel;
+  uint16  bytes_per_sample;
+  uint32  row, col;     /* Current row and col of image */
+  uint32  nrow, ncol;   /* Number of rows and cols in current tile */
+  uint32  row_offset, col_offset; /* Output buffer offsets */
+  tsize_t tbytes = 0, tilesize = TIFFTileSize(in);
+  tsample_t s;
+  uint8*  bufp = (uint8*)obuf;
+  unsigned char *srcbuffs[MAX_SAMPLES];
+  unsigned char *tbuff = NULL;
+
+  bytes_per_sample = (bps + 7) / 8;
+
+............
+#if defined(VMS)
+# define unlink delete
+#endif
+
+#ifndef PATH_MAX
+#define PATH_MAX 1024
+#endif
+
+#ifndef streq
+#define	streq(a,b)	(strcmp((a),(b)) == 0)
+#endif
+#define	strneq(a,b,n)	(strncmp((a),(b),(n)) == 0)
+
+#define	TRUE	1
+#define	FALSE	0
+
+#ifndef TIFFhowmany
+#define TIFFhowmany(x, y) ((((uint32)(x))+(((uint32)(y))-1))/((uint32)(y)))
+#define TIFFhowmany8(x) (((x)&0x07)?((uint32)(x)>>3)+1:(uint32)(x)>>3)
+#endif
+
+/*
+ * Definitions and data structures required to support cropping and image
+ * manipulations.
+ */
+
+#define EDGE_TOP      1
+#define EDGE_LEFT     2
+#define EDGE_BOTTOM   3
+#define EDGE_RIGHT    4
+#define EDGE_CENTER   5
+
+#define MIRROR_HORIZ  1
+#define MIRROR_VERT   2
+#define MIRROR_BOTH   3
+#define ROTATECW_90   8
+#define ROTATECW_180 16
+#define ROTATECW_270 32
+#define ROTATE_ANY (ROTATECW_90 | ROTATECW_180 | ROTATECW_270)
+
+#define CROP_NONE     0
+#define CROP_MARGINS  1
+#define CROP_WIDTH    2
+#define CROP_LENGTH   4
+#define CROP_ZONES    8
+#define CROP_REGIONS 16
+#define CROP_ROTATE  32
+#define CROP_MIRROR  64
+#define CROP_INVERT 128
+
+/* Modes for writing out images and selections */
+#define ONE_FILE_COMPOSITE       0 /* One file, sections combined sections */
+#define ONE_FILE_SEPARATED       1 /* One file, sections to new IFDs */
+#define FILE_PER_IMAGE_COMPOSITE 2 /* One file per image, combined sections */
+#define FILE_PER_IMAGE_SEPARATED 3 /* One file per input image */
+#define FILE_PER_SELECTION       4 /* One file per selection */
+
+#define COMPOSITE_IMAGES         0 /* Selections combined into one image */  
+#define SEPARATED_IMAGES         1 /* Selections saved to separate images */
+
+#define STRIP    1
+#define TILE     2
+
+#define MAX_REGIONS   8  /* number of regions to extract from a single page */
+#define MAX_OUTBUFFS  8  /* must match larger of zones or regions */
+#define MAX_SECTIONS 32  /* number of sections per page to write to output */
+#define MAX_IMAGES 2048  /* number of images in descrete list, not in the file */
+#define MAX_SAMPLES   8  /* maximum number of samples per pixel supported */
+#define MAX_BITS_PER_SAMPLE 64 /* maximum bit depth supported */
+#define MAX_EXPORT_PAGES 999999  /* maximum number of export pages per file */
+
+#define DUMP_NONE   0
+#define DUMP_TEXT   1
+#define DUMP_RAW    2
+
+/* Offsets into buffer for margins and fixed width and length segments */
+struct offset {
+  uint32  tmargin;
+  uint32  lmargin;
+  uint32  bmargin;
+  uint32  rmargin;
+  uint32  crop_width;
+  uint32  crop_length;
+  uint32  startx;
+  uint32  endx;
+  uint32  starty;
+  uint32  endy;
+};
+
+/* Description of a zone within the image. Position 1 of 3 zones would be 
+ * the first third of the image. These are computed after margins and 
+ * width/length requests are applied so that you can extract multiple 
+ * zones from within a larger region for OCR or barcode recognition.
+ */
+
+struct  buffinfo {
+  uint32 size;           /* size of this buffer */
+  unsigned char *buffer; /* address of the allocated buffer */
+};
+
+struct  zone {
+  int   position;  /* ordinal of segment to be extracted */
+  int   total;     /* total equal sized divisions of crop area */
+  };
+
+struct  pageseg {
+  uint32 x1;        /* index of left edge */
+  uint32 x2;        /* index of right edge */
+  uint32 y1;        /* index of top edge */
+  uint32 y2;        /* index of bottom edge */
+  int    position;  /* ordinal of segment to be extracted */
+  int    total;     /* total equal sized divisions of crop area */
+  uint32 buffsize;  /* size of buffer needed to hold the cropped zone */
+};
+
+struct  coordpairs {
+  double X1;        /* index of left edge in current units */
+  double X2;        /* index of right edge in current units */
+  double Y1;        /* index of top edge in current units */
+  double Y2;        /* index of bottom edge in current units */
+};
+
+struct  region {
+  uint32 x1;        /* pixel offset of left edge */
+  uint32 x2;        /* pixel offset of right edge */
+  uint32 y1;        /* pixel offset of top edge */
+  uint32 y2;        /* picel offset of bottom edge */
+  uint32 width;     /* width in pixels */
+  uint32 length;    /* length in pixels */
+  uint32 buffsize;  /* size of buffer needed to hold the cropped region */
+  unsigned char *buffptr; /* address of start of the region */
+};
+
+/* Cropping parameters from command line and image data 
+ * Note: This should be renamed to proc_opts and expanded to include all current globals
+ * if possible, but each function that accesses global variables will have to be redone.
+ */
+struct crop_mask {
+  double width;           /* Selection width for master crop region in requested units */
+  double length;          /* Selection length for master crop region in requesed units */
+  double margins[4];      /* Top, left, bottom, right margins */
+  float  xres;            /* Horizontal resolution read from image*/
+  float  yres;            /* Vertical resolution read from image */
+  uint32 combined_width;  /* Width of combined cropped zones */
+  uint32 combined_length; /* Length of combined cropped zones */
+  uint32 bufftotal;       /* Size of buffer needed to hold all the cropped region */
+  uint16 img_mode;        /* Composite or separate images created from zones or regions */
+  uint16 exp_mode;        /* Export input images or selections to one or more files */
+  uint16 crop_mode;       /* Crop options to be applied */
+  uint16 res_unit;        /* Resolution unit for margins and selections */
+  uint16 edge_ref;        /* Reference edge for sections extraction and combination */
+  uint16 rotation;        /* Clockwise rotation of the extracted region or image */
+  uint16 mirror;          /* Mirror extracted region or image horizontally or vertically */
+  uint16 invert;          /* Invert the color map of image or region */
+  uint16 photometric;     /* Status of photometric interpretation for inverted image */
+  uint16 selections;      /* Number of regions or zones selected */
+  uint16 regions;         /* Number of regions delimited by corner coordinates */
+  struct region regionlist[MAX_REGIONS]; /* Regions within page or master crop region */
+  uint16 zones;           /* Number of zones delimited by Ordinal:Total requested */
+  struct zone zonelist[MAX_REGIONS]; /* Zones indices to define a region */
+  struct coordpairs corners[MAX_REGIONS]; /* Coordinates of upper left and lower right corner */
+};
+
+#define MAX_PAPERNAMES 49
+#define MAX_PAPERNAME_LENGTH 15
+#define DEFAULT_RESUNIT      RESUNIT_INCH
+#define DEFAULT_PAGE_HEIGHT   14.0
+#define DEFAULT_PAGE_WIDTH     8.5
+#define DEFAULT_RESOLUTION   300
+#define DEFAULT_PAPER_SIZE  "legal"
+
+#define ORIENTATION_NONE       0
+#define ORIENTATION_PORTRAIT   1
+#define ORIENTATION_LANDSCAPE  2
+#define ORIENTATION_SEASCAPE   4
+#define ORIENTATION_AUTO      16
+
+#define PAGE_MODE_NONE         0
+#define PAGE_MODE_RESOLUTION   1
+#define PAGE_MODE_PAPERSIZE    2
+#define PAGE_MODE_MARGINS      4
+#define PAGE_MODE_ROWSCOLS     8
+
+#define INVERT_DATA_ONLY      10
+#define INVERT_DATA_AND_TAG   11
+
+struct paperdef {
+  char   name[MAX_PAPERNAME_LENGTH];
+  double width;
+  double length;
+  double asratio;
+  };
+
+............

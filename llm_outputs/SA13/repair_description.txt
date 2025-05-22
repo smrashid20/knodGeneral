@@ -1,0 +1,13 @@
+To repair the vulnerability in the given source code, several steps need to be taken. 
+
+First, the issue at hand needs to be identified. The problem lies in the fact that zone transfer controls for writable DLZ (Dynamically Loaded Zones) zones are not effective due to the allowzonexfr method not being called for such zones. This means that the current implementation does not properly restrict zone transfers for DLZ zones, potentially leading to unauthorized access.
+
+The next step is to understand the logic behind the buggy source code. It appears that the code checks if the result of a certain operation is not successful, and if so, it proceeds to check if the client's view has been searched for DLZ zones. If it has, the code then calls the dlzAllowZonexfr method to determine if the zone transfer is allowed.
+
+To fix the vulnerability, the logic needs to be modified to include an additional check for DLZ zones, regardless of the result of the initial operation. This ensures that the allowzonexfr method is called for DLZ zones, effectively enforcing zone transfer controls.
+
+The repair involves adding a conditional check to see if the zone type is DLZ, in addition to the existing check for an unsuccessful result. This ensures that the allowzonexfr method is called for DLZ zones, even if the initial result is successful.
+
+By adding this additional check, the code now properly enforces zone transfer controls for writable DLZ zones, addressing the identified vulnerability. The repaired code will now correctly call the allowzonexfr method for DLZ zones, preventing unauthorized access and ensuring the security of the system.
+
+In summary, the repair involves identifying the issue, understanding the existing logic, modifying the logic to include an additional check for DLZ zones, and ensuring that the allowzonexfr method is called for these zones. This fix effectively addresses the vulnerability and improves the security of the system.

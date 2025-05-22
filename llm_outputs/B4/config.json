@@ -1,0 +1,24 @@
+{
+    "vul_id": "B4",
+    "project_name": "GnuTLS",
+    "language": "cpp",
+    "vul_code_file_rel_path": "lib/x509/ocsp.c",
+    "vul_code_func_start_line": 1277,
+    "vul_code_func_end_line": 1356,
+    "vul_code_block_start_line": 1316,
+    "vul_code_block_end_line": 1327,
+    "vul_code_func_fixed_start_line": 1277,
+    "vul_code_func_fixed_end_line": 1357,
+    "vul_code_block_fixed_start_line": 1316,
+    "vul_code_block_fixed_end_line": 1328,
+    "vul_code_initial_block_start": 1316,
+    "vul_code_initial_block_end": 1320,
+    "vul_code_context_lines": ["1277-1288", "36-47"],
+    "context_lines": [{
+        "lib/x509/ocsp.c": ["1277-1288", "36-47"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "ocsp.c",
+    "vul_code_lines":  ["1322"],
+    "vul_code_line": 1322
+}

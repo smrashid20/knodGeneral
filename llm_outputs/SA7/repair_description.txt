@@ -1,0 +1,13 @@
+The repair of the vulnerability in the X509_verify_cert function involves several steps to ensure that the function properly processes X.509 Basic Constraints cA values during identification of alternative certificate chains.
+
+The first step is to identify the root cause of the vulnerability, which is the incorrect handling of self-signed certificates in the chain. The function needs to correctly identify and handle self-signed certificates to prevent remote attackers from spoofing a Certification Authority role.
+
+The next step is to modify the function to correctly update the last_untrusted variable when a self-signed certificate is encountered. This variable keeps track of the number of untrusted certificates in the chain, and it needs to be updated correctly to ensure that the function works as expected.
+
+The third step is to modify the function to correctly handle the removal of certificates from the chain. When a self-signed certificate is encountered, the function needs to remove the certificate from the chain and update the last_untrusted variable accordingly.
+
+The fourth step is to add a check to ensure that the last_untrusted variable is updated correctly after the chain has been modified. This check is necessary to prevent the function from incorrectly identifying the number of untrusted certificates in the chain.
+
+The final step is to add a statement at the end of the function to update the last_untrusted variable to the current size of the chain. This ensures that the function always returns the correct number of untrusted certificates in the chain.
+
+Overall, the repair involves modifying the function to correctly handle self-signed certificates, update the last_untrusted variable, and ensure that the function returns the correct number of untrusted certificates in the chain. These changes prevent remote attackers from spoofing a Certification Authority role and triggering unintended certificate verifications via a valid leaf certificate.

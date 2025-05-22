@@ -1,0 +1,17 @@
+The repair steps for the provided code patch involve addressing a vulnerability in the SSH transport protocol that allows remote attackers to bypass integrity checks. Here are the steps to repair the vulnerability:
+
+1. **Identify the vulnerability**: The first step is to understand the vulnerability, which is related to the SSH Binary Packet Protocol (BPP) mishandling the handshake phase and sequence numbers. This allows attackers to bypass integrity checks and potentially downgrade or disable security features.
+
+2. **Understand the existing code**: The buggy source code is examined to identify the specific issue. In this case, the code checks if the first KEX packet follows or if the session's send_first_kex_follows flag is set. It then compares the client and server methods for KEX and host keys.
+
+3. **Add strict KEX feature support**: The repair involves adding support for the "strict KEX" feature, which is designed to prevent the vulnerability. This feature requires verifying packet sequence numbers to ensure the integrity of the connection.
+
+4. **Check for strict KEX support**: The code checks if the server or client supports the strict KEX feature by examining the KEX methods. If supported, the code sets a flag (SSH_SESSION_FLAG_KEX_STRICT) to enable strict KEX.
+
+5. **Enable strict KEX**: If the strict KEX feature is supported, the code enables it by setting the SSH_SESSION_FLAG_KEX_STRICT flag. This flag is used to verify packet sequence numbers and prevent the vulnerability.
+
+6. **Log the result**: The code logs a debug message indicating whether the client or server supports strict KEX and whether it is enabled.
+
+7. **Verify packet sequence numbers**: With strict KEX enabled, the code verifies packet sequence numbers to ensure the integrity of the connection. This prevents attackers from bypassing integrity checks and downgrading or disabling security features.
+
+By following these steps, the repair patch addresses the vulnerability in the SSH transport protocol and ensures the integrity of the connection by verifying packet sequence numbers.

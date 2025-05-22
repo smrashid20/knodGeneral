@@ -1,0 +1,7 @@
+The vulnerability in the OpenSSL library arises from the incorrect handling of custom ciphers created using the EVP_CIPHER_meth_new function. When an application passes NID_undef as the unique identifier for a custom cipher, the library mistakenly matches it with the NULL cipher, leading to the emission of plaintext as ciphertext. This issue is addressed in the repair by adding additional checks to ensure that the custom cipher is handled correctly.
+
+The repair introduces two new conditions to the if statement: (cipher!= null && cipher.getOrigin() == EvpCipher.Origin.METHOD) and (cipher == null && ctx.getCipher()!= null && ctx.getCipher().getOrigin() == EvpCipher.Origin.METHOD). These conditions verify whether the cipher is a custom cipher created using the EVP_CIPHER_meth_new function, indicated by an origin of EvpCipher.Origin.METHOD.
+
+By including these checks, the repair ensures that custom ciphers are properly identified and handled. If a custom cipher is detected, the function will proceed with the legacy handling, which is designed to correctly handle these types of ciphers. This prevents the incorrect matching with the NULL cipher and the resulting emission of plaintext as ciphertext.
+
+In essence, the repair adds a crucial safeguard to prevent the vulnerability by accurately identifying and handling custom ciphers, thereby maintaining the confidentiality and integrity of encrypted data.

@@ -1,0 +1,11 @@
+The repair of the vulnerability in the X509_verify_cert function involves a crucial step to ensure the correct identification of alternative certificate chains and prevent remote attackers from spoofing a Certification Authority role. Here are the steps to repair the vulnerability:
+
+1. **Free the found certificate**: The first step is to free the found certificate, which is stored in the `xtmp` variable. This is necessary because the certificate will be added again later in the process.
+
+2. **Remove unnecessary certificates from the chain**: Once the found certificate is freed, the next step is to remove all the certificates above the current point in the chain. This is done by popping the certificates from the `ctx->chain` stack and freeing them individually. This process continues until the desired point in the chain is reached.
+
+3. **Update the last untrusted index**: The critical step in the repair is to update the `ctx->last_untrusted` index. In the buggy code, this index is decremented without considering the actual number of untrusted certificates in the chain. In the repaired code, the `ctx->last_untrusted` index is updated to reflect the actual number of untrusted certificates in the chain by setting it to the number of certificates in the `ctx->chain` stack.
+
+4. **Reset the retry flag**: Finally, the retry flag is set to 1 to indicate that the verification process should be retried with the updated chain.
+
+By following these steps, the repair ensures that the X509_verify_cert function correctly processes X.509 Basic Constraints cA values during identification of alternative certificate chains, preventing remote attackers from spoofing a Certification Authority role and triggering unintended certificate verifications.

@@ -1,0 +1,24 @@
+{
+    "vul_id": "C3",
+    "project_name": "mosquitto",
+    "language": "cpp",
+    "vul_code_file_rel_path": "src/security_default.c",
+    "vul_code_func_start_line": 301,
+    "vul_code_func_end_line": 427,
+    "vul_code_block_start_line": 320,
+    "vul_code_block_end_line": 322,
+    "vul_code_func_fixed_start_line": 301,
+    "vul_code_func_fixed_end_line": 427,
+    "vul_code_block_fixed_start_line": 320,
+    "vul_code_block_fixed_end_line": 322,
+    "vul_code_initial_block_start": 317,
+    "vul_code_initial_block_end": 319,
+    "vul_code_context_lines": ["301-309", "26-35"],
+    "context_lines": [{
+        "src/security_default.c": ["301-309", "26-35"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "security_default.c",
+    "vul_code_lines":  ["320"],
+    "vul_code_line": 320
+}

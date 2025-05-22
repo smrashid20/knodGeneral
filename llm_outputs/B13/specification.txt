@@ -1,0 +1,9 @@
+Zone transfer from a primary to one or more secondary authoritative name servers across a public network carries risk. The zone transfer may be secured using named.conf statements, TSIG cryptographic methods or TLS. Clearly, if the secondary authoritative name server(s) all lie within a network entirely under the user’s control, the security threat may be regarded as non-existent. Any implementation requirements again depend on the site’s security policy.
+
+A server sending a request to another server must be told whether to use a key, and if so, which key to use.
+
+Processing of TSIG-signed messages can result in several errors:
+If a TSIG-aware server receives a message signed by an unknown key, the response will be unsigned, with the TSIG extended error code set to BADKEY.
+If a TSIG-aware server receives a message from a known key but with an invalid signature, the response will be unsigned, with the TSIG extended error code set to BADSIG.
+If a TSIG-aware server receives a message with a time outside of the allowed range, the response will be signed but the TSIG extended error code set to BADTIME, and the time values will be adjusted so that the response can be successfully verified.
+In all of the above cases, the server returns a response code of NOTAUTH (not authenticated).

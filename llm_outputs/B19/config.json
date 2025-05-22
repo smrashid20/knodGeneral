@@ -1,0 +1,24 @@
+{
+    "vul_id": "B19",
+    "project_name": "ejabberd",
+    "language": "cpp",
+    "vul_code_file_rel_path": "src/tls/tls_drv.c",
+    "vul_code_func_start_line": 318,
+    "vul_code_func_end_line": 515,
+    "vul_code_block_start_line": 339,
+    "vul_code_block_end_line": 377,
+    "vul_code_func_fixed_start_line": 320,
+    "vul_code_func_fixed_end_line": 519,
+    "vul_code_block_fixed_start_line": 341,
+    "vul_code_block_fixed_end_line": 381,
+    "vul_code_initial_block_start": 339,
+    "vul_code_initial_block_end": 340,
+    "vul_code_context_lines": ["318-332", "30-55"],
+    "context_lines": [{
+        "src/tls/tls_drv.c": ["318-332", "30-55"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "tls_drv.c",
+    "vul_code_lines":  ["359"],
+    "vul_code_line": 359
+}

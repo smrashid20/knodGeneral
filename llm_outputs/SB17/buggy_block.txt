@@ -1,0 +1,6 @@
+        if (Commons.OPENSSL_VERSION_NUMBER >= Commons.OPENSSL_1_1 && !Commons.HAVE_LIBRESSL) {
+            crls = storeCtx.get1_crls(subject);
+        }
+        else if (Commons.OPENSSL_VERSION_NUMBER >= Commons.OPENSSL_1_0 && !Commons.HAVE_LIBRESSL) {
+            crls = Commons.get1_crls(storeCtx, subject);
+        }

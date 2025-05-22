@@ -1,0 +1,13 @@
+To repair the vulnerability in the given code, several steps need to be taken. 
+
+First, the issue with the revocation date check must be identified and understood. The problem arises from the incorrect use of the revocation date when deciding whether to honor certificate revocation via a Certificate Revocation List (CRL). This can be exploited by an attacker who can manipulate the local clock.
+
+The next step is to analyze the existing code and identify the specific lines of code that are causing the vulnerability. In this case, the issue lies in the conditional statement that checks if the current time is past the revocation date of the certificate.
+
+To fix the vulnerability, the revocation date check should be removed from the conditional statement. This is because the revocation date is not a reliable factor in determining whether a certificate has been revoked, especially when the local clock can be manipulated.
+
+Instead, the code should focus solely on verifying the serial number of the certificate. This can be done by comparing the serial number of the certificate being checked with the serial number of the certificate in the CRL. If the serial numbers match, it indicates that the certificate has been revoked.
+
+By removing the revocation date check and relying solely on the serial number comparison, the code becomes more secure and less vulnerable to exploitation by attackers. This is because the serial number of a certificate is a unique identifier that cannot be easily manipulated or changed.
+
+Overall, the repair involves simplifying the conditional statement to focus solely on the serial number comparison, thereby eliminating the vulnerability associated with the revocation date check. This ensures that the code accurately determines whether a certificate has been revoked, without being susceptible to manipulation by attackers.

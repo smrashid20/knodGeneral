@@ -1,0 +1,13 @@
+The repair steps for the given vulnerability involve addressing the issue of the Initialization Vector (IV) not being properly randomized in connections using AES-CBC or DES3 with TLS/DTLS 1.2 or 1.1. Here's a step-by-step explanation of the repair:
+
+1. **Identify the issue**: The problem lies in the fact that the IV is being set to zero after being generated, which makes it predictable and vulnerable to attacks. This is a critical issue as a random IV is essential for secure encryption.
+
+2. **Remove the problematic code**: The repair involves removing the loop that sets the IV to zero. This loop is unnecessary and is the root cause of the vulnerability.
+
+3. **Preserve the IV generation**: The repair retains the code that generates the IV using the ssl.rng.generateBlock function. This function is responsible for generating a random IV, which is essential for secure encryption.
+
+4. **Retain the last IV storage**: The repair also retains the line that stores the generated IV in the ssl.lastIv variable. This is likely used for future reference or for maintaining the state of the connection.
+
+5. **Ensure proper error handling**: The repair preserves the error handling mechanism, which returns an error code if the IV generation fails. This ensures that the function behaves correctly even in the event of an error.
+
+By following these steps, the repair ensures that the IV is properly randomized and not set to a predictable value, thus addressing the vulnerability and improving the security of the connections using AES-CBC or DES3 with TLS/DTLS 1.2 or 1.1.

@@ -1,0 +1,41 @@
+	 if (is_key_file_modified(buf, &mtime) || ssl_ctx == NULL)
+	 {
+	    SSL_CTX *ctx;
+
+	    hash_table_insert(buf, mtime, NULL);
+
+	    ctx = SSL_CTX_new(SSLv23_method());
+	    die_unless(ctx, "SSL_CTX_new failed");
+
+	    res = SSL_CTX_use_certificate_chain_file(ctx, buf);
+	    die_unless(res > 0, "SSL_CTX_use_certificate_file failed");
+
+	    res = SSL_CTX_use_PrivateKey_file(ctx, buf, SSL_FILETYPE_PEM);
+	    die_unless(res > 0, "SSL_CTX_use_PrivateKey_file failed");
+
+	    res = SSL_CTX_check_private_key(ctx);
+	    die_unless(res > 0, "SSL_CTX_check_private_key failed");
+
+	    SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2|SSL_OP_NO_TICKET);
+
+	    SSL_CTX_set_cipher_list(ctx, CIPHERS);
+
+	    SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_OFF);
+	    SSL_CTX_set_default_verify_paths(ctx);
+#ifdef SSL_MODE_RELEASE_BUFFERS
+	    SSL_CTX_set_mode(ctx, SSL_MODE_RELEASE_BUFFERS);
+#endif
+	    /* SSL_CTX_load_verify_locations(ctx, "/etc/ejabberd/ca_certificates.pem", NULL); */
+	    /* SSL_CTX_load_verify_locations(ctx, NULL, "/etc/ejabberd/ca_certs/"); */
+
+	    /* This IF is commented to allow verification in all cases: */
+	    /* if (command == SET_CERTIFICATE_FILE_ACCEPT) */
+	    /* { */
+	       SSL_CTX_set_verify(ctx,
+				  SSL_VERIFY_PEER|SSL_VERIFY_CLIENT_ONCE,
+				  verify_callback);
+	    /* } */
+
+	    ssl_ctx = ctx;
+	    hash_table_insert(buf, mtime, ssl_ctx);
+	 }

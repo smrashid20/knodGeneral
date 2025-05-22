@@ -1,0 +1,176 @@
+package main;
+
+import commons.*;
+
+public class TlsDriver {
+    public static int tls_drv_control(Object handleObj,
+                                      int command,
+                                      byte[] buf,
+                                      int len,
+                                      BinaryHolder rbufHolder,
+                                      int rlen)
+    {
+        TlsData d = (TlsData)handleObj;
+        int res;
+        int size;
+        Binary b;
+        Certificate cert;
+        int flags = command;
+
+        command &= 0xffff;
+
+        ErrUtil.ERR_clear_error();
+        switch (command) {
+            case Commons.SET_CERTIFICATE_FILE_ACCEPT:
+            case Commons.SET_CERTIFICATE_FILE_CONNECT: {
+                long[] mtime = new long[1];
+                SSLContext ssl_ctx = HashTable.lookup(new String(buf), mtime);
+                if (HashTable.is_key_file_modified(new String(buf), mtime) || ssl_ctx == null) {
+                    SSLContext ctx;
+                    HashTable.insert(new String(buf), mtime[0], null);
+
+                    ctx = SSLContext.newInstance(SSLContext.SSLV23_METHOD);
+                    Util.die_unless(ctx != null, "SSL_CTX_new failed");
+
+                    res = ctx.useCertificateChainFile(new String(buf));
+                    Util.die_unless(res > 0, "SSL_CTX_use_certificate_file failed");
+
+                    res = ctx.usePrivateKeyFile(new String(buf), Commons.SSL_FILETYPE_PEM);
+                    Util.die_unless(res > 0, "SSL_CTX_use_PrivateKey_file failed");
+
+                    res = ctx.checkPrivateKey();
+                    Util.die_unless(res > 0, "SSL_CTX_check_private_key failed");
+
+                    ctx.setOptions(Commons.SSL_OP_NO_SSLv2 | Commons.SSL_OP_NO_TICKET);
+
+                    ctx.setSessionCacheMode(Commons.SSL_SESS_CACHE_OFF);
+                    ctx.setDefaultVerifyPaths();
+                    ctx.setVerify(Commons.SSL_VERIFY_PEER | Commons.SSL_VERIFY_CLIENT_ONCE,
+                            new VerifyCallback());
+
+                    ssl_ctx = ctx;
+                    HashTable.insert(new String(buf), mtime[0], ssl_ctx);
+                }
+
+                d.ssl = SSL.newInstance(ssl_ctx);
+                Util.die_unless(d.ssl != null, "SSL_new failed");
+
+                if ((flags & Commons.VERIFY_NONE) != 0) {
+                    d.ssl.setVerify(Commons.SSL_VERIFY_NONE, new VerifyCallback());
+                }
+
+                d.bioRead  = BIO.newMemory();
+                d.bioWrite = BIO.newMemory();
+                d.ssl.setBIO(d.bioRead, d.bioWrite);
+
+                if (command == Commons.SET_CERTIFICATE_FILE_ACCEPT) {
+                    d.ssl.setAcceptState();
+                } else {
+                    d.ssl.setConnectState();
+                }
+                break;
+            }
+            case Commons.SET_ENCRYPTED_INPUT:
+                Util.die_unless(d.ssl != null, "SSL not initialized");
+                d.bioRead.write(buf, 0, len);
+                break;
+            case Commons.SET_DECRYPTED_OUTPUT:
+                Util.die_unless(d.ssl != null, "SSL not initialized");
+                res = d.ssl.write(buf, 0, len);
+                if (res <= 0) {
+                    res = d.ssl.getError(res);
+                    if (res == Commons.SSL_ERROR_WANT_READ ||
+                            res == Commons.SSL_ERROR_WANT_WRITE)
+                    {
+                        b = Binary.alloc(1);
+                        b.orig_bytes[0] = 2;
+                        rbufHolder.value = b;
+                        return 1;
+                    } else {
+                        Util.die_unless(false, "SSL_write failed");
+                    }
+                }
+                break;
+            case Commons.GET_ENCRYPTED_OUTPUT:
+                Util.die_unless(d.ssl != null, "SSL not initialized");
+                size = d.bioWrite.ctrlPending() + 1;
+                b = Binary.alloc(size);
+                b.orig_bytes[0] = 0;
+                d.bioWrite.read(b.orig_bytes, 1, size - 1);
+                rbufHolder.value = b;
+                return size;
+            case Commons.GET_DECRYPTED_INPUT:
+                if (!d.ssl.isInitFinished()) {
+                    res = d.ssl.doHandshake();
+                    if (res <= 0) {
+                        Util.die_unless(d.ssl.getError(res) == Commons.SSL_ERROR_WANT_READ,
+                                "SSL_do_handshake failed");
+                    }
+                }
+                if (d.ssl.isInitFinished()) {
+                    int reqSize = 0;
+                    if (len == 4) {
+                        reqSize = ((buf[0]&0xFF)<<24)
+                                |((buf[1]&0xFF)<<16)
+                                |((buf[2]&0xFF)<< 8)
+                                | (buf[3]&0xFF);
+                    }
+                    size = Commons.BUF_SIZE + 1;
+                    int outLen = 1;
+                    b = Binary.alloc(size);
+                    b.orig_bytes[0] = 0;
+                    res = 0;
+                    while ((reqSize == 0 || outLen < reqSize + 1) &&
+                            (res = d.ssl.read(b.orig_bytes, outLen,
+                                    ((reqSize == 0 || reqSize+1>=size)
+                                            ? size-outLen
+                                            : reqSize+1-outLen))) > 0)
+                    {
+                        outLen += res;
+                        if (size - outLen < Commons.BUF_SIZE) {
+                            size *= 2;
+                            b = Binary.realloc(b, size);
+                        }
+                    }
+                    if (res < 0) {
+                        int err = d.ssl.getError(res);
+                        if (err == Commons.SSL_ERROR_WANT_READ) {
+                        }
+                    }
+                    b = Binary.realloc(b, outLen);
+                    rbufHolder.value = b;
+                    return outLen;
+                }
+                break;
+            case Commons.GET_PEER_CERTIFICATE:
+                cert = d.ssl.getPeerCertificate();
+                if (cert == null) {
+                    b = Binary.alloc(1);
+                    b.orig_bytes[0] = 1;
+                    rbufHolder.value = b;
+                    return 1;
+                } else {
+                    int clen = cert.getEncodedLength();
+                    if (clen >= 0) {
+                        clen++;
+                        b = Binary.alloc(clen);
+                        b.orig_bytes[0] = 0;
+                        cert.encode(b.orig_bytes, 1);
+                        rbufHolder.value = b;
+                        return clen;
+                    }
+                }
+                break;
+            case Commons.GET_VERIFY_RESULT:
+                b = Binary.alloc(1);
+                b.orig_bytes[0] = (byte)d.ssl.getVerifyResult();
+                rbufHolder.value = b;
+                return 1;
+        }
+
+        b = Binary.alloc(1);
+        b.orig_bytes[0] = 0;
+        rbufHolder.value = b;
+        return 1;
+    }
+}

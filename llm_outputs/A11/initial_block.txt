@@ -1,0 +1,2 @@
+/*
+ * Find a parent in trusted CAs or the provided chain, or return NULL.

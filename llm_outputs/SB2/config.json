@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB2",
+    "project_name": "SB2",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/Ssl3GetKeyExchange.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 138,
+    "vul_code_block_start_line": 54,
+    "vul_code_block_end_line": 103,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 139,
+    "vul_code_block_fixed_start_line": 54,
+    "vul_code_block_fixed_end_line": 107,
+    "vul_code_initial_block_start": 54,
+    "vul_code_initial_block_end": 54,
+    "vul_code_context_lines": ["5-15"],
+    "context_lines": [{
+        "src/main/Ssl3GetKeyExchange.java": ["5-15"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Ssl3GetKeyExchange.java",
+    "vul_code_lines":  ["54"],
+    "vul_code_line": 54,
+    "rem_start": 54,
+    "rem_end": 54,
+    "add_start": 54,
+    "add_end": 63
+}

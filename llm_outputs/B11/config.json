@@ -1,0 +1,24 @@
+{
+    "vul_id": "B11",
+    "project_name": "wolfssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "wolfcrypt/src/asn.c",
+    "vul_code_func_start_line": 10062,
+    "vul_code_func_end_line": 10491,
+    "vul_code_block_start_line": 10214,
+    "vul_code_block_end_line": 10218,
+    "vul_code_func_fixed_start_line": 10062,
+    "vul_code_func_fixed_end_line": 10495,
+    "vul_code_block_fixed_start_line": 10214,
+    "vul_code_block_fixed_end_line": 10222,
+    "vul_code_initial_block_start": 10214,
+    "vul_code_initial_block_end": 10214,
+    "vul_code_context_lines": ["10062-10074", "142-173"],
+    "context_lines": [{
+        "wolfcrypt/src/asn.c": ["10062-10074", "142-173"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "asn.c",
+    "vul_code_lines":  ["10216"],
+    "vul_code_line": 10216
+}

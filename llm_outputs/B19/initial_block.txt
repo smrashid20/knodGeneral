@@ -1,0 +1,2 @@
+	 time_t mtime = 0;
+	 SSL_CTX *ssl_ctx = hash_table_lookup(buf, &mtime);

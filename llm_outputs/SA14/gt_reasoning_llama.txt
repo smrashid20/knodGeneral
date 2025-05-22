@@ -1,0 +1,9 @@
+The repair for the OpenSSL vulnerability, also known as the "CCS Injection" vulnerability, involves adding a crucial step to the handshake process to prevent man-in-the-middle attackers from hijacking sessions or obtaining sensitive information.
+
+In the buggy code, when the handshake reaches the Finished state (SSL3_ST_CR_FINISHED_A or SSL3_ST_CR_FINISHED_B), the code sets the handshake stage to OK (SSL_ST_OK) without properly verifying the ChangeCipherSpec (CCS) message. This allows an attacker to inject a crafted TLS handshake, triggering the use of a zero-length master key and compromising the security of the connection.
+
+The repair addresses this vulnerability by adding a flag, SSL3_FLAGS_CCS_OK, to the state object before setting the handshake stage to OK. This flag indicates that the CCS message has been properly processed and verified. By setting this flag, the code ensures that the handshake stage is only advanced to OK after the CCS message has been successfully validated.
+
+In essence, the repair adds an additional check to prevent the handshake from proceeding without proper CCS validation. This prevents an attacker from injecting a crafted TLS handshake and hijacking the session. By adding this simple yet crucial step, the repair effectively mitigates the CCS Injection vulnerability and ensures the security of the OpenSSL connection.
+
+The key insight behind this repair is that the CCS message must be properly validated before advancing the handshake stage to OK. By setting the SSL3_FLAGS_CCS_OK flag, the code ensures that this validation has taken place, preventing an attacker from exploiting the vulnerability. This repair demonstrates the importance of careful validation and verification in cryptographic protocols to prevent security vulnerabilities.

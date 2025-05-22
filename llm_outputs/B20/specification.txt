@@ -1,0 +1,17 @@
+STARTTLS Command
+In order to begin the STARTTLS negotiation, the initiating entity issues the STARTTLS command (i.e., a <starttls/> element qualified by the 'urn\:ietf\:params\:xml\:ns\:xmpp-tls' namespace) to instruct the receiving entity that it wishes to begin a STARTTLS negotiation to secure the stream.
+
+The receiving entity MUST reply with either a <proceed/> element (proceed case) or a <failure/> element (failure case) qualified by the 'urn\:ietf\:params\:xml\:ns\:xmpp-tls' namespace.
+
+Failure Case
+If the failure case occurs, the receiving entity MUST return a <failure/> element qualified by the 'urn\:ietf\:params\:xml\:ns\:xmpp-tls' namespace, close the XML stream, and terminate the underlying TCP connection.
+
+Causes for the failure case include but are not limited to:
+
+1. The initiating entity has sent a malformed STARTTLS command.
+2. The receiving entity did not offer the STARTTLS feature in its stream features.
+3. The receiving entity cannot complete STARTTLS negotiation because of an internal error.
+
+Informational Note: STARTTLS failure is not triggered by TLS errors such as bad\_certificate or handshake\_failure, which are generated and handled during the TLS negotiation itself as described in \[TLS].
+
+If the failure case occurs, the initiating entity MAY attempt to reconnect.

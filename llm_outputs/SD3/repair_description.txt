@@ -1,0 +1,15 @@
+To repair the vulnerability in the provided code, several steps need to be taken. 
+
+First, the existing code logic that checks if X11 forwarding is enabled should be retained. This is because the vulnerability only arises when X11 forwarding is enabled but not in trusted mode.
+
+Next, a new condition should be added to check if the X11 trusted mode is enabled. This is necessary because the vulnerability specifically occurs when trusted mode is not used.
+
+After that, a check should be introduced to verify if a refusal deadline for X connections has been set. This deadline is crucial in determining whether the X connection should be allowed or not.
+
+If the refusal deadline has been set, the current time should be compared with the deadline. This comparison will determine whether the X connection is within the permitted time window or not.
+
+If the current time exceeds the refusal deadline, the X connection should be refused due to a timeout. This refusal is essential in preventing remote attackers from bypassing intended access restrictions.
+
+Finally, if all checks pass, the X connection should be accepted. This ensures that legitimate X connections are allowed while preventing potential security breaches.
+
+By following these steps, the vulnerability in the original code can be effectively repaired, and the security of the system can be enhanced. The new code logic ensures that X connections are properly validated and restricted according to the configured settings, thereby preventing unauthorized access.

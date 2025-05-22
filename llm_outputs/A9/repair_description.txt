@@ -1,0 +1,13 @@
+The repair steps for the given vulnerability involve modifying the condition that checks whether to generate a client random value for DTLS negotiations. Here's a step-by-step explanation of the repair:
+
+1. **Identify the issue**: The vulnerability arises from the DTLS client always using 32 '\0' bytes instead of a random value, which breaks the security guarantees of the DTLS protocol. The problem lies in the condition that determines when to generate a client random value.
+
+2. **Analyze the condition**: The original condition checks if the `hsk_hello_verify_requests` field is equal to 0 when the session is a DTLS session. This condition is incorrect because it prevents the generation of a client random value when `hsk_hello_verify_requests` is 0, which is not the intended behavior.
+
+3. **Correct the condition**: To fix the vulnerability, the condition should be modified to check if `hsk_hello_verify_requests` is not equal to 0 when the session is a DTLS session. This ensures that a client random value is generated when `hsk_hello_verify_requests` is non-zero, which is the correct behavior.
+
+4. **Modify the code**: The corrected condition is implemented by changing the comparison operator from `==` to `!=` in the `if` statement. This change ensures that the `_gnutls_gen_client_random` function is called when the session is a DTLS session and `hsk_hello_verify_requests` is non-zero.
+
+5. **Verify the fix**: After applying the correction, the code should be reviewed and tested to ensure that it generates a random client value for DTLS negotiations when required. This verification step is crucial to confirm that the vulnerability has been successfully addressed.
+
+By following these steps, the vulnerability in the DTLS client can be effectively repaired, and the security guarantees of the DTLS protocol can be restored.

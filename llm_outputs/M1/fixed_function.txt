@@ -1,0 +1,7 @@
+    public void writeToBuffer(String input) {
+        for (int i = 0; i < input.length(); i++) {
+        	if(i < buffer.length){
+            	buffer[i] = input.charAt(i); // Bounds checking prevents overflow
+            }
+        }
+    }

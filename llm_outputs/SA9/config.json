@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA9",
+    "project_name": "SA9",
+    "language": "java",
+    "vul_code_file_rel_path": "src/Handshake.java",
+    "vul_code_func_start_line": 13,
+    "vul_code_func_end_line": 180,
+    "vul_code_block_start_line": 97,
+    "vul_code_block_end_line": 104,
+    "vul_code_func_fixed_start_line": 13,
+    "vul_code_func_fixed_end_line": 180,
+    "vul_code_block_fixed_start_line": 97,
+    "vul_code_block_fixed_end_line": 104,
+    "vul_code_initial_block_start": 97,
+    "vul_code_initial_block_end": 97,
+    "vul_code_context_lines": ["5-22"],
+    "context_lines": [{
+        "src/Handshake.java": ["5-22"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Handshake.java",
+    "vul_code_lines":  ["98"],
+    "vul_code_line": 98,
+    "rem_start": 97,
+    "rem_end": 98,
+    "add_start": 97,
+    "add_end": 98
+}

@@ -1,0 +1,12 @@
+### src/main/XMPPConnection.java ###
+public class XMPPConnection{
+    public boolean socketClosed;
+    public boolean connected;
+    public boolean wasAuthenticated;
+    public SASLFeatureReceived saslFeatureReceived;
+    public ConnectionConfiguration config;
+
+    protected void connectInternal()
+            throws SmackException, IOException, XMPPException {
+
+............

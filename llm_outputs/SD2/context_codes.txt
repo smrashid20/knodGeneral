@@ -1,0 +1,15 @@
+### src/SshPamContextHandler.java ###
+public class SshPamContextHandler {
+    public static Authctxt authctxt;
+    public static Object sshpam_ctxt;
+    public static Object sshpam_authok;
+    public static KbdintDevice sshpam_device;
+    public static MonitorDispatch mon_dispatch;
+    public static Monitor pmonitor;
+    public static final int MONITOR_REQ_PAM_INIT_CTX = 1;
+    public static final int MONITOR_ANS_PAM_INIT_CTX = 2;
+    public static final int MONITOR_REQ_PAM_FREE_CTX = 3;
+
+    public static int mm_answer_pam_init_ctx(int sock, Buffer m) {
+
+............

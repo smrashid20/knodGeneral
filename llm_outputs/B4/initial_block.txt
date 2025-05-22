@@ -1,0 +1,5 @@
+	ret = gnutls_x509_crt_get_serial(crt, cserial.data, &t);
+	if (ret < 0) {
+		gnutls_assert();
+		goto cleanup;
+	}

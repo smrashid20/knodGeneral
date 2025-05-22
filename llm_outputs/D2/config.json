@@ -1,0 +1,24 @@
+{
+    "vul_id": "D2",
+    "project_name": "openssh-portable",
+    "language": "cpp",
+    "vul_code_file_rel_path": "monitor.c",
+    "vul_code_func_start_line": 1084,
+    "vul_code_func_end_line": 1101,
+    "vul_code_block_start_line": 1084,
+    "vul_code_block_end_line": 1101,
+    "vul_code_func_fixed_start_line": 1084,
+    "vul_code_func_fixed_end_line": 1099,
+    "vul_code_block_fixed_start_line": 1084,
+    "vul_code_block_fixed_end_line": 1099,
+    "vul_code_initial_block_start": 1084,
+    "vul_code_initial_block_end": 1088,
+    "vul_code_context_lines": ["108-200"],
+    "context_lines": [{
+        "monitor.c": ["108-200"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "monitor.c",
+    "vul_code_lines":  ["1089"],
+    "vul_code_line": 1089
+}

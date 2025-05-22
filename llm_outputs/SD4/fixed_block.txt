@@ -1,0 +1,13 @@
+        if (name != null && namelen == 0) {
+            namelen = name.length();
+        }
+
+        if (name != null && namelen > 0) {
+            int checkLen = Math.min(name.length(), namelen);
+            for (int i = 0; i < checkLen; i++) {
+                if (name.charAt(i) == '\0') {
+                    foundNul = true;
+                    break;
+                }
+            }
+        }

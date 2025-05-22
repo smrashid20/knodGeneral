@@ -1,0 +1,11 @@
+        if (ret == X509PolicyChecker.X509_PCY_TREE_INVALID) {
+
+            for (int i = 1; i < ctx.chain.size(); i++) {
+                X509Certificate x = ctx.chain.get(i);
+
+                cbFailIf(x == null || (x.hashCode() & EXFLAG_INVALID_POLICY) != 0
+                        , ctx, x, i, X509Error.X509_V_ERR_INVALID_POLICY_EXTENSION);
+            }
+
+            return 1;
+        }

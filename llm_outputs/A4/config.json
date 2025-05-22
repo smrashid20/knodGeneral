@@ -1,0 +1,24 @@
+{
+    "vul_id": "A4",
+    "project_name": "openssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "providers/implementations/ciphers/cipher_rc4_hmac_md5.c",
+    "vul_code_func_start_line": 140,
+    "vul_code_func_end_line": 203,
+    "vul_code_block_start_line": 186,
+    "vul_code_block_end_line": 186,
+    "vul_code_func_fixed_start_line": 140,
+    "vul_code_func_fixed_end_line": 203,
+    "vul_code_block_fixed_start_line": 186,
+    "vul_code_block_fixed_end_line": 186,
+    "vul_code_initial_block_start": 173,
+    "vul_code_initial_block_end": 185,
+    "vul_code_context_lines": ["140-147", "23-45"],
+    "context_lines": [{
+        "providers/implementations/ciphers/cipher_rc4_hmac_md5.c": ["140-147", "23-45"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "cipher_rc4_hmac_md5.c",
+    "vul_code_lines":  ["186"],
+    "vul_code_line": 186
+}

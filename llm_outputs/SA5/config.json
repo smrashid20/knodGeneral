@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA5",
+    "project_name": "SA5",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/OCSPVerifier.java",
+    "vul_code_func_start_line": 7,
+    "vul_code_func_end_line": 58,
+    "vul_code_block_start_line": 44,
+    "vul_code_block_end_line": 50,
+    "vul_code_func_fixed_start_line": 7,
+    "vul_code_func_fixed_end_line": 60,
+    "vul_code_block_fixed_start_line": 44,
+    "vul_code_block_fixed_end_line": 52,
+    "vul_code_initial_block_start": 44,
+    "vul_code_initial_block_end": 44,
+    "vul_code_context_lines": ["5-12"],
+    "context_lines": [{
+        "src/main/OCSPVerifier.java": ["5-12"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "OCSPVerifier.java",
+    "vul_code_lines":  ["49"],
+    "vul_code_line": 49,
+    "rem_start": 49,
+    "rem_end": 50,
+    "add_start": 49,
+    "add_end": 51
+}

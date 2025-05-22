@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB9",
+    "project_name": "SB9",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/Tls13CertificateVerify.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 63,
+    "vul_code_block_start_line": 31,
+    "vul_code_block_end_line": 58,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 68,
+    "vul_code_block_fixed_start_line": 31,
+    "vul_code_block_fixed_end_line": 63,
+    "vul_code_initial_block_start": 31,
+    "vul_code_initial_block_end": 31,
+    "vul_code_context_lines": ["5-14"],
+    "context_lines": [{
+        "src/main/Tls13CertificateVerify.java": ["5-14"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Tls13CertificateVerify.java",
+    "vul_code_lines":  ["33"],
+    "vul_code_line": 33,
+    "rem_start": 31,
+    "rem_end": 59,
+    "add_start": 31,
+    "add_end": 64
+}

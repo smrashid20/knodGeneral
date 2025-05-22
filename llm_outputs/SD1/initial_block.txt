@@ -1,0 +1,9 @@
+        if (srtp.probation_cnt > 0 && (err == SRTP_ERR_REPLAY_OLD || err == SRTP_ERR_REPLAY_FAIL)) {
+            SrtpCrypto tx = srtp.tx_policy;
+            SrtpCrypto rx = srtp.rx_policy;
+            pjmedia_transport_srtp_stop(srtp);
+            int status = pjmedia_transport_srtp_start(srtp, tx, rx);
+            if (status == PJ_SUCCESS && !srtp.bypass_srtp) {
+                err = srtp_unprotect(srtp.srtp_rx_ctx, pkt, len);
+            }
+        }

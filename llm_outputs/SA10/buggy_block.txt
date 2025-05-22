@@ -1,0 +1,8 @@
+        if (crt.sigOid.len != sig_oid2.len
+                || !equalOids(crt.sigOid.p, sig_oid2.p, crt.sigOid.len)
+                || sig_params1.len != sig_params2.len
+                || (sig_params1.len != 0
+                && !equalBytes(sig_params1.p, sig_params2.p))) {
+            Err.x509crtFree(crt);
+            return Constants.MBEDTLS_ERR_X509_SIG_MISMATCH;
+        }

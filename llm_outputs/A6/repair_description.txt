@@ -1,0 +1,13 @@
+To repair the vulnerability in the ChaCha20-Poly1305 AEAD cipher implementation, several steps need to be taken.
+
+First, the issue with the code is identified as allowing a nonce length of up to 16 bytes, whereas the RFC 7539 specification requires a fixed nonce length of 96 bits (12 bytes). This can lead to a situation where an application may inadvertently reuse a nonce value, compromising the confidentiality and integrity of the encrypted messages.
+
+The first step in the repair is to define a new constant, CHACHA20_POLY1305_MAX_IVLEN, which represents the maximum allowed nonce length of 12 bytes. This constant will be used to enforce the correct nonce length in the code.
+
+The next step is to modify the EVP_CTRL_AEAD_SET_IVLEN case in the code to check if the provided nonce length is within the allowed range. The condition is updated to check if the nonce length is less than or equal to zero or greater than the newly defined CHACHA20_POLY1305_MAX_IVLEN. If the nonce length is outside this range, the function returns an error.
+
+By making this change, the code ensures that the nonce length is always set to a value that is compliant with the RFC 7539 specification, preventing the possibility of nonce reuse and the associated security risks.
+
+Additionally, it is essential to ensure that the rest of the codebase is updated to use the new CHACHA20_POLY1305_MAX_IVLEN constant consistently, to prevent any inconsistencies or potential security vulnerabilities.
+
+Overall, the repair involves defining a new constant to represent the maximum allowed nonce length, updating the code to enforce this length, and ensuring consistency throughout the codebase. These steps help to prevent nonce reuse and ensure the secure use of the ChaCha20-Poly1305 AEAD cipher.

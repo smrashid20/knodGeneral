@@ -1,0 +1,20 @@
+      for (s = 0; s < spp; s++)
+        {  /* Read each plane of a tile set into srcbuffs[s] */
+	tbytes = TIFFReadTile(in, srcbuffs[s], col, row, 0, s);
+        if (tbytes < 0  && !ignore)
+          {
+	  TIFFError(TIFFFileName(in),
+                 "Error, can't read tile for row %lu col %lu, "
+		 "sample %lu",
+		 (unsigned long) col, (unsigned long) row,
+		 (unsigned long) s);
+		 status = 0;
+          for (sample = 0; (sample < spp) && (sample < MAX_SAMPLES); sample++)
+            {
+            tbuff = srcbuffs[sample];
+            if (tbuff != NULL)
+              _TIFFfree(tbuff);
+            }
+          return status;
+	  }
+	}

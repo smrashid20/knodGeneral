@@ -1,0 +1,9 @@
+The repair addresses a vulnerability in the SSH transport protocol that allows remote attackers to bypass integrity checks, potentially downgrading or disabling security features. This vulnerability, known as the Terrapin attack, occurs due to the mishandling of the handshake phase and sequence numbers in the SSH Binary Packet Protocol (BPP).
+
+The root cause of the issue lies in the fact that the SSH protocol does not properly verify the sequence numbers of packets during the key exchange (KEX) phase. This allows an attacker to manipulate the packet sequence, effectively bypassing integrity checks and potentially downgrading or disabling security features such as encryption and authentication.
+
+The repair introduces a new feature called "strict KEX," which aims to mitigate this vulnerability. When the peer supports strict KEX, the session flag SSH_SESSION_FLAG_KEX_STRICT is set, and packet sequence numbers are verified. This ensures that the sequence numbers of packets are correctly validated, preventing an attacker from manipulating the packet sequence.
+
+The repair checks if the client or server supports strict KEX by examining the KEX methods negotiated during the handshake. If strict KEX is supported, the session flag is set, and packet sequence numbers are verified. This provides an additional layer of security, preventing attackers from exploiting the Terrapin vulnerability.
+
+In essence, the repair enhances the security of the SSH protocol by introducing a mechanism to verify packet sequence numbers during the KEX phase, thereby preventing attackers from bypassing integrity checks and downgrading or disabling security features. This fix ensures that the SSH connection remains secure and resilient to attacks that exploit the Terrapin vulnerability.

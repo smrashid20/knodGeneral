@@ -1,0 +1,24 @@
+{
+    "vul_id": "A8",
+    "project_name": "libssh",
+    "language": "cpp",
+    "vul_code_file_rel_path": "src/kex.c",
+    "vul_code_func_start_line": 351,
+    "vul_code_func_end_line": 631,
+    "vul_code_block_start_line": 500,
+    "vul_code_block_end_line": 510,
+    "vul_code_func_fixed_start_line": 354,
+    "vul_code_func_fixed_end_line": 654,
+    "vul_code_block_fixed_start_line": 503,
+    "vul_code_block_fixed_end_line": 534,
+    "vul_code_initial_block_start": 500,
+    "vul_code_initial_block_end": 510,
+    "vul_code_context_lines": ["354-371", "49-215"],
+    "context_lines": [{
+        "src/kex.c": ["354-371", "49-215"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "kex.c",
+    "vul_code_lines":  ["500"],
+    "vul_code_line": 500
+}

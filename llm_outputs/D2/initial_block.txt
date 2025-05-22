@@ -1,0 +1,5 @@
+int
+mm_answer_pam_init_ctx(int sock, Buffer *m)
+{
+	debug3("%s", __func__);
+	sshpam_ctxt = (sshpam_device.init_ctx)(authctxt);

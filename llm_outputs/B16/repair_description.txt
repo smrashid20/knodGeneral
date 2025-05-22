@@ -1,0 +1,15 @@
+To repair the vulnerability in the dnsmasq code, several steps need to be taken to ensure that the reply destination address and port are properly matched with the pending forwarded queries. Here's a step-by-step explanation of the repair process:
+
+1. **Verify the sentto condition**: The first step is to check if the `sentto` condition is met, which indicates that the reply is from a forwarded query. This is already present in the buggy code.
+
+2. **Check the query ID**: Next, verify that the query ID of the reply matches the ID of the pending forwarded query. This is also present in the buggy code.
+
+3. **Verify the hash**: The code then checks if the hash of the reply matches the hash of the pending forwarded query. If no hash is provided, it skips this check. This step is also present in the buggy code.
+
+4. **Check the family and file descriptor**: After passing the above checks, the code needs to verify that the reply is from the correct family (IPv4 or IPv6) and that the file descriptor matches the one used to send the query. This is done by checking if the `rfd4` or `rfd6` structure matches the file descriptor `fd`.
+
+5. **Check the sentto socket**: If the above checks pass, the code then verifies that the reply is from the correct sentto socket. This is done by checking if the `sfd` structure matches the file descriptor `fd`.
+
+6. **Return the matched query**: If all the above checks pass, the code returns the matched query, indicating that the reply is valid and can be accepted by dnsmasq.
+
+By adding these additional checks, the repair ensures that the reply destination address and port are properly matched with the pending forwarded queries, making it much harder for an attacker to forge a reply and perform a DNS Cache Poisoning attack. This fix aligns with the specifications outlined in RFC5452, which requires that all attributes of a query be used to match a reply.

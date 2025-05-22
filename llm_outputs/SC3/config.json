@@ -1,0 +1,28 @@
+{
+    "vul_id": "SC3",
+    "project_name": "SC3",
+    "language": "java",
+    "vul_code_file_rel_path": "src/master/Security_Default.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 34,
+    "vul_code_block_start_line": 29,
+    "vul_code_block_end_line": 31,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 37,
+    "vul_code_block_fixed_start_line": 29,
+    "vul_code_block_fixed_end_line": 34,
+    "vul_code_initial_block_start": 29,
+    "vul_code_initial_block_end": 29,
+    "vul_code_context_lines": ["6-10"],
+    "context_lines": [{
+        "src/master/Security_Default.java": ["6-10"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Security_Default.java",
+    "vul_code_lines":  ["30"],
+    "vul_code_line": 30,
+    "rem_start": 30,
+    "rem_end": 31,
+    "add_start": 30,
+    "add_end": 33
+}

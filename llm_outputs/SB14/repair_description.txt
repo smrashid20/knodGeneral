@@ -1,0 +1,13 @@
+To repair the vulnerability in the given code, several steps were taken. 
+
+First, the root cause of the issue was identified. The problem occurred when specifically crafted TCP streams caused connections to BIND to remain in CLOSE_WAIT status for an indefinite period, even after the client had terminated the connection. This issue was likely caused by the fact that the handle_detach_cb function was not being called in all scenarios, leading to the connection remaining in CLOSE_WAIT status.
+
+Next, the code was analyzed to determine why the handle_detach_cb function was not being called in all scenarios. It was found that the function was only being called when the sock.tid matched the NodeManager's nmTid. However, this condition did not account for cases where the sock had a close handle callback.
+
+To fix this issue, a check was added to see if the NodeManager has a close handle callback for the sock. This check was added to the condition that calls the handle_detach_cb function. 
+
+With this additional check in place, the handle_detach_cb function will now be called when the sock.tid matches the NodeManager's nmTid and the NodeManager has a close handle callback for the sock. This ensures that the connection is properly closed and does not remain in CLOSE_WAIT status indefinitely.
+
+The rest of the code remains the same, as it was not contributing to the vulnerability. The NetiEventDetach event is still created and passed to the EventPasser, and the event is still enqueued to the NodeManager's worker. 
+
+Overall, the repair involves adding a simple check to ensure that the handle_detach_cb function is called in all scenarios where it is necessary, thereby preventing the connection from remaining in CLOSE_WAIT status indefinitely.

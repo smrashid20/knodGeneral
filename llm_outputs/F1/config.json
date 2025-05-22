@@ -1,0 +1,24 @@
+{
+    "vul_id": "F1",
+    "project_name": "libtiff",
+    "language": "cpp",
+    "vul_code_file_rel_path": "tools/tiffcrop.c",
+    "vul_code_func_start_line": 951,
+    "vul_code_func_end_line": 1096,
+    "vul_code_block_start_line": 992,
+    "vul_code_block_end_line": 1011,
+    "vul_code_func_fixed_start_line": 951,
+    "vul_code_func_fixed_end_line": 1096,
+    "vul_code_block_fixed_start_line": 992,
+    "vul_code_block_fixed_end_line": 1011,
+    "vul_code_initial_block_start": 992,
+    "vul_code_initial_block_end": 992,
+    "vul_code_context_lines": ["951-968", "143-334"],
+    "context_lines": [{
+        "tools/tiffcrop.c": ["951-968", "143-334"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "tiffcrop.c",
+    "vul_code_lines":  ["992"],
+    "vul_code_line": 992
+}

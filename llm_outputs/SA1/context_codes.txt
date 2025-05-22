@@ -1,0 +1,21 @@
+### src/CipherInitializer.java ###
+public class CipherInitializer {
+    private static boolean OPENSSL_NO_ENGINE = false;
+    private static boolean FIPS_MODULE = false;
+
+    public static void setOpenSslNoEngine(boolean value) {
+        OPENSSL_NO_ENGINE = value;
+    }
+
+    public static void setFipsModule(boolean value) {
+        FIPS_MODULE = value;
+    }
+
+    public static boolean initializeCipher(
+            CipherContext ctx, Cipher cipher, Engine impl,
+            byte[] key, byte[] iv, int enc, CipherParams params) {
+
+        int n;
+        Engine tmpImpl = null;
+
+............

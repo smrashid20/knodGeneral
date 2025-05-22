@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB3",
+    "project_name": "SB3",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/AuthHandler.java",
+    "vul_code_func_start_line": 13,
+    "vul_code_func_end_line": 19,
+    "vul_code_block_start_line": 14,
+    "vul_code_block_end_line": 18,
+    "vul_code_func_fixed_start_line": 13,
+    "vul_code_func_fixed_end_line": 22,
+    "vul_code_block_fixed_start_line": 14,
+    "vul_code_block_fixed_end_line": 21,
+    "vul_code_initial_block_start": 14,
+    "vul_code_initial_block_end": 14,
+    "vul_code_context_lines": ["8-13"],
+    "context_lines": [{
+        "src/main/AuthHandler.java": ["8-13"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "AuthHandler.java",
+    "vul_code_lines":  ["15"],
+    "vul_code_line": 15,
+    "rem_start": 14,
+    "rem_end": 14,
+    "add_start": 14,
+    "add_end": 18
+}

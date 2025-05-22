@@ -1,0 +1,7 @@
+    if (ret <= 0) {
+        int err = X509_STORE_CTX_get_error(ctx);
+
+        ERR_raise_data(ERR_LIB_OCSP, OCSP_R_CERTIFICATE_VERIFY_ERROR,
+                       "Verify error: %s", X509_verify_cert_error_string(err));
+        goto end;
+    }

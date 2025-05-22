@@ -1,0 +1,9 @@
+When PEAP uses crypto binding, it uses a different key calculation defined in [PEAP-MPPE] that consumes inner EAP method keying material. The PRF+ function used in [PEAP-MPPE] is not taken from the TLS exporter but is instead calculated via a different method given in [PEAP-PRF]. That derivation remains unchanged in this specification.
+
+The above derivation uses SHA-1, which may be formally deprecated in the near future.
+
+The PRF+ calculation uses a PEAP Tunnel Key (TK), defined in [PEAP-TK] as the first 60 octets of the Key_Material, as specified in [RFC5216]: TLS-PRF-128 (master secret, "client EAP encryption", client.random || server.random).
+
+We note that the text in [PEAP-PRF] does not define Key_Material. Instead, it defines TK as the first octets of Key_Material and gives a definition of Key_Material that is appropriate for TLS versions before TLS 1.3.
+
+For TLS 1.3, the TK should be derived from the Key_Material defined in Section 2.1 instead of using the TLS-PRF-128 derivation in [PEAP-PRF]. The method defined in [PEAP-TK] must not be used.

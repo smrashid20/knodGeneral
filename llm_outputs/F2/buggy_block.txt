@@ -1,0 +1,2 @@
+	    if (err >= limit)
+		rows[nrows++] = br + bpr*sy;

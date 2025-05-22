@@ -1,0 +1,15 @@
+The repair for the vulnerability involves modifying the logic for handling zone transfers in the DNS server. The vulnerability arises from the fact that the `allowzonexfr` method is not being called for writable DLZ (Dynamically Loadable Zones) zones, making the zone transfer controls ineffective.
+
+The first step in the repair is to check if the zone is a DLZ zone, in addition to checking if the result of the initial zone table lookup is not successful. This is done to ensure that the DLZ databases are searched for a match, even if the zone is marked as a DLZ zone in the zone table.
+
+The next step is to check if the `dlz_searched` list is not empty. This list contains the DLZ databases that have already been searched for a match. If the list is not empty, it means that the DLZ databases have already been searched, and the server can proceed to check the zone transfer permissions.
+
+The server then calls the `dns_dlzallowzonexfr` function to check the zone transfer permissions for the DLZ zone. This function checks the IP address of the client requesting the zone transfer against the list of allowed IP addresses for the zone.
+
+If the `dns_dlzallowzonexfr` function returns a result of `ISC_R_NOPERM`, it means that the client is not allowed to perform a zone transfer. In this case, the server logs an error message and returns a `DNS_R_REFUSED` response to the client.
+
+If the `dns_dlzallowzonexfr` function returns a result other than `ISC_R_SUCCESS` or `ISC_R_NOPERM`, it means that the server is not authoritative for the zone. In this case, the server returns a `DNS_R_NOTAUTH` response to the client.
+
+Finally, if the `dlz_searched` list is empty, it means that the DLZ databases have not been searched for a match. In this case, the server returns a `DNS_R_NOTAUTH` response to the client, indicating that it is not authoritative for the zone.
+
+Overall, the repair involves adding an additional check for DLZ zones and modifying the logic for handling zone transfers to ensure that the `allowzonexfr` method is called for writable DLZ zones. This ensures that the zone transfer controls are effective and that the server only allows authorized clients to perform zone transfers.

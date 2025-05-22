@@ -1,0 +1,8 @@
+Revocation Checking of an Authorized Responder
+Since an authorized OCSP responder provides status information for one or more CAs, OCSP clients need to know how to check that an Authorized Responder's certificate has not been revoked. CAs may choose to deal with this problem in one of three ways:
+
+* A CA may specify that an OCSP client can trust a responder for the lifetime of the responder's certificate. The CA does so by including the extension id-pkix-ocsp-nocheck. This SHOULD be a non-critical extension. The value of the extension SHALL be NULL. CAs issuing such a certificate should realize that a compromise of the responder's key is as serious as the compromise of a CA key used to sign CRLs, at least for the validity period of this certificate. CAs may choose to issue this type of certificate with a very short lifetime and renew it frequently.
+
+* A CA may specify how the responder's certificate is to be checked for revocation. This can be done by using CRL Distribution Points if the check should be done using CRLs, or by using Authority Information Access if the check should be done in some other way. Details for specifying either of these two mechanisms are available in \[RFC5280].
+
+* A CA may choose not to specify any method of revocation checking for the responder's certificate, in which case it would be up to the OCSP client's local security policy to decide whether that certificate should be checked for revocation or not.

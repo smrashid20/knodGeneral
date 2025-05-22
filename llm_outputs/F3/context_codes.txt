@@ -1,0 +1,18 @@
+### tools/gif2tiff.c ###
+readextension(void)
+{
+    int count;
+    char buf[255];
+    int status = 1;
+
+............
+#define	GIFGAMMA	(1.5)		/* smaller makes output img brighter */
+#define	IMAX		0xffff		/* max intensity value */
+#define EXTRAFUDGE	128		/* some people write BAD .gif files */
+
+#define	streq(a,b)	(strcmp(a,b) == 0)
+#define	strneq(a,b,n)	(strncmp(a,b,n) == 0)
+
+unsigned short gamtab[256];
+
+............

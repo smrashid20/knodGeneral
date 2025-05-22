@@ -1,0 +1,94 @@
+### library/x509_crt.c ###
+static int x509_crt_parse_der_core( mbedtls_x509_crt *crt,
+                                    const unsigned char *buf,
+                                    size_t buflen,
+                                    int make_copy,
+                                    mbedtls_x509_crt_ext_cb_t cb,
+                                    void *p_ctx )
+{
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+    size_t len;
+    unsigned char *p, *end, *crt_end;
+    mbedtls_x509_buf sig_params1, sig_params2, sig_oid2;
+
+    memset( &sig_params1, 0, sizeof( mbedtls_x509_buf ) );
+    memset( &sig_params2, 0, sizeof( mbedtls_x509_buf ) );
+    memset( &sig_oid2, 0, sizeof( mbedtls_x509_buf ) );
+
+............
+typedef struct {
+    mbedtls_x509_crt *crt;
+    uint32_t flags;
+} x509_crt_verify_chain_item;
+
+/*
+ * Max size of verification chain: end-entity + intermediates + trusted root
+ */
+#define X509_MAX_VERIFY_CHAIN_SIZE    ( MBEDTLS_X509_MAX_INTERMEDIATE_CA + 2 )
+
+/*
+ * Default profile
+ */
+const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default =
+{
+#if defined(MBEDTLS_TLS_DEFAULT_ALLOW_SHA1_IN_CERTIFICATES)
+    /* Allow SHA-1 (weak, but still safe in controlled environments) */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA1 ) |
+#endif
+    /* Only SHA-2 hashes */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA224 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
+    0xFFFFFFF, /* Any PK alg    */
+    0xFFFFFFF, /* Any curve     */
+    2048,
+};
+
+/*
+ * Next-default profile
+ */
+const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_next =
+{
+    /* Hashes from SHA-256 and above */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
+    0xFFFFFFF, /* Any PK alg    */
+#if defined(MBEDTLS_ECP_C)
+    /* Curves at or above 128-bit security level */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP256R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP384R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP521R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP256R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP384R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_BP512R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP256K1 ),
+#else
+    0,
+#endif
+    2048,
+};
+
+/*
+ * NSA Suite B Profile
+ */
+const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb =
+{
+    /* Only SHA-256 and 384 */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ),
+    /* Only ECDSA */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_PK_ECDSA ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_PK_ECKEY ),
+#if defined(MBEDTLS_ECP_C)
+    /* Only NIST P-256 and P-384 */
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP256R1 ) |
+    MBEDTLS_X509_ID_FLAG( MBEDTLS_ECP_DP_SECP384R1 ),
+#else
+    0,
+#endif
+    0,
+};
+
+............

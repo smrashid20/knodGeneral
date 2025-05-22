@@ -1,0 +1,46 @@
+### src/tls/tls_drv.c ###
+static ErlDrvSSizeT tls_drv_control(ErlDrvData handle,
+			   unsigned int command,
+			   char *buf, ErlDrvSizeT len,
+			   char **rbuf, ErlDrvSizeT rlen)
+{
+   tls_data *d = (tls_data *)handle;
+   int res;
+   int size;
+   ErlDrvBinary *b;
+   X509 *cert;
+   unsigned int flags = command;
+
+   command &= 0xffff;
+
+   ERR_clear_error();
+
+............
+#define BUF_SIZE 1024
+
+typedef struct {
+      ErlDrvPort port;
+      BIO *bio_read;
+      BIO *bio_write;
+      SSL *ssl;
+} tls_data;
+
+#ifdef _WIN32
+typedef unsigned __int32 uint32_t;
+#endif
+
+#ifndef SSL_OP_NO_TICKET
+#define SSL_OP_NO_TICKET 0
+#endif
+
+/*
+ * R15B changed several driver callbacks to use ErlDrvSizeT and
+ * ErlDrvSSizeT typedefs instead of int.
+ * This provides missing typedefs on older OTP versions.
+ */
+#if ERL_DRV_EXTENDED_MAJOR_VERSION < 2
+typedef int ErlDrvSizeT;
+typedef int ErlDrvSSizeT;
+#endif
+
+............

@@ -1,0 +1,10 @@
+        Connections.connectUsingConfiguration();
+        socketClosed = false;
+        initConnection();
+        saslFeatureReceived.checkIfSuccessOrWaitOrThrow();
+        connected = true;
+        callConnectionConnectedListener();
+        if (wasAuthenticated) {
+            login();
+            notifyReconnection();
+        }

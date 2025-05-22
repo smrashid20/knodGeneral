@@ -1,0 +1,79 @@
+### src/tls13.c ###
+int DoTls13ServerHello(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
+                       word32 helloSz, byte* extMsgType)
+{
+    int ret;
+    byte suite[2];
+    byte tls12minor;
+#ifdef WOLFSSL_ASYNC_CRYPT
+    Dsh13Args* args = NULL;
+    WOLFSSL_ASSERT_SIZEOF_GE(ssl->async->args, *args);
+#else
+    Dsh13Args  args[1];
+#endif
+
+    WOLFSSL_START(WC_FUNC_SERVER_HELLO_DO);
+    WOLFSSL_ENTER("DoTls13ServerHello");
+
+    tls12minor = TLSv1_2_MINOR;
+
+............
+#ifndef TRUE
+    #define TRUE  1
+#endif
+#ifndef FALSE
+    #define FALSE 0
+#endif
+
+#ifndef HAVE_HKDF
+    #ifndef _MSC_VER
+        #error "The build option HAVE_HKDF is required for TLS 1.3"
+    #else
+        #pragma message("error: The build option HAVE_HKDF is required for TLS 1.3")
+    #endif
+#endif
+
+#ifndef HAVE_TLS_EXTENSIONS
+    #ifndef _MSC_VER
+        #error "The build option HAVE_TLS_EXTENSIONS is required for TLS 1.3"
+    #else
+        #pragma message("error: The build option HAVE_TLS_EXTENSIONS is required for TLS 1.3")
+    #endif
+#endif
+
+
+/* Set ret to error value and jump to label.
+ *
+ * err     The error value to set.
+ * eLabel  The label to jump to.
+ */
+#define ERROR_OUT(err, eLabel) { ret = (err); goto eLabel; }
+
+/* Size of the TLS v1.3 label use when deriving keys. */
+#define TLS13_PROTOCOL_LABEL_SZ    6
+/* The protocol label for TLS v1.3. */
+static const byte tls13ProtocolLabel[TLS13_PROTOCOL_LABEL_SZ + 1] = "tls13 ";
+
+#ifdef WOLFSSL_DTLS13
+#define DTLS13_PROTOCOL_LABEL_SZ    6
+static const byte dtls13ProtocolLabel[DTLS13_PROTOCOL_LABEL_SZ + 1] = "dtls13";
+#endif /* WOLFSSL_DTLS13 */
+
+#if defined(HAVE_ECH)
+#define ECH_ACCEPT_CONFIRMATION_SZ 8
+#define ECH_ACCEPT_CONFIRMATION_LABEL_SZ 23
+static const byte
+    echAcceptConfirmationLabel[ECH_ACCEPT_CONFIRMATION_LABEL_SZ + 1] =
+    "ech accept confirmation";
+#endif
+
+#ifndef NO_CERTS
+#if !defined(NO_RSA) || defined(HAVE_ECC) || defined(HAVE_ED25519) || \
+    defined(HAVE_ED448) || defined(HAVE_PQC)
+
+static WC_INLINE int GetMsgHash(WOLFSSL* ssl, byte* hash);
+
+#endif
+#endif
+
+............

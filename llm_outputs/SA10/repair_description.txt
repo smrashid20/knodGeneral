@@ -1,0 +1,11 @@
+To repair the vulnerability, several steps were taken to ensure the certificate is properly validated. 
+
+First, the existing checks for the signature OID (Object Identifier) were retained, as they are essential for verifying the signature algorithm used in the certificate. These checks include comparing the lengths of the signature OIDs and verifying that the OIDs themselves match.
+
+Next, an additional check was introduced to compare the tags of the signature parameters. This is crucial because a NULL algorithm parameters entry can be misinterpreted as an array of REAL with a size of zero. By comparing the tags, the code can now correctly distinguish between these two cases.
+
+The existing checks for the lengths of the signature parameters were also retained. This ensures that the code still verifies that the lengths of the two parameter sets match.
+
+Finally, the code still checks the contents of the signature parameters if their lengths are non-zero. This ensures that the parameters themselves match, not just their lengths.
+
+By adding the tag comparison, the code can now correctly handle the case where a NULL algorithm parameters entry is present, preventing a potential security vulnerability. The other checks were retained to ensure that the certificate is thoroughly validated. Overall, the repair involves a careful examination of the certificate's signature parameters to prevent any potential mismatches or misinterpretations.

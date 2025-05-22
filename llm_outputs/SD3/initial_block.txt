@@ -1,0 +1,1 @@
+    public static X11ConnectionResult channel_handle_x11_open_request(SshOptions options, String originator_info) {

@@ -1,0 +1,28 @@
+{
+    "vul_id": "SC2",
+    "project_name": "SC2",
+    "language": "java",
+    "vul_code_file_rel_path": "src/master/CheckChainExtensions.java",
+    "vul_code_func_start_line": 7,
+    "vul_code_func_end_line": 64,
+    "vul_code_block_start_line": 19,
+    "vul_code_block_end_line": 33,
+    "vul_code_func_fixed_start_line": 7,
+    "vul_code_func_fixed_end_line": 64,
+    "vul_code_block_fixed_start_line": 19,
+    "vul_code_block_fixed_end_line": 33,
+    "vul_code_initial_block_start": 19,
+    "vul_code_initial_block_end": 19,
+    "vul_code_context_lines": ["7-12"],
+    "context_lines": [{
+        "src/master/CheckChainExtensions.java": ["7-12"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "CheckChainExtensions.java",
+    "vul_code_lines":  ["29"],
+    "vul_code_line": 29,
+    "rem_start": 29,
+    "rem_end": 30,
+    "add_start": 29,
+    "add_end": 30
+}

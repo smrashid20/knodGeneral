@@ -1,0 +1,14 @@
+The vulnerability in question allows a malicious client to bypass mutual authentication on a TLS v1.3 server by not sending the certificate_verify message. This is a significant security risk, as it enables unauthorized access to the server.
+
+To address this vulnerability, the repair introduces a crucial check to ensure that the client has presented a valid certificate when mutual authentication is required. Here's the reasoning behind the repair:
+
+When the server requires mutual authentication, it expects the client to send a certificate_verify message as part of the TLS handshake. However, in the buggy code, there is no explicit check to verify if the client has indeed sent this message. The repair rectifies this by introducing a conditional statement that checks two critical conditions:
+
+1. If the server requires mutual authentication (ssl.options.mutualAuth) or if the server is configured to fail the connection if no client certificate is presented (ssl.options.failNoCert).
+2. If the client has not sent a certificate_verify message (ssl.options.havePeerVerify is false) and the connection is not being resumed (ssl.options.resuming is false).
+
+If both conditions are true, it means the client has not presented a valid certificate, and the server should terminate the connection. The repair code returns an error (Constants.NO_PEER_CERT) and sends a fatal alert to the client using the Tls13Helper.DoCertFatalAlert function.
+
+By introducing this check, the repair ensures that the server enforces mutual authentication and prevents malicious clients from bypassing the certificate verification process. This fix is essential to maintaining the security and integrity of the TLS connection.
+
+In summary, the repair addresses the vulnerability by adding a critical check to verify that the client has presented a valid certificate when mutual authentication is required. This ensures that the server enforces authentication and prevents unauthorized access, thereby maintaining the security of the TLS connection.

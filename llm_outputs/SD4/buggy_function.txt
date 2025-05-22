@@ -1,0 +1,58 @@
+    public static boolean int_x509_param_set_hosts(X509_VERIFY_PARAM_ID id, int mode,
+                                                  String name, int namelen) {
+        String copy;
+        boolean foundNul = false;
+
+        if (name != null && namelen > 0) {
+            int checkLen = Math.min(name.length(), namelen);
+            for (int i = 0; i < checkLen; i++) {
+                if (name.charAt(i) == '\0') {
+                    foundNul = true;
+                    break;
+                }
+            }
+        }
+
+        if (foundNul) {
+            return false;
+        }
+
+        if (mode == SET_HOST && id.hosts != null) {
+            string_stack_free(id.hosts);
+            id.hosts = null;
+        }
+
+        if (name == null || namelen == 0) {
+            return true;
+        }
+
+        int lenToCopy = Math.min(name.length(), namelen);
+        try {
+            copy = name.substring(0, lenToCopy);
+        } catch (OutOfMemoryError e) {
+            copy = null;
+        } catch (StringIndexOutOfBoundsException e) { 
+            copy = null;
+        }
+
+
+        if (copy == null) {
+            return false;
+        }
+
+        if (id.hosts == null) {
+            id.hosts = sk_OPENSSL_STRING_new_null();
+            if (id.hosts == null) {
+                return false;
+            }
+        }
+
+        if (!sk_OPENSSL_STRING_push(id.hosts, copy)) {
+            if (sk_OPENSSL_STRING_num(id.hosts) == 0) {
+                id.hosts = null;
+            }
+            return false;
+        }
+
+        return true;
+    }

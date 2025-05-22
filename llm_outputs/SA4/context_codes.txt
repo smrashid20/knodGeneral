@@ -1,0 +1,9 @@
+### src/main/RC4_HMAC_MD5.java ###
+public class RC4_HMAC_MD5 {
+
+    public static int rc4_hmac_md5_set_ctx_params(Object vctx, OSSL_PARAM[] params) {
+        PROV_RC4_HMAC_MD5_CTX ctx = (PROV_RC4_HMAC_MD5_CTX) vctx;
+        OSSL_PARAM p;
+        int sz;
+
+............

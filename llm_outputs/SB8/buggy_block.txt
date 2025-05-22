@@ -1,0 +1,22 @@
+        if (extMsgType[0] == CommonsConstants.server_hello) {
+            PreSharedKey psk = null;
+            TlsExtension ext = TLSX.find(ssl.extensions, CommonsConstants.TLSX_PRE_SHARED_KEY);
+            if (ext != null)
+                psk = (PreSharedKey) ext.data;
+            while (psk != null && !psk.chosen)
+                psk = psk.next;
+            if (psk == null) {
+                ssl.options.resuming = false;
+                ssl.arrays.psk_keySz = 0;
+                for (int i = 0; i < ssl.arrays.psk_key.length; i++)
+                    ssl.arrays.psk_key[i] = 0;
+            }
+            else {
+                ret = SetupPskKey(ssl, psk, 0);
+                if (ret != 0)
+                    return ret;
+                ssl.options.pskNegotiated = true;
+            }
+            ssl.keys.encryptionOn = true;
+            ssl.options.serverState = CommonsConstants.SERVER_HELLO_COMPLETE;
+        }

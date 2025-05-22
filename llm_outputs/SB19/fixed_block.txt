@@ -1,0 +1,30 @@
+                if (HashTable.is_key_file_modified(new String(buf), mtime) || ssl_ctx == null) {
+                    SSLContext ctx;
+                    HashTable.insert(new String(buf), mtime[0], null);
+
+                    ctx = SSLContext.newInstance("TLS");
+                    Util.die_unless(ctx != null, "SSL_CTX_new failed");
+
+                    res = ctx.useCertificateChainFile(new String(buf));
+                    Util.die_unless(res > 0, "SSL_CTX_use_certificate_chain_file failed");
+
+                    res = ctx.usePrivateKeyFile(new String(buf), Commons.SSL_FILETYPE_PEM);
+                    Util.die_unless(res > 0, "SSL_CTX_use_PrivateKey_file failed");
+
+                    res = ctx.checkPrivateKey();
+                    Util.die_unless(res > 0, "SSL_CTX_check_private_key failed");
+
+                    ctx.setOptions(Commons.SSL_OP_NO_SSLv2
+                            | Commons.SSL_OP_NO_SSLv3
+                            | Commons.SSL_OP_NO_TICKET);
+
+                    ctx.setSessionCacheMode(Commons.SSL_SESS_CACHE_OFF);
+                    ctx.setDefaultVerifyPaths();
+                    ctx.setVerify(Commons.SSL_VERIFY_PEER | Commons.SSL_VERIFY_CLIENT_ONCE,
+                            new VerifyCallback());
+
+                    ctx.setCipherList("HIGH:!aNULL:!MD5:!RC4");
+
+                    ssl_ctx = ctx;
+                    HashTable.insert(new String(buf), mtime[0], ssl_ctx);
+                }

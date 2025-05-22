@@ -1,0 +1,9 @@
+The vulnerability in the OpenSSL library arises from the incorrect handling of custom ciphers created using the EVP_CIPHER_meth_new() function. When an application passes NID_undef as the NID value to EVP_CIPHER_meth_new(), the encryption/decryption initialization functions mistakenly match the NULL cipher as an equivalent and fetch it from the available providers. This results in the plaintext being emitted as the ciphertext, effectively bypassing encryption.
+
+The root cause of this issue lies in the fact that the code does not properly handle custom ciphers with an NID of NID_undef. To address this vulnerability, the repair introduces additional checks to ensure that custom ciphers are handled correctly.
+
+The repair adds two new conditions to the if statement: (cipher!= NULL && cipher->origin == EVP_ORIG_METH) and (cipher == NULL && ctx->cipher!= NULL && ctx->cipher->origin == EVP_ORIG_METH). These conditions check if the cipher is a custom cipher created using EVP_CIPHER_meth_new() by verifying its origin.
+
+If the cipher is a custom cipher, the code now correctly handles it by freeing the fetched cipher and setting it to NULL, and then proceeding to the legacy path. This ensures that the custom cipher is not mistakenly matched with the NULL cipher, preventing the encryption bypass vulnerability.
+
+In essence, the repair introduces a more robust check to identify custom ciphers and handle them correctly, thereby preventing the vulnerability from occurring. By adding these additional checks, the code ensures that custom ciphers are properly handled, and the encryption/decryption process is secure.

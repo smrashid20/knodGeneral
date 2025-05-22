@@ -1,0 +1,24 @@
+### crypto/ocsp/ocsp_vfy.c ###
+static int ocsp_verify_signer(X509 *signer, int response,
+                              X509_STORE *st, unsigned long flags,
+                              STACK_OF(X509) *untrusted, STACK_OF(X509) **chain)
+{
+    X509_STORE_CTX *ctx = X509_STORE_CTX_new();
+    X509_VERIFY_PARAM *vp;
+    int ret = -1;
+
+............
+static int ocsp_find_signer(X509 **psigner, OCSP_BASICRESP *bs,
+                            STACK_OF(X509) *certs, unsigned long flags);
+static X509 *ocsp_find_signer_sk(STACK_OF(X509) *certs, OCSP_RESPID *id);
+static int ocsp_check_issuer(OCSP_BASICRESP *bs, STACK_OF(X509) *chain);
+static int ocsp_check_ids(STACK_OF(OCSP_SINGLERESP) *sresp,
+                          OCSP_CERTID **ret);
+static int ocsp_match_issuerid(X509 *cert, OCSP_CERTID *cid,
+                               STACK_OF(OCSP_SINGLERESP) *sresp);
+static int ocsp_check_delegated(X509 *x);
+static int ocsp_req_find_signer(X509 **psigner, OCSP_REQUEST *req,
+                                const X509_NAME *nm, STACK_OF(X509) *certs,
+                                unsigned long flags);
+
+............

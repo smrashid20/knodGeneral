@@ -1,0 +1,9 @@
+        #ifdef HAVE_OCSP
+            if (verify == VERIFY_OCSP_CERT) {
+                /* trust for the lifetime of the responder's cert*/
+                if (cert->ocspNoCheckSet)
+                    verify = VERIFY;
+                else
+                    verify = VERIFY_OCSP;
+            }
+        #endif

@@ -1,0 +1,24 @@
+{
+    "vul_id": "A9",
+    "project_name": "GnuTLS",
+    "language": "cpp",
+    "vul_code_file_rel_path": "lib/handshake.c",
+    "vul_code_func_start_line": 2065,
+    "vul_code_func_end_line": 2285,
+    "vul_code_block_start_line": 2169,
+    "vul_code_block_end_line": 2177,
+    "vul_code_func_fixed_start_line": 2065,
+    "vul_code_func_fixed_end_line": 2285,
+    "vul_code_block_fixed_start_line": 2169,
+    "vul_code_block_fixed_end_line": 2177,
+    "vul_code_initial_block_start": 2169,
+    "vul_code_initial_block_end": 2169,
+    "vul_code_context_lines": ["2065-2076", "61-76"],
+    "context_lines": [{
+        "lib/handshake.c": ["2065-2076", "61-76"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "handshake.c",
+    "vul_code_lines":  ["2170"],
+    "vul_code_line": 2170
+}

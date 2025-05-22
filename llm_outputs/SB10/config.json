@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB10",
+    "project_name": "SB10",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/Tls12Builder.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 39,
+    "vul_code_block_start_line": 26,
+    "vul_code_block_end_line": 36,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 36,
+    "vul_code_block_fixed_start_line": 26,
+    "vul_code_block_fixed_end_line": 33,
+    "vul_code_initial_block_start": 26,
+    "vul_code_initial_block_end": 26,
+    "vul_code_context_lines": ["5-17"],
+    "context_lines": [{
+        "src/main/Tls12Builder.java": ["5-17"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Tls12Builder.java",
+    "vul_code_lines":  ["33"],
+    "vul_code_line": 33,
+    "rem_start": 33,
+    "rem_end": 36,
+    "add_start": 33,
+    "add_end": 33
+}

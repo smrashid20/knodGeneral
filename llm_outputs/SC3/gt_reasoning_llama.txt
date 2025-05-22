@@ -1,0 +1,9 @@
+The vulnerability in Eclipse Mosquitto arises from its handling of Access Control List (ACL) files. When an ACL file is specified but is empty or contains only comments or blank lines, Mosquitto defaults to an allow policy, effectively bypassing any intended access restrictions. This behavior is unexpected and can lead to security issues.
+
+The root cause of this vulnerability lies in the way Mosquitto checks for the presence of ACL configurations. In the buggy code, Mosquitto only checks if `aclList` and `aclPatterns` are null. If both are null, it defers to a default policy, which in this case is an allow policy. However, this check does not account for the scenario where an ACL file is specified but is empty.
+
+The repair addresses this issue by adding an additional check for the presence of an ACL file. If `aclList` and `aclPatterns` are null, the code now also checks if an ACL file (`aclFile`) has been specified. If no ACL file is specified, the original behavior of deferring to a default policy is maintained. However, if an ACL file is specified but `aclList` and `aclPatterns` are null (indicating an empty ACL file), the code will no longer default to an allow policy.
+
+Instead, the implicit behavior in this scenario is to deny all access, as the presence of an ACL file, even if empty, indicates that access restrictions are intended. This change aligns with the principle of least privilege and enhances the security posture of Mosquitto by preventing unintended access in the absence of explicit ACL rules.
+
+In summary, the repair ensures that Mosquitto correctly handles empty ACL files by denying all access, rather than defaulting to an allow policy. This change mitigates the vulnerability and provides a more secure configuration option for users who intend to restrict access but have not yet defined specific ACL rules.

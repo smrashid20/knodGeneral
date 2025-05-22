@@ -1,0 +1,9 @@
+        if ((ctx.chains_count < ctx.max_chains ? (ctx.chains[ctx.chains_count] = X509Utils.x509_verify_chain_dup(chain)) : null) == null) {
+            return X509Utils.x509_verify_cert_error(ctx, last, depth, X509Constants.X509_V_ERR_OUT_OF_MEM, 0);
+        }
+        if (!X509Utils.x509_verify_cert_valid(ctx, leaf, null))
+            return 0;
+        if (!X509Utils.x509_verify_cert_hostname(ctx, leaf, name))
+            return 0;
+        ctx.chains_count++;
+        ctx.error = X509Constants.X509_V_OK;

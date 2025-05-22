@@ -1,0 +1,20 @@
+### src/SSHKeyExchange.java ###
+public class SSHKeyExchange{
+    private SSHSession session;
+    private SSHCrypto crypto;
+    private SSHKex server;
+    private SSHKex client;
+
+    public SSHKeyExchange(SSHSession session) {
+        this.session = session;
+        this.crypto = session.getNextCrypto();
+        this.server = crypto.getServerKex();
+        this.client = crypto.getClientKex();
+    }
+
+    public int selectMethods() {
+        String[] clientMethods = client.getMethods();
+        String[] serverMethods = server.getMethods();
+        String extStart;
+
+............

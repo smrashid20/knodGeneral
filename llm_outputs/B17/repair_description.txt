@@ -1,0 +1,16 @@
+To repair the vulnerability in the provided code, several steps need to be taken. 
+
+First, the issue needs to be identified and understood. In this case, the problem lies in the tls_verify_crl function, where the code fails to check for the appropriate field of a CRL (Certificate Revocation List) entry. Specifically, it checks twice for the subject instead of once for the subject and once for the issuer. This prevents some valid CRLs from being taken into account, allowing clients with revoked certificates to connect to the server.
+
+Next, the affected code needs to be located. The provided buggy source code shows that the issue is in the way CRLs are retrieved from the X509 store context. The code uses different functions to retrieve CRLs based on the OpenSSL version.
+
+To fix the issue, the code needs to be modified to correctly check for both the subject and the issuer of the CRL entry. The repair code provided shows that the fix involves changing the argument passed to the X509_STORE_CTX_get1_crls and X509_STORE_get1_crls functions from "subject" to "issuer". This ensures that the code checks for the issuer of the CRL entry, in addition to the subject.
+
+The repair steps can be summarized as follows:
+
+1. Identify the issue: Understand the problem with the tls_verify_crl function and how it affects the code.
+2. Locate the affected code: Find the code that retrieves CRLs from the X509 store context.
+3. Modify the code: Change the argument passed to the CRL retrieval functions from "subject" to "issuer".
+4. Test the fix: Verify that the modified code correctly checks for both the subject and the issuer of the CRL entry.
+
+By following these steps, the vulnerability in the code can be repaired, ensuring that the tls_verify_crl function correctly checks for revoked certificates and prevents clients with revoked certificates from connecting to the server.

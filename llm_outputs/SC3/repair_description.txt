@@ -1,0 +1,15 @@
+To repair the vulnerability in the Eclipse Mosquitto code, several steps need to be taken. 
+
+First, the current logic of the code needs to be understood. The code checks if both the ACL list and ACL patterns are null, and if so, it returns a "MOSQ_ERR_PLUGIN_DEFER" error. This indicates that the current logic assumes that if no ACL list or patterns are defined, the default policy should be used.
+
+However, this logic is flawed because it does not account for the case where an ACL file is defined but is empty or contains only comments or blank lines. In this case, the code should not default to an allow policy, but rather deny all access.
+
+To fix this, the code needs to be modified to check if an ACL file is defined, in addition to checking the ACL list and patterns. If an ACL file is defined, but the ACL list and patterns are null, the code should not return the "MOSQ_ERR_PLUGIN_DEFER" error. Instead, it should deny all access, as per the new behavior.
+
+The next step is to add a check for the ACL file. This involves adding a conditional statement to check if the ACL file is null. If the ACL file is null, the code can continue to return the "MOSQ_ERR_PLUGIN_DEFER" error, as this indicates that no ACL file has been defined.
+
+However, if the ACL file is not null, the code should not return the "MOSQ_ERR_PLUGIN_DEFER" error, even if the ACL list and patterns are null. This is because the presence of an ACL file, even if it is empty, indicates that access should be denied.
+
+By adding this additional check, the code can correctly handle the case where an ACL file is defined but is empty or contains only comments or blank lines. This ensures that the new behavior of denying all access in this case is implemented correctly.
+
+Overall, the repair involves adding a conditional statement to check for the presence of an ACL file, and modifying the logic to deny all access if an ACL file is defined but the ACL list and patterns are null. This ensures that the code correctly implements the new behavior and fixes the vulnerability.

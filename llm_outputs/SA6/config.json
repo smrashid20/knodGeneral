@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA6",
+    "project_name": "SA6",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/ChaCha20Poly1305Ctrl.java",
+    "vul_code_func_start_line": 10,
+    "vul_code_func_end_line": 87,
+    "vul_code_block_start_line": 41,
+    "vul_code_block_end_line": 43,
+    "vul_code_func_fixed_start_line": 10,
+    "vul_code_func_fixed_end_line": 87,
+    "vul_code_block_fixed_start_line": 41,
+    "vul_code_block_fixed_end_line": 43,
+    "vul_code_initial_block_start": 40,
+    "vul_code_initial_block_end": 40,
+    "vul_code_context_lines": ["9-11"],
+    "context_lines": [{
+        "src/main/ChaCha20Poly1305Ctrl.java": ["9-11"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "ChaCha20Poly1305Ctrl.java",
+    "vul_code_lines":  ["41"],
+    "vul_code_line": 41,
+    "rem_start": 41,
+    "rem_end": 42,
+    "add_start": 41,
+    "add_end": 42
+}

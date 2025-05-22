@@ -1,0 +1,9 @@
+It is important both to stop using old, less secure versions of SSL/TLS and to start using modern, more secure versions; therefore, the following are the recommendations concerning TLS/SSL protocol versions:
+
+* Implementations MUST NOT negotiate SSL version 2.
+* Implementations MUST NOT negotiate SSL version 3.
+* Implementations SHOULD NOT negotiate TLS version 1.0 \[RFC2246]; the only exception is when no higher version is available in the negotiation.
+* Implementations SHOULD NOT negotiate TLS version 1.1 \[RFC4346]; the only exception is when no higher version is available in the negotiation.
+* Implementations MUST support TLS 1.2 \[RFC5246] and MUST prefer to negotiate TLS version 1.2 over earlier versions of TLS.
+
+This BCP applies to TLS 1.2 and also to earlier versions. It is not safe for readers to assume that the recommendations in this BCP apply to any future version of TLS.

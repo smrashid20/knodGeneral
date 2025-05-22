@@ -1,0 +1,15 @@
+To repair the vulnerability in the tls_verify_crl function, several steps need to be taken. 
+
+First, the issue needs to be identified and understood. The problem lies in the fact that the function is checking for the subject field of a CRL entry twice, instead of checking for both the subject and issuer fields. This prevents some valid CRLs from being taken into account, allowing clients with revoked certificates to connect to the server.
+
+Next, the code needs to be reviewed to determine where the incorrect check is being made. In this case, the function is calling either storeCtx.get1_crls or Commons.get1_crls, depending on the version of OpenSSL being used. 
+
+The function is currently passing the subject as an argument to these functions, which is incorrect. Instead, it should be passing the issuer as an argument to correctly check the issuer field of the CRL entry.
+
+To fix this, the argument passed to the get1_crls function needs to be changed from subject to issuer. This will ensure that the function checks the issuer field of the CRL entry, rather than the subject field twice.
+
+By making this change, the function will correctly check both the subject and issuer fields of the CRL entry, preventing clients with revoked certificates from connecting to the server. This repair will improve the security of the tls_verify_crl function and prevent potential security vulnerabilities.
+
+It is also important to note that this change should be thoroughly tested to ensure that it does not introduce any new issues or affect the functionality of the function in any way. This can be done by running a series of tests to verify that the function is working as expected with the new change.
+
+In summary, the steps to repair the vulnerability are to identify the issue, review the code to determine where the incorrect check is being made, change the argument passed to the get1_crls function from subject to issuer, and thoroughly test the change to ensure it does not introduce any new issues.

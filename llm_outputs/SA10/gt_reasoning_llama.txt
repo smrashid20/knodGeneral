@@ -1,0 +1,9 @@
+The vulnerability in question arises from the fact that a NULL algorithm parameters entry can be misinterpreted as an array of REAL with a size of zero. This can lead to a situation where a certificate is considered valid even if the parameters do not match.
+
+The issue lies in the fact that the buggy code only checks if the lengths of the signature parameters are equal and if the contents are equal when the lengths are non-zero. However, it does not verify if the types of the parameters match. In the case of a NULL algorithm parameters entry, the length is zero, but the type is also important.
+
+The repair addresses this issue by adding an additional check to verify if the tags of the signature parameters match. The tag represents the type of the parameter, and by checking if the tags are equal, we can ensure that a NULL algorithm parameters entry is not misinterpreted as an array of REAL with a size of zero.
+
+In essence, the repair adds an extra layer of verification to ensure that the parameters not only have the same length and content but also the same type. This prevents a potential mismatch between the expected and actual parameters, which could lead to a certificate being considered valid when it should not be.
+
+By adding this additional check, the repair ensures that the certificate verification process is more robust and accurate, preventing potential security vulnerabilities that could arise from the misinterpretation of NULL algorithm parameters entries. This fix is a crucial step in maintaining the integrity of the certificate verification process and preventing potential security breaches.

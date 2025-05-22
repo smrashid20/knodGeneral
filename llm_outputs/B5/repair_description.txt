@@ -1,0 +1,15 @@
+The repair steps for the given vulnerability involve validating the signature algorithms when importing a certificate. Here's a step-by-step explanation of the repair:
+
+1. **Initial Certificate Decoding**: The first step is to decode the certificate using the `asn1_der_decoding` function. This step remains the same as in the buggy code.
+
+2. **Extracting Signature Algorithm**: After successful decoding, the next step is to extract the signature algorithm from the certificate. This is done using the `_gnutls_x509_get_signature_algorithm` function, which retrieves the signature algorithm from the "signatureAlgorithm.algorithm" field of the certificate.
+
+3. **Extracting TBS Signature Algorithm**: In addition to the signature algorithm, the repair code also extracts the signature algorithm from the "tbsCertificate.signature.algorithm" field of the certificate. This is done using the same `_gnutls_x509_get_signature_algorithm` function.
+
+4. **Comparing Signature Algorithms**: The extracted signature algorithms from steps 2 and 3 are then compared to ensure they match. If the algorithms do not match, an error message is logged, and the function returns an error code.
+
+5. **Proceeding with Certificate Processing**: If the signature algorithms match, the function proceeds with processing the certificate. This includes extracting the raw issuer distinguished name (DN) from the "tbsCertificate.issuer.rdnSequence" field of the certificate using the `_gnutls_x509_get_raw_field2` function.
+
+6. **Error Handling**: Throughout the repair steps, error handling is performed using the `gnutls_assert` function, which checks for errors and returns an error code if any issues are encountered.
+
+By adding the steps to extract and compare the signature algorithms, the repair code ensures that the signature algorithms match when importing a certificate, thus addressing the vulnerability.

@@ -1,0 +1,160 @@
+### smack-tcp/src/main/java/org/jivesoftware/smack/tcp/XMPPTCPConnection.java ###
+    @Override
+    protected void connectInternal() throws SmackException, IOException, XMPPException {
+        // Establishes the TCP connection to the server and does setup the reader and writer. Throws an exception if
+        // there is an error establishing the connection
+        connectUsingConfiguration();
+
+        // We connected successfully to the servers TCP port
+        socketClosed = false;
+        initConnection();
+
+............
+public class XMPPTCPConnection extends AbstractXMPPConnection {
+
+    private static final int QUEUE_SIZE = 500;
+    private static final Logger LOGGER = Logger.getLogger(XMPPTCPConnection.class.getName());
+
+    /**
+     * The socket which is used for this connection.
+     */
+    private Socket socket;
+
+    /**
+     * 
+     */
+    private boolean disconnectedButResumeable = false;
+
+    /**
+     * Flag to indicate if the socket was closed intentionally by Smack.
+     * <p>
+     * This boolean flag is used concurrently, therefore it is marked volatile.
+     * </p>
+     */
+    private volatile boolean socketClosed = false;
+
+    private boolean usingTLS = false;
+
+    /**
+     * Protected access level because of unit test purposes
+     */
+    protected PacketWriter packetWriter;
+
+    /**
+     * Protected access level because of unit test purposes
+     */
+    protected PacketReader packetReader;
+
+    private final SynchronizationPoint<Exception> initalOpenStreamSend = new SynchronizationPoint<Exception>(this);
+
+    /**
+     * 
+     */
+    private final SynchronizationPoint<XMPPException> maybeCompressFeaturesReceived = new SynchronizationPoint<XMPPException>(
+                    this);
+
+    /**
+     * 
+     */
+    private final SynchronizationPoint<XMPPException> compressSyncPoint = new SynchronizationPoint<XMPPException>(
+                    this);
+
+    /**
+     * The default bundle and defer callback, used for new connections.
+     * @see bundleAndDeferCallback
+     */
+    private static BundleAndDeferCallback defaultBundleAndDeferCallback;
+
+    /**
+     * The used bundle and defer callback.
+     * <p>
+     * Although this field may be set concurrently, the 'volatile' keyword was deliberately not added, in order to avoid
+     * having a 'volatile' read within the writer threads loop.
+     * </p>
+     */
+    private BundleAndDeferCallback bundleAndDeferCallback = defaultBundleAndDeferCallback;
+
+    private static boolean useSmDefault = false;
+
+    private static boolean useSmResumptionDefault = true;
+
+    /**
+     * The stream ID of the stream that is currently resumable, ie. the stream we hold the state
+     * for in {@link #clientHandledStanzasCount}, {@link #serverHandledStanzasCount} and
+     * {@link #unacknowledgedStanzas}.
+     */
+    private String smSessionId;
+
+    private final SynchronizationPoint<XMPPException> smResumedSyncPoint = new SynchronizationPoint<XMPPException>(
+                    this);
+
+    private final SynchronizationPoint<XMPPException> smEnabledSyncPoint = new SynchronizationPoint<XMPPException>(
+                    this);
+
+    /**
+     * The client's preferred maximum resumption time in seconds.
+     */
+    private int smClientMaxResumptionTime = -1;
+
+    /**
+     * The server's preferred maximum resumption time in seconds.
+     */
+    private int smServerMaxResumptimTime = -1;
+
+    /**
+     * Indicates whether Stream Management (XEP-198) should be used if it's supported by the server.
+     */
+    private boolean useSm = useSmDefault;
+    private boolean useSmResumption = useSmResumptionDefault;
+
+    /**
+     * The counter that the server sends the client about it's current height. For example, if the server sends
+     * {@code <a h='42'/>}, then this will be set to 42 (while also handling the {@link #unacknowledgedStanzas} queue).
+     */
+    private long serverHandledStanzasCount = 0;
+
+    /**
+     * The counter for stanzas handled ("received") by the client.
+     * <p>
+     * Note that we don't need to synchronize this counter. Although JLS 17.7 states that reads and writes to longs are
+     * not atomic, it guarantees that there are at most 2 separate writes, one to each 32-bit half. And since
+     * {@link SMUtils#incrementHeight(long)} masks the lower 32 bit, we only operate on one half of the long and
+     * therefore have no concurrency problem because the read/write operations on one half are guaranteed to be atomic.
+     * </p>
+     */
+    private long clientHandledStanzasCount = 0;
+
+    private BlockingQueue<Stanza> unacknowledgedStanzas;
+
+    /**
+     * Set to true if Stream Management was at least once enabled for this connection.
+     */
+    private boolean smWasEnabledAtLeastOnce = false;
+
+    /**
+     * This listeners are invoked for every stanza that got acknowledged.
+     * <p>
+     * We use a {@link ConccurrentLinkedQueue} here in order to allow the listeners to remove
+     * themselves after they have been invoked.
+     * </p>
+     */
+    private final Collection<StanzaListener> stanzaAcknowledgedListeners = new ConcurrentLinkedQueue<StanzaListener>();
+
+    /**
+     * This listeners are invoked for a acknowledged stanza that has the given stanza ID. They will
+     * only be invoked once and automatically removed after that.
+     */
+    private final Map<String, StanzaListener> stanzaIdAcknowledgedListeners = new ConcurrentHashMap<String, StanzaListener>();
+
+    /**
+     * Predicates that determine if an stream management ack should be requested from the server.
+     * <p>
+     * We use a linked hash set here, so that the order how the predicates are added matches the
+     * order in which they are invoked in order to determine if an ack request should be send or not.
+     * </p>
+     */
+    private final Set<StanzaFilter> requestAckPredicates = new LinkedHashSet<StanzaFilter>();
+
+    private final XMPPTCPConnectionConfiguration config;
+
+............

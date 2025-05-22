@@ -1,0 +1,15 @@
+The repair steps for the given vulnerability involve modifying the ssl3_get_key_exchange function to prevent RSA-to-EXPORT_RSA downgrade attacks and brute-force decryption. Here's a step-by-step explanation of the repair:
+
+1. **Check for Export Cipher**: The first step is to check if the cipher being used is an export cipher. This is done by calling the `Helper.SSL_C_IS_EXPORT(cipher)` function. If the cipher is not an export cipher, the function immediately returns an error.
+
+2. **Verify Cipher Suitability**: The function then verifies that the cipher is suitable for use with RSA. This is done by checking the `alg_k` variable, which represents the key exchange algorithm. If the algorithm is not RSA, the function proceeds with the rest of the key exchange process.
+
+3. **Parse RSA Parameters**: The function then parses the RSA parameters from the input data. This includes the modulus length, modulus value, public exponent length, and public exponent value.
+
+4. **Validate RSA Parameters**: The function validates the RSA parameters to ensure they are within the expected ranges. This includes checking the length of the modulus and public exponent, as well as ensuring that the values are not too large.
+
+5. **Create RSA Object**: If the RSA parameters are valid, the function creates a new RSA object and sets its modulus and public exponent values.
+
+6. **Assign RSA Object to Session**: Finally, the function assigns the newly created RSA object to the session's peer RSA temporary variable.
+
+The key change in the repair is the addition of the export cipher check at the beginning of the function. This prevents the function from proceeding with the key exchange if the cipher is not an export cipher, which helps to prevent RSA-to-EXPORT_RSA downgrade attacks. Additionally, the function's existing validation and parsing of RSA parameters helps to prevent brute-force decryption attacks by ensuring that the RSA values are valid and within expected ranges.

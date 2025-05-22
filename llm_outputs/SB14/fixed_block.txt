@@ -1,0 +1,11 @@
+        if (sock.tid == NodeManager.nmTid() && !NodeManager.hasCloseHandleCb(sock)) {
+            NodeManager.nmhandle_detach_cb(handle);
+        }
+        else {
+            NetiEventDetach event =
+                    NodeManager.getNetiEventDetach(sock.mgr, sock);
+            event.handle = handle;
+            EventPasser.passEvent(event);
+            NodeManager.enqueueEvent(
+                    sock.mgr.workers[sock.tid], event);
+        }

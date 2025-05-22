@@ -1,0 +1,15 @@
+The vulnerability in question allows for forging attacks due to the mishandling of AlgorithmIdentifier parameters. This issue arises from the fact that the original code does not properly validate the parameters associated with the digest algorithm. 
+
+In the original code, after retrieving the OID (Object Identifier) of the digest algorithm, it only checks if the OID corresponds to SHA-1 and then verifies if the signature algorithm matches the expected value. However, it does not verify the parameters of the digest algorithm itself.
+
+The repair addresses this vulnerability by adding a check for the presence and validity of the digest algorithm parameters. It first logs the digest algorithm parameters for debugging purposes. Then, it checks if there are any parameters present by comparing the end of the data (daEnd) with the current position (next). If parameters are present, it attempts to parse the next ASN.1 element using ASN1.getNext().
+
+The repair then checks three conditions to ensure the parameters are valid: 
+
+1. The ASN1.getNext() function should not return an error.
+2. The parameters should be null, as most digest algorithms do not have any parameters.
+3. The length of the parameters should match the remaining data.
+
+If any of these conditions are not met, the function logs an error message and returns -1, indicating that the digest algorithm parameters are unexpected and potentially malicious.
+
+By adding this validation, the repair prevents forging attacks that could exploit the mishandling of AlgorithmIdentifier parameters, thereby improving the security of the system.

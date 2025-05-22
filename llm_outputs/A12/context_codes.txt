@@ -1,0 +1,62 @@
+### src/tls13.c ###
+/* Parse and handle a TLS v1.3 Finished message.
+ *
+ * ssl       The SSL/TLS object.
+ * input     The message buffer.
+ * inOutIdx  On entry, the index into the message buffer of Finished.
+ *           On exit, the index of byte after the Finished message and padding.
+ * size      Length of message data.
+ * totalSz   Length of remaining data in the message buffer.
+ * sniff     Indicates whether we are sniffing packets.
+ * returns 0 on success and otherwise failure.
+ */
+int DoTls13Finished(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
+                           word32 size, word32 totalSz, int sniff)
+{
+    int    ret;
+    word32 finishedSz = 0;
+    byte*  secret;
+    byte   mac[WC_MAX_DIGEST_SIZE];
+
+............
+#ifdef __sun
+    #include <sys/filio.h>
+#endif
+
+#ifndef TRUE
+    #define TRUE  1
+#endif
+#ifndef FALSE
+    #define FALSE 0
+#endif
+
+#ifndef HAVE_HKDF
+    #ifndef _MSC_VER
+        #error "The build option HAVE_HKDF is required for TLS 1.3"
+    #else
+        #pragma message("error: The build option HAVE_HKDF is required for TLS 1.3")
+    #endif
+#endif
+
+#ifndef HAVE_TLS_EXTENSIONS
+    #ifndef _MSC_VER
+        #error "The build option HAVE_TLS_EXTENSIONS is required for TLS 1.3"
+    #else
+        #pragma message("error: The build option HAVE_TLS_EXTENSIONS is required for TLS 1.3")
+    #endif
+#endif
+
+
+/* Set ret to error value and jump to label.
+ *
+ * err     The error value to set.
+ * eLabel  The label to jump to.
+ */
+#define ERROR_OUT(err, eLabel) { ret = (err); goto eLabel; }
+
+/* Size of the TLS v1.3 label use when deriving keys. */
+#define TLS13_PROTOCOL_LABEL_SZ    6
+/* The protocol label for TLS v1.3. */
+static const byte tls13ProtocolLabel[TLS13_PROTOCOL_LABEL_SZ + 1] = "tls13 ";
+
+............

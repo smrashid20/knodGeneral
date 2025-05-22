@@ -1,0 +1,10 @@
+### lib/x509/x509.c ###
+int
+gnutls_x509_crt_import(gnutls_x509_crt_t cert,
+		       const gnutls_datum_t * data,
+		       gnutls_x509_crt_fmt_t format)
+{
+	int result = 0;
+	int version;
+
+............

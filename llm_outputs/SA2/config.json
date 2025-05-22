@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA2",
+    "project_name": "SA2",
+    "language": "java",
+    "vul_code_file_rel_path": "src/X509PolicyValidator.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 61,
+    "vul_code_block_start_line": 29,
+    "vul_code_block_end_line": 39,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 69,
+    "vul_code_block_fixed_start_line": 29,
+    "vul_code_block_fixed_end_line": 47,
+    "vul_code_initial_block_start": 29,
+    "vul_code_initial_block_end": 29,
+    "vul_code_context_lines": ["3-27"],
+    "context_lines": [{
+        "src/X509PolicyValidator.java": ["3-27"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "X509PolicyValidator.java",
+    "vul_code_lines":  ["31"],
+    "vul_code_line": 31,
+    "rem_start": 29,
+    "rem_end": 39,
+    "add_start": 29,
+    "add_end": 47
+}

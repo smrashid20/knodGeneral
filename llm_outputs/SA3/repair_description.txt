@@ -1,0 +1,11 @@
+The repair steps for the OpenSSL vulnerability involve modifying the conditional statement that checks for custom ciphers. The goal is to prevent the incorrect handling of legacy custom ciphers passed to the encryption and decryption initialization functions.
+
+The first step is to identify the conditions under which the legacy handling function should be called. The original code checks for the presence of an engine, a non-null temporary implementation, or a non-null implementation. However, this is not sufficient to prevent the vulnerability.
+
+The next step is to add additional conditions to the if statement to check for custom ciphers. Specifically, the code should check if the cipher is not null and its origin is METHOD, or if the cipher is null but the context's cipher is not null and its origin is METHOD. This ensures that the legacy handling function is called only when a custom cipher is being used.
+
+The third step is to maintain the existing logic within the if statement. If the context's cipher is the same as the fetched cipher, the code should set the context's cipher to null, free the fetched cipher, and set the fetched cipher to null. This is necessary to prevent any potential memory leaks or incorrect cipher usage.
+
+The final step is to call the legacy handling function with the context, cipher, implementation, temporary implementation, and encryption flag as arguments. This function will handle the custom cipher correctly and prevent the vulnerability.
+
+By adding the additional conditions to the if statement, the code ensures that custom ciphers are handled correctly and the vulnerability is fixed. The legacy handling function will only be called when a custom cipher is being used, preventing the incorrect fetching of the NULL cipher and the emission of plaintext as ciphertext.

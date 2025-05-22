@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA10",
+    "project_name": "SA10",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/X509CrtParser.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 67,
+    "vul_code_block_start_line": 54,
+    "vul_code_block_end_line": 61,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 68,
+    "vul_code_block_fixed_start_line": 54,
+    "vul_code_block_fixed_end_line": 62,
+    "vul_code_initial_block_start": 54,
+    "vul_code_initial_block_end": 54,
+    "vul_code_context_lines": ["5-13"],
+    "context_lines": [{
+        "src/main/X509CrtParser.java": ["5-13"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "X509CrtParser.java",
+    "vul_code_lines":  ["55"],
+    "vul_code_line": 55,
+    "rem_start": 55,
+    "rem_end": 55,
+    "add_start": 55,
+    "add_end": 56
+}

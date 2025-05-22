@@ -1,0 +1,24 @@
+{
+    "vul_id": "A12",
+    "project_name": "wolfssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "src/tls13.c",
+    "vul_code_func_start_line": 6882,
+    "vul_code_func_end_line": 6989,
+    "vul_code_block_start_line": 6890,
+    "vul_code_block_end_line": 6904,
+    "vul_code_func_fixed_start_line": 6882,
+    "vul_code_func_fixed_end_line": 7001,
+    "vul_code_block_fixed_start_line": 6890,
+    "vul_code_block_fixed_end_line": 6916,
+    "vul_code_initial_block_start": 6890,
+    "vul_code_initial_block_end": 6890,
+    "vul_code_context_lines": ["6871-6888", "110-148"],
+    "context_lines": [{
+        "src/tls13.c": ["6871-6888", "110-148"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "tls13.c",
+    "vul_code_lines":  ["6891"],
+    "vul_code_line": 6891
+}

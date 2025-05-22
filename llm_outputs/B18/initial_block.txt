@@ -1,0 +1,3 @@
+	if (asn1_get_next(data, data_len, &hdr) < 0 ||
+	    hdr.class != ASN1_CLASS_UNIVERSAL ||
+	    hdr.tag != ASN1_TAG_SEQUENCE) {

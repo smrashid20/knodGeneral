@@ -1,0 +1,97 @@
+### lib/ns/xfrout.c ###
+void
+ns_xfr_start(ns_client_t *client, dns_rdatatype_t reqtype) {
+	isc_result_t result;
+	dns_name_t *question_name;
+	dns_rdataset_t *question_rdataset;
+	dns_zone_t *zone = NULL, *raw = NULL, *mayberaw;
+	dns_db_t *db = NULL;
+	dns_dbversion_t *ver = NULL;
+	dns_rdataclass_t question_class;
+	rrstream_t *soa_stream = NULL;
+	rrstream_t *data_stream = NULL;
+	rrstream_t *stream = NULL;
+	dns_difftuple_t *current_soa_tuple = NULL;
+	dns_name_t *soa_name;
+	dns_rdataset_t *soa_rdataset;
+	dns_rdata_t soa_rdata = DNS_RDATA_INIT;
+	bool have_soa = false;
+	const char *mnemonic = NULL;
+	isc_mem_t *mctx = client->mctx;
+	dns_message_t *request = client->message;
+	xfrout_ctx_t *xfr = NULL;
+	isc_quota_t *quota = NULL;
+	dns_transfer_format_t format = client->view->transfer_format;
+	isc_netaddr_t na;
+	dns_peer_t *peer = NULL;
+	isc_buffer_t *tsigbuf = NULL;
+	char *journalfile;
+	char msg[NS_CLIENT_ACLMSGSIZE("zone transfer")];
+	char keyname[DNS_NAME_FORMATSIZE];
+	bool is_poll = false;
+	bool is_dlz = false;
+	bool is_ixfr = false;
+	uint32_t begin_serial = 0, current_serial;
+
+	switch (reqtype) {
+	case dns_rdatatype_axfr:
+		mnemonic = "AXFR";
+		break;
+	case dns_rdatatype_ixfr:
+		mnemonic = "IXFR";
+		break;
+	default:
+		INSIST(0);
+		ISC_UNREACHABLE();
+	}
+
+............
+#define XFROUT_COMMON_LOGARGS \
+	ns_lctx, DNS_LOGCATEGORY_XFER_OUT, NS_LOGMODULE_XFER_OUT
+
+#define XFROUT_PROTOCOL_LOGARGS \
+	XFROUT_COMMON_LOGARGS, ISC_LOG_INFO
+
+#define XFROUT_DEBUG_LOGARGS(n) \
+	XFROUT_COMMON_LOGARGS, ISC_LOG_DEBUG(n)
+
+#define XFROUT_RR_LOGARGS \
+	XFROUT_COMMON_LOGARGS, XFROUT_RR_LOGLEVEL
+
+#define XFROUT_RR_LOGLEVEL	ISC_LOG_DEBUG(8)
+
+/*%
+ * Fail unconditionally and log as a client error.
+ * The test against ISC_R_SUCCESS is there to keep the Solaris compiler
+ * from complaining about "end-of-loop code not reached".
+ */
+#define FAILC(code, msg) \
+	do {							\
+		result = (code);				\
+		ns_client_log(client, DNS_LOGCATEGORY_XFER_OUT, \
+			   NS_LOGMODULE_XFER_OUT, ISC_LOG_INFO, \
+			   "bad zone transfer request: %s (%s)", \
+			   msg, isc_result_totext(code));	\
+		if (result != ISC_R_SUCCESS) goto failure;	\
+	} while (0)
+
+#define FAILQ(code, msg, question, rdclass) \
+	do {							\
+		char _buf1[DNS_NAME_FORMATSIZE];		\
+		char _buf2[DNS_RDATACLASS_FORMATSIZE]; 		\
+		result = (code);				\
+		dns_name_format(question, _buf1, sizeof(_buf1));  \
+		dns_rdataclass_format(rdclass, _buf2, sizeof(_buf2)); \
+		ns_client_log(client, DNS_LOGCATEGORY_XFER_OUT, \
+			   NS_LOGMODULE_XFER_OUT, ISC_LOG_INFO, \
+			   "bad zone transfer request: '%s/%s': %s (%s)", \
+			   _buf1, _buf2, msg, isc_result_totext(code));	\
+		if (result != ISC_R_SUCCESS) goto failure;	\
+	} while (0)
+
+#define CHECK(op) \
+	do { result = (op); 					\
+		if (result != ISC_R_SUCCESS) goto failure; 	\
+	} while (0)
+
+............

@@ -1,0 +1,12 @@
+            if (msg.verifiedSig
+                    && msg.tsigstatus == Commons.dns_rcode_noerror
+                    && tsig.error == Commons.dns_rcode_noerror) {
+                result = Commons.ISC_R_SUCCESS;
+            }
+            else if (!msg.verifiedSig
+                    || msg.tsigstatus != Commons.dns_rcode_noerror) {
+                result = Commons.DNS_R_TSIGVERIFYFAILURE;
+            }
+            else {
+                result = Commons.DNS_R_TSIGERRORSET;
+            }

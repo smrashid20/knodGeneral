@@ -1,0 +1,54 @@
+### src/tls13.c ###
+static int DoTls13CertificateVerify(WOLFSSL* ssl, byte* input,
+                                    word32* inOutIdx, word32 totalSz)
+{
+    int         ret = 0;
+    buffer*     sig = &ssl->buffers.sig;
+#ifdef WOLFSSL_ASYNC_CRYPT
+    Dcv13Args* args = (Dcv13Args*)ssl->async.args;
+    typedef char args_test[sizeof(ssl->async.args) >= sizeof(*args) ? 1 : -1];
+    (void)sizeof(args_test);
+#else
+    Dcv13Args  args[1];
+#endif
+
+    WOLFSSL_START(WC_FUNC_CERTIFICATE_VERIFY_DO);
+    WOLFSSL_ENTER("DoTls13CertificateVerify");
+
+............
+#ifdef __sun
+    #include <sys/filio.h>
+#endif
+
+#ifndef TRUE
+    #define TRUE  1
+#endif
+#ifndef FALSE
+    #define FALSE 0
+#endif
+
+#ifndef HAVE_HKDF
+    #ifndef _MSC_VER
+        #error "The build option HAVE_HKDF is required for TLS 1.3"
+    #else
+        #pragma message("error: The build option HAVE_HKDF is required for TLS 1.3")
+    #endif
+#endif
+
+#ifndef HAVE_TLS_EXTENSIONS
+    #ifndef _MSC_VER
+        #error "The build option HAVE_TLS_EXTENSIONS is required for TLS 1.3"
+    #else
+        #pragma message("error: The build option HAVE_TLS_EXTENSIONS is required for TLS 1.3")
+    #endif
+#endif
+
+
+/* Set ret to error value and jump to label.
+ *
+ * err     The error value to set.
+ * eLabel  The label to jump to.
+ */
+#define ERROR_OUT(err, eLabel) { ret = (err); goto eLabel; }
+
+............

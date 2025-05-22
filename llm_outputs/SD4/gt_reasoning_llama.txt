@@ -1,0 +1,9 @@
+The vulnerability in the int_x509_param_set_hosts function arises from its inability to handle a specific edge case where the hostname length is zero. This oversight leads to the silent omission of hostname verification, creating an opportunity for man-in-the-middle attackers to spoof servers and obtain sensitive information through a crafted certificate.
+
+The root cause of this vulnerability lies in the function's failure to properly handle the case where the namelen parameter is zero. In the buggy code, the function only checks for the presence of a null character in the hostname if the namelen is greater than zero. However, when namelen is zero, the function does not perform any checks, effectively bypassing hostname verification.
+
+The repair addresses this vulnerability by introducing a conditional statement to handle the case where namelen is zero. If namelen is zero and the name is not null, the function sets namelen to the actual length of the name. This ensures that the function correctly handles hostnames with a length of zero and performs the necessary checks to prevent hostname spoofing.
+
+By adding this simple check, the function can now properly handle the edge case where the hostname length is zero, thereby preventing the silent omission of hostname verification. This fix effectively closes the vulnerability and prevents man-in-the-middle attackers from exploiting it.
+
+In essence, the repair ensures that the function consistently enforces hostname verification, regardless of the length of the hostname. This is in line with the expected behavior of the function, as indicated in the LibreSSL documentation, which suggests that the function should support hostnames with a length of zero. By aligning the function's behavior with the documentation, the repair provides a more secure and reliable implementation of the int_x509_param_set_hosts function.

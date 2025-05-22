@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB7",
+    "project_name": "SB7",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/X509Verifier.java",
+    "vul_code_func_start_line": 5,
+    "vul_code_func_end_line": 29,
+    "vul_code_block_start_line": 18,
+    "vul_code_block_end_line": 26,
+    "vul_code_func_fixed_start_line": 5,
+    "vul_code_func_fixed_end_line": 32,
+    "vul_code_block_fixed_start_line": 18,
+    "vul_code_block_fixed_end_line": 29,
+    "vul_code_initial_block_start": 18,
+    "vul_code_initial_block_end": 18,
+    "vul_code_context_lines": ["4-9"],
+    "context_lines": [{
+        "src/main/X509Verifier.java": ["4-9"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "X509Verifier.java",
+    "vul_code_lines":  ["18"],
+    "vul_code_line": 18,
+    "rem_start": 25,
+    "rem_end": 25,
+    "add_start": 25,
+    "add_end": 27
+}

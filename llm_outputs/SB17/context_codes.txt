@@ -1,0 +1,11 @@
+### src/main/TlsCrlVerifier.java ###
+public class TlsCrlVerifier {
+    public static int tls_verify_crl(int ok, X509StoreCtx ctx) {
+        int i = 0, n = 0, res = 0;
+        X509Name subject = null;
+        X509Name issuer = null;
+        X509Certificate xs = null;
+        CrlList crls = null;
+        X509StoreCtx storeCtx = null;
+
+............

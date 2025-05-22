@@ -1,0 +1,12 @@
+### src/main/X509CrtParser.java ###
+public class X509CrtParser {
+    public static int x509_crt_parse_der_core(
+            MbedtlsX509Crt crt, byte[] buf, int buflen,
+            int make_copy, X509CrtExtCb cb, Object p_ctx) {
+        int ret = Constants.MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
+        int p = 0, end = buflen, crt_end;
+        MbedtlsX509Buf sig_params1 = new MbedtlsX509Buf();
+        MbedtlsX509Buf sig_params2 = new MbedtlsX509Buf();
+        MbedtlsX509Buf sig_oid2    = new MbedtlsX509Buf();
+
+............

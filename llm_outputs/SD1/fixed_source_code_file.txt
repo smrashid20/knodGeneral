@@ -1,0 +1,42 @@
+package SD1_fixed.src;
+
+import SD1_fixed.src.commons.Pjmedia_tp_cb_param;
+import SD1_fixed.src.commons.SrtpCrypto;
+import SD1_fixed.src.commons.TransportSrtp;
+
+public class SrtpTransportCallback {
+    public static final int PJ_EIGNORED = -1;
+    public static final int PJ_SUCCESS = 0;
+    public static final int SRTP_ERR_REPLAY_OLD = 1;
+    public static final int SRTP_ERR_REPLAY_FAIL = 2;
+    public static int unprotectCallCount = 0;
+
+    public static void srtp_rtp_cb(Pjmedia_tp_cb_param param) {
+        TransportSrtp srtp = (TransportSrtp) param.user_data;
+        Object pkt = param.pkt;
+        int size = param.size;
+        int len = size;
+        int err = srtp_unprotect(srtp.srtp_rx_ctx, pkt, len);
+        if (srtp.probation_cnt > 0 && (err == SRTP_ERR_REPLAY_OLD || err == SRTP_ERR_REPLAY_FAIL)) {
+            SrtpCrypto tx = srtp.tx_policy;
+            SrtpCrypto rx = srtp.rx_policy;
+            pjmedia_transport_srtp_stop(srtp);
+            int status = pjmedia_transport_srtp_start(srtp, tx, rx);
+            if (status == PJ_SUCCESS && !srtp.bypass_srtp) {
+                err = srtp_unprotect(srtp.srtp_rx_ctx, pkt, len);
+            }
+        }
+        if (err == PJ_SUCCESS && srtp.rtp_cb != null) {
+            srtp.rtp_cb.rtp_cb(srtp.user_data, pkt, len);
+        }
+    }
+
+    static int pjmedia_transport_send_rtp(SD1_fixed.src.commons.Keying key, Object pkt, int size) { return PJ_EIGNORED; }
+    static void pjmedia_transport_srtp_stop(TransportSrtp srtp) {}
+    static int pjmedia_transport_srtp_start(TransportSrtp srtp, SrtpCrypto tx, SrtpCrypto rx) { return PJ_SUCCESS; }
+    static int srtp_unprotect(Object ctx, Object pkt, int len) {
+        unprotectCallCount++;
+        return unprotectCallCount == 1 ? SRTP_ERR_REPLAY_OLD : PJ_SUCCESS;
+    }
+}
+

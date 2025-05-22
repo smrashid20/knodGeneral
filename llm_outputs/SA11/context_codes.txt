@@ -1,0 +1,7 @@
+### src/main/X509CrtRevocationChecker.java ###
+public class X509CrtRevocationChecker {
+    public static int mbedtls_x509_crt_is_revoked(
+            MbedtlsX509Crt crt, MbedtlsX509Crl crl) {
+        MbedtlsX509CrlEntry cur = crl.entry;
+
+............

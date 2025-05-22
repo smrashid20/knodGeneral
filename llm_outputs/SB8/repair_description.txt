@@ -1,0 +1,15 @@
+The repair steps for the provided vulnerability involve addressing the issue where a TLS 1.3 client uses a default predictable buffer for the IKM value when generating the session master secret if neither a PSK (pre-shared key) extension nor a KSE (key share extension) is received from the server. Here's a step-by-step explanation of the repair:
+
+1. **Identify the vulnerable condition**: The repair starts by identifying the condition where the client does not receive a PSK extension from the server. This is done by checking if the `psk` variable is null after searching for the PSK extension in the server's response.
+
+2. **Check for key share extension**: In addition to checking for the PSK extension, the repair also checks if a key share extension is present. This is done by verifying if the `namedGroup` field in the `ssl.session` object is non-zero, indicating the presence of a key share extension.
+
+3. **Return an error if neither extension is present**: If neither a PSK extension nor a key share extension is present, the repair returns an error code `EXT_MISSING`. This error indicates that the client is unable to establish a secure connection due to the missing extensions.
+
+4. **Prevent predictable IKM value usage**: By returning an error when neither extension is present, the repair prevents the client from using a default predictable buffer for the IKM value. This ensures that the session master secret is generated securely, even if the server does not provide a PSK or key share extension.
+
+5. **Maintain existing functionality**: The repair does not alter the existing functionality of the code when a PSK extension is present. If a PSK extension is received, the client will continue to use the provided PSK to generate the session master secret.
+
+6. **Ensure secure key negotiation**: The repair ensures that the client only proceeds with the TLS handshake if a secure key negotiation has taken place. This is achieved by verifying the `pskNegotiated` flag in the `ssl.options` object before proceeding with the handshake.
+
+By implementing these steps, the repair addresses the vulnerability and ensures that the TLS 1.3 client generates a secure session master secret, even when connecting to a malicious server that does not provide a PSK or key share extension.

@@ -1,0 +1,24 @@
+{
+    "vul_id": "F4",
+    "project_name": "libtiff",
+    "language": "cpp",
+    "vul_code_file_rel_path": "libtiff/tif_pixarlog.c",
+    "vul_code_func_start_line": 740,
+    "vul_code_func_end_line": 872,
+    "vul_code_block_start_line": 780,
+    "vul_code_block_end_line": 804,
+    "vul_code_func_fixed_start_line": 742,
+    "vul_code_func_fixed_end_line": 880,
+    "vul_code_block_fixed_start_line": 782,
+    "vul_code_block_fixed_end_line": 812,
+    "vul_code_initial_block_start": 780,
+    "vul_code_initial_block_end": 780,
+    "vul_code_context_lines": ["740-749", "101-111"],
+    "context_lines": [{
+        "libtiff/tif_pixarlog.c": ["740-749", "101-111"]
+    }],
+    "vul_description":  "Memory Corruption vulnerability",
+    "vul_code_file":  "tif_pixarlog.c",
+    "vul_code_lines":  ["786"],
+    "vul_code_line": 786
+}

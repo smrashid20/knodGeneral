@@ -1,0 +1,6 @@
+### src/main/ChaCha20Poly1305Ctrl.java ###
+public class ChaCha20Poly1305Ctrl {
+    public static int chacha20_poly1305_ctrl(EvpCipherCtx ctx, int type, int arg, Object ptr) {
+        EvpChaChaAeadCtx actx = ctx.aeadCtx;
+
+............

@@ -1,0 +1,24 @@
+{
+    "vul_id": "B15",
+    "project_name": "BIND",
+    "language": "cpp",
+    "vul_code_file_rel_path": "lib/dns/zoneverify.c",
+    "vul_code_func_start_line": 1502,
+    "vul_code_func_end_line": 1590,
+    "vul_code_block_start_line": 1554,
+    "vul_code_block_end_line": 1589,
+    "vul_code_func_fixed_start_line": 1502,
+    "vul_code_func_fixed_end_line": 1596,
+    "vul_code_block_fixed_start_line": 1555,
+    "vul_code_block_fixed_end_line": 1595,
+    "vul_code_initial_block_start": 1554,
+    "vul_code_initial_block_end": 1556,
+    "vul_code_context_lines": ["1502-1514", "54-96"],
+    "context_lines": [{
+        "lib/dns/zoneverify.c": ["1502-1514", "54-96"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "zoneverify.c",
+    "vul_code_lines":  ["1557"],
+    "vul_code_line": 1557
+}

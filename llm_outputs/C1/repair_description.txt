@@ -1,0 +1,13 @@
+To repair the vulnerability in the OpenSSL code, several steps need to be taken. 
+
+First, the issue with the X509_verify_cert function returning a negative value to indicate an internal error needs to be addressed. This function is called on the client side to verify a certificate supplied by a server. The negative return value is mishandled by OpenSSL, causing an IO function to not indicate success and a subsequent call to SSL_get_error to return an unexpected value.
+
+The repair involves modifying the logic that handles the return value of X509_verify_cert. Currently, if the application has not set a custom verification callback using SSL_CTX_set_cert_verify_callback, the negative return value from X509_verify_cert is not properly handled.
+
+To fix this, the code needs to be modified to treat an error in X509_verify_cert as a failure to verify the certificate. This ensures that the IO function will correctly indicate an error and the subsequent call to SSL_get_error will return a value that the application can handle.
+
+The repair involves adding a conditional statement to check if the return value of X509_verify_cert is negative. If it is, the code should set the return value to 0, indicating a failure to verify the certificate. This ensures that the error is properly handled and the application will not receive an unexpected return value from SSL_get_error.
+
+By making this change, the vulnerability is addressed, and the code is made more robust. The repair ensures that the OpenSSL library will correctly handle errors that occur during certificate verification, preventing unexpected behavior in applications that use the library.
+
+Overall, the repair involves a simple but important change to the logic that handles certificate verification errors. By treating errors as failures to verify, the code ensures that applications will receive the expected return values and can handle errors correctly.

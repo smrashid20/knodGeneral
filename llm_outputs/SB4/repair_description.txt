@@ -1,0 +1,11 @@
+To repair the vulnerability in the gnutls_ocsp_resp_check_crt function, several steps need to be taken. 
+
+First, the issue with the code is identified as a failure to verify the serial length of an OCSP response. This oversight allows remote attackers to bypass the intended certificate validation mechanism by exploiting trailing bytes left by gnutls_malloc.
+
+The first step in the repair process is to ensure that the size of the certificate serial number is correctly set. This is achieved by assigning the value from the tHolder array to the size attribute of the cserial object. This ensures that the size of the certificate serial number is accurately represented.
+
+Next, the comparison between the sizes of the certificate serial number and the response serial number is performed. This check is crucial in verifying that the serial numbers match and that there are no trailing bytes that could be exploited by an attacker.
+
+Finally, the memcmp function is used to compare the actual data of the certificate serial number and the response serial number. This function checks for any discrepancies between the two serial numbers, ensuring that they are identical.
+
+By implementing these steps, the vulnerability in the gnutls_ocsp_resp_check_crt function is effectively addressed. The repair ensures that the serial length of the OCSP response is properly verified, preventing remote attackers from bypassing the certificate validation mechanism. The corrected code provides an additional layer of security, safeguarding against potential attacks that could compromise the integrity of the system.

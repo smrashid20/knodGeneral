@@ -1,0 +1,20 @@
+                if (args.sigAlgo == Commons.ed25519_sa_algo && !ssl.peerEd25519KeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ED25519 sig but not ED25519 cert");
+                    return Commons.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == Commons.ed448_sa_algo && !ssl.peerEd448KeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ED448 sig but not ED448 cert");
+                    return Commons.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == Commons.ecc_dsa_sa_algo && !ssl.peerEccDsaKeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent ECC sig but not ECC cert");
+                    return Commons.SIG_VERIFY_E;
+                }
+                if (args.sigAlgo == Commons.rsa_sa_algo) {
+                    Wslib.WOLFSSL_MSG("Peer sent PKCS#1.5 algo but not in certificate");
+                    return Commons.INVALID_PARAMETER;
+                }
+                if (args.sigAlgo == Commons.rsa_pss_sa_algo && !ssl.peerRsaKeyPresent) {
+                    Wslib.WOLFSSL_MSG("Peer sent RSA sig but not RSA cert");
+                    return Commons.SIG_VERIFY_E;
+                }

@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB1",
+    "project_name": "SB1",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/Ssl3GetCertVerify.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 161,
+    "vul_code_block_start_line": 34,
+    "vul_code_block_end_line": 44,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 169,
+    "vul_code_block_fixed_start_line": 34,
+    "vul_code_block_fixed_end_line": 44,
+    "vul_code_initial_block_start": 34,
+    "vul_code_initial_block_end": 34,
+    "vul_code_context_lines": ["5-22"],
+    "context_lines": [{
+        "src/main/Ssl3GetCertVerify.java": ["5-22"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Ssl3GetCertVerify.java",
+    "vul_code_lines":  ["36"],
+    "vul_code_line": 36,
+    "rem_start": 36,
+    "rem_end": 37,
+    "add_start": 36,
+    "add_end": 37
+}

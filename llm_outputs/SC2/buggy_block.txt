@@ -1,0 +1,15 @@
+            if (strict && num > 1) {
+                ret = CheckCurve.checkCurve(x);
+                if (ret < 0) {
+                    ctx.error = X509StoreCtx.X509_V_ERR_UNSPECIFIED;
+                    ret = 0;
+                } else if (ret == 0) {
+                    ctx.error = X509StoreCtx.X509_V_ERR_EC_KEY_EXPLICIT_PARAMS;
+                }
+            }
+
+            if ((x.ex_flags & X509.EXFLAG_CA) == 0
+                    && x.ex_pathlen != -1 && strict) {
+                ctx.error = X509StoreCtx.X509_V_ERR_INVALID_EXTENSION;
+                ret = 0;
+            }

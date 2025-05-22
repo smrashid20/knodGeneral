@@ -1,0 +1,9 @@
+### src/master/TlsClient.java ###
+        this.state = new TlsState();
+        this.state.handshakeStage = 0;
+        this.state.flags = 0;
+        this.state.handshakeComplete = false;
+        this.state.masterSecretDerived = false;
+        this.state.SSL3_FLAGS_CCS_OK = 0x0080;
+
+............

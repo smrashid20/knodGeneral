@@ -1,0 +1,9 @@
+The vulnerability in question arises from the ineffective zone transfer controls for writable DLZ (Dynamically Loaded Zones) zones. This issue stems from the fact that the `allowzonexfr` method, which is responsible for controlling zone transfers, was not being called for DLZ zones.
+
+The original code only checks if the result of a DNS operation is not successful (`result!= DnsResult.ISC_R_SUCCESS`) before attempting to call the `dlzAllowZonexfr` method. However, this check is insufficient because it does not account for the specific case of DLZ zones. As a result, the `allowzonexfr` method is not called for DLZ zones, rendering the zone transfer controls ineffective.
+
+The repair addresses this vulnerability by modifying the condition to also check if the zone type is `DNS_ZONE_DLZ`, regardless of the result of the DNS operation. This ensures that the `dlzAllowZonexfr` method is called for DLZ zones, thereby enforcing the zone transfer controls.
+
+In essence, the repair adds an additional condition to the `if` statement to specifically handle DLZ zones. This change guarantees that the `allowzonexfr` method is invoked for DLZ zones, even if the DNS operation is successful. By doing so, the repair effectively closes the vulnerability and ensures that zone transfer controls are enforced for all zones, including DLZ zones.
+
+The reasoning behind this repair is straightforward: by explicitly checking for DLZ zones and calling the `allowzonexfr` method accordingly, the code ensures that the zone transfer controls are applied consistently across all zone types. This change prevents unauthorized zone transfers and enhances the overall security of the DNS system.

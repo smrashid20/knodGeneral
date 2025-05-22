@@ -1,0 +1,17 @@
+### ssl/ssl_cert.c ###
+static int ssl_security_default_callback(const SSL *s, const SSL_CTX *ctx,
+                                         int op, int bits, int nid, void *other,
+                                         void *ex);
+
+static CRYPTO_ONCE ssl_x509_store_ctx_once = CRYPTO_ONCE_STATIC_INIT;
+static volatile int ssl_x509_store_ctx_idx = -1;
+
+DEFINE_RUN_ONCE_STATIC(ssl_x509_store_ctx_init)
+{
+    ssl_x509_store_ctx_idx = X509_STORE_CTX_get_ex_new_index(0,
+                                                             "SSL for verify callback",
+                                                             NULL, NULL, NULL);
+    return ssl_x509_store_ctx_idx >= 0;
+}
+
+............

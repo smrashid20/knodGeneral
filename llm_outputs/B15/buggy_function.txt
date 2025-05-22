@@ -1,0 +1,89 @@
+static isc_result_t
+check_dnskey_sigs(vctx_t *vctx, const dns_rdata_dnskey_t *dnskey,
+		  dns_rdata_t *rdata, bool is_ksk)
+{
+	unsigned char *active_keys, *standby_keys;
+	dns_keynode_t *keynode = NULL;
+	bool *goodkey;
+	dst_key_t *key = NULL;
+	isc_result_t result;
+
+	active_keys = (is_ksk ? vctx->ksk_algorithms : vctx->zsk_algorithms);
+	standby_keys = (is_ksk ? vctx->standby_ksk : vctx->standby_zsk);
+	goodkey = (is_ksk ? &vctx->goodksk : &vctx->goodzsk);
+
+	if (dns_dnssec_selfsigns(rdata, vctx->origin, &vctx->keyset,
+				 &vctx->keysigs, false, vctx->mctx))
+	{
+		if (active_keys[dnskey->algorithm] != 255) {
+			active_keys[dnskey->algorithm]++;
+		}
+	} else if (!is_ksk &&
+		   dns_dnssec_signs(rdata, vctx->origin, &vctx->soaset,
+				    &vctx->soasigs, false, vctx->mctx))
+	{
+		if (active_keys[dnskey->algorithm] != 255) {
+			active_keys[dnskey->algorithm]++;
+		}
+		return (ISC_R_SUCCESS);
+	} else {
+		if (standby_keys[dnskey->algorithm] != 255) {
+			standby_keys[dnskey->algorithm]++;
+		}
+		return (ISC_R_SUCCESS);
+	}
+
+	/*
+	 * If a trust anchor table was not supplied, a correctly self-signed
+	 * DNSKEY RRset is good enough.
+	 */
+	if (vctx->secroots == NULL) {
+		*goodkey = true;
+		return (ISC_R_SUCCESS);
+	}
+
+	/*
+	 * Look up the supplied key in the trust anchor table.
+	 */
+	result = dns_dnssec_keyfromrdata(vctx->origin, rdata, vctx->mctx,
+					 &key);
+	if (result != ISC_R_SUCCESS) {
+		return (result);
+	}
+	result = dns_keytable_findkeynode(vctx->secroots, vctx->origin,
+					  dst_key_alg(key), dst_key_id(key),
+					  &keynode);
+	switch (result) {
+	case ISC_R_SUCCESS:
+		/*
+		 * The supplied key is a trust anchor.
+		 */
+		dns_keytable_detachkeynode(vctx->secroots, &keynode);
+		dns_rdataset_settrust(&vctx->keyset, dns_trust_secure);
+		dns_rdataset_settrust(&vctx->keysigs, dns_trust_secure);
+		*goodkey = true;
+		break;
+	case DNS_R_PARTIALMATCH:
+	case ISC_R_NOTFOUND:
+		/*
+		 * The supplied key is not present in the trust anchor table,
+		 * but other keys signing the DNSKEY RRset may be, so this is
+		 * not an error, we just do not set 'vctx->good[kz]sk'.
+		 */
+		result = ISC_R_SUCCESS;
+		break;
+	default:
+		/*
+		 * An error occurred while searching the trust anchor table,
+		 * return it to the caller.
+		 */
+		break;
+	}
+
+	/*
+	 * Clean up.
+	 */
+	dst_key_free(&key);
+
+	return (result);
+}

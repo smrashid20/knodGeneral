@@ -1,0 +1,11 @@
+To repair the vulnerability, several steps need to be taken. 
+
+First, after the SASL feature has been successfully received, the code checks if a secure connection has already been established. This is necessary because the features are parsed a second time after TLS is established, and we want to avoid unnecessary disconnections.
+
+Next, the code checks the security mode configuration. If the security mode is set to "required" and a secure connection has not been established, it means that the server does not offer TLS, which is a requirement for secure communication.
+
+In this case, the code initiates a shutdown of the connection to the server. This is a security measure to prevent any further communication over an insecure connection.
+
+Finally, the code throws a SecurityRequiredByClientException. This exception indicates that the client requires a secure connection, but the server does not provide one. By throwing this exception, the code ensures that the client is aware of the security risk and can take appropriate action.
+
+By adding these checks and taking the necessary actions, the repair ensures that the client is protected from man-in-the-middle attacks and that TLS protections are not bypassed. The client will only proceed with the connection if a secure connection is established, and will otherwise disconnect and throw an exception.

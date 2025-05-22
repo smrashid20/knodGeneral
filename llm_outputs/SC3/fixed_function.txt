@@ -1,0 +1,32 @@
+    public static MosqErr mosquittoAclCheckDefault(
+            MosquittoDb db,
+            MosquittoContext context,
+            String topic,
+            Access access
+    ) {
+        if (db == null || context == null || topic == null) {
+            return MosqErr.MOSQ_ERR_INVAL;
+        }
+        if (context.bridge) {
+            return MosqErr.MOSQ_ERR_SUCCESS;
+        }
+
+        MosquittoSecurityOptions securityOpts;
+        if (db.config.perListenerSettings) {
+            if (context.listener == null) {
+                return MosqErr.MOSQ_ERR_ACL_DENIED;
+            }
+            securityOpts = context.listener.securityOptions;
+        } else {
+            securityOpts = db.config.securityOptions;
+        }
+
+        if (securityOpts.aclList == null && securityOpts.aclPatterns == null) {
+
+            if (securityOpts.aclFile == null) {
+                return MosqErr.MOSQ_ERR_PLUGIN_DEFER;
+            }
+        }
+
+        return MosqErr.MOSQ_ERR_ACL_DENIED;
+    }

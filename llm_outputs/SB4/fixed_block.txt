@@ -1,0 +1,9 @@
+        if (ret < 0) {
+            return ret;
+        }
+        cserial.size = (int) tHolder[0];
+
+        if (rserial.size != cserial.size
+                || !Helper.memcmp(cserial.data, rserial.data, rserial.size)) {
+            return ErrorCodes.GNUTLS_E_OCSP_RESPONSE_ERROR;
+        }

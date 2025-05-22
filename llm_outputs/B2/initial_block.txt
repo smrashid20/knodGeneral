@@ -1,0 +1,2 @@
+	if (alg_k & SSL_kRSA)
+		{

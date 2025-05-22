@@ -1,0 +1,24 @@
+{
+    "vul_id": "A14",
+    "project_name": "openssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "ssl/s3_pkt.c",
+    "vul_code_func_start_line": 960,
+    "vul_code_func_end_line": 1438,
+    "vul_code_block_start_line": 1299,
+    "vul_code_block_end_line": 1329,
+    "vul_code_func_fixed_start_line": 960,
+    "vul_code_func_fixed_end_line": 1447,
+    "vul_code_block_fixed_start_line": 1299,
+    "vul_code_block_fixed_end_line": 1338,
+    "vul_code_initial_block_start": 1319,
+    "vul_code_initial_block_end": 1319,
+    "vul_code_context_lines": ["960-965", "121-123"],
+    "context_lines": [{
+        "ssl/s3_pkt.c": ["960-965", "121-123"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "s3_pkt.c",
+    "vul_code_lines":  ["1312"],
+    "vul_code_line": 1312
+}

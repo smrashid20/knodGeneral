@@ -1,0 +1,13 @@
+To repair the vulnerability in the given source code, several steps need to be taken. 
+
+First, we need to identify the root cause of the vulnerability. In this case, the issue arises from the lack of a check for the refusal deadline for X connections when ForwardX11Trusted mode is not used. This allows remote attackers to bypass intended access restrictions by establishing a connection outside of the permitted time window.
+
+The next step is to understand the concept of the refusal deadline and how it applies to X connections. The refusal deadline is a time limit after which new X connections are no longer accepted. This is typically implemented using the x11_refuse_time variable, which stores the time at which the refusal deadline expires.
+
+To address the vulnerability, we need to add a check to ensure that the current time is before the refusal deadline. This can be done by comparing the current time, obtained using the monotime function, with the x11_refuse_time variable. If the current time is greater than or equal to the refusal deadline, it indicates that the deadline has expired, and we should reject the X connection.
+
+The next step is to implement the necessary logic to reject the X connection when the refusal deadline has expired. This involves adding a conditional statement to check the deadline and, if expired, logging a message indicating that the X connection has been rejected due to the ForwardX11Timeout expiring. The function should then return an error code to indicate that the connection was rejected.
+
+Finally, we need to ensure that the existing logic for checking the fixed size part of the packet is still in place. This check is necessary to ensure that the packet is valid and can be processed correctly. By adding the refusal deadline check before the packet size check, we can ensure that the vulnerability is addressed while still maintaining the existing functionality of the code.
+
+By following these steps, we can effectively repair the vulnerability and prevent remote attackers from bypassing intended access restrictions by establishing X connections outside of the permitted time window.

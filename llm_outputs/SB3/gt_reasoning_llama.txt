@@ -1,0 +1,9 @@
+The vulnerability in question arises from a non-compliant check of available authentication methods in the client-side SSH code. This allows a malicious SSH server to manipulate the login process, bypassing additional security measures such as FIDO2 tokens or SSH-Askpass. As a result, an attacker can exploit a forwarded agent to log on to another server without being detected.
+
+The root cause of this issue lies in the fact that the client-side SSH code does not properly verify the authentication methods offered by the server. In a typical SSH connection, the client and server negotiate the authentication methods to be used. However, in this case, the client does not correctly check if the server's offered methods are compliant with the expected security standards.
+
+The repair addresses this vulnerability by introducing an additional check before proceeding with the authentication process. Specifically, it checks if trivial authentication is disabled in the client options and if the current authentication method is indeed trivial. If both conditions are true, it throws an exception, preventing the authentication process from continuing.
+
+This check is crucial because trivial authentication methods are often insecure and can be easily exploited by attackers. By disallowing trivial authentication, the client ensures that only more secure methods, such as those using FIDO2 tokens or SSH-Askpass, are used. This significantly reduces the risk of an attacker manipulating the login process and exploiting a forwarded agent.
+
+In essence, the repair enforces a more stringent security policy by verifying the authentication methods offered by the server and ensuring that they meet the expected security standards. This prevents a malicious server from bypassing additional security measures and reduces the risk of unauthorized access to other servers via a forwarded agent.

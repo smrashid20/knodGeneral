@@ -1,0 +1,11 @@
+To repair the vulnerability in the TLS v1.3 server, several steps need to be taken. 
+
+First, the server needs to check if it requires mutual authentication. This is done by verifying if the server is acting as the server end and if mutual authentication is enabled or if the server is set to fail if no client certificate is provided.
+
+Next, the server needs to verify if the client has sent a certificate verify message. This is done by checking if the peer verify option is set and if the connection is not being resumed. If the peer verify option is not set and the connection is not being resumed, it means the client has not sent a certificate verify message.
+
+If the client has not sent a certificate verify message and the server requires mutual authentication, the server needs to terminate the connection. This is done by sending a fatal alert to the client and returning an error code indicating that no peer certificate was provided.
+
+Finally, the server can proceed with the original buffer size check to ensure that the incoming data does not exceed the available buffer space. This check is necessary to prevent buffer overflow attacks.
+
+By adding these checks, the server can ensure that a malicious client cannot bypass mutual authentication by not sending a certificate verify message. The server will now correctly enforce mutual authentication and terminate the connection if the client does not provide a valid certificate.

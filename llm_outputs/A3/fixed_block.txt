@@ -1,0 +1,14 @@
+    if (ctx->engine != NULL
+#if !defined(OPENSSL_NO_ENGINE) && !defined(FIPS_MODULE)
+            || tmpimpl != NULL
+#endif
+            || impl != NULL
+            || (cipher != NULL && cipher->origin == EVP_ORIG_METH)
+            || (cipher == NULL && ctx->cipher != NULL
+                               && ctx->cipher->origin == EVP_ORIG_METH)) {
+        if (ctx->cipher == ctx->fetched_cipher)
+            ctx->cipher = NULL;
+        EVP_CIPHER_free(ctx->fetched_cipher);
+        ctx->fetched_cipher = NULL;
+        goto legacy;
+    }

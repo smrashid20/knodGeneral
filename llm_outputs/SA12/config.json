@@ -1,0 +1,28 @@
+{
+    "vul_id": "SA12",
+    "project_name": "SA12",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/Tls13FinishedHandler.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 80,
+    "vul_code_block_start_line": 14,
+    "vul_code_block_end_line": 17,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 89,
+    "vul_code_block_fixed_start_line": 14,
+    "vul_code_block_fixed_end_line": 26,
+    "vul_code_initial_block_start": 14,
+    "vul_code_initial_block_end": 14,
+    "vul_code_context_lines": ["5-13"],
+    "context_lines": [{
+        "src/main/Tls13FinishedHandler.java": ["5-13"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Tls13FinishedHandler.java",
+    "vul_code_lines":  ["14"],
+    "vul_code_line": 14,
+    "rem_start": 14,
+    "rem_end": 14,
+    "add_start": 14,
+    "add_end": 27
+}

@@ -1,0 +1,37 @@
+### src/CipherInitializer.java ###
+    public static int evpCipherInitInternal(EvpCipherCtx ctx, EvpCipher cipher,
+                                            Engine impl, byte[] key, byte[] iv,
+                                            int enc, OsslParam[] params) {
+        int n = 0;
+        Engine tmpImpl = null;
+
+        if (!OPENSSL_NO_ENGINE && !FIPS_MODULE) {
+            tmpImpl = null;
+        }
+
+        ctx.setIvLen(-1);
+
+        if (enc == -1) {
+            enc = ctx.getEncrypt();
+        } else {
+            enc = (enc == 1) ? 1 : 0;
+            ctx.setEncrypt(enc);
+        }
+
+        if (cipher == null && ctx.getCipher() == null) {
+            Err.raise("EVP", "No cipher set");
+            return 0;
+        }
+
+        if (!OPENSSL_NO_ENGINE && !FIPS_MODULE) {
+            if (ctx.getEngine() != null && ctx.getCipher() != null &&
+                    (cipher == null || cipher.getNid() == ctx.getCipher().getNid())) {
+                return skipToInit(ctx);
+            }
+
+            if (cipher != null && impl == null) {
+                tmpImpl = Engine.getCipherEngine(cipher.getNid());
+            }
+        }
+
+............

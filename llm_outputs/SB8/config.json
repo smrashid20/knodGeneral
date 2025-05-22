@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB8",
+    "project_name": "SB8",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/Tls13ServerHello.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 46,
+    "vul_code_block_start_line": 19,
+    "vul_code_block_end_line": 40,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 48,
+    "vul_code_block_fixed_start_line": 19,
+    "vul_code_block_fixed_end_line": 42,
+    "vul_code_initial_block_start": 19,
+    "vul_code_initial_block_end": 19,
+    "vul_code_context_lines": ["5-9"],
+    "context_lines": [{
+        "src/main/Tls13ServerHello.java": ["5-9"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "Tls13ServerHello.java",
+    "vul_code_lines":  ["38"],
+    "vul_code_line": 38,
+    "rem_start": 38,
+    "rem_end": 38,
+    "add_start": 38,
+    "add_end": 40
+}

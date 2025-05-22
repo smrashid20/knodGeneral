@@ -1,0 +1,4 @@
+    private AdminManager() {
+        // Load an admin provider.
+        initProvider(ADMIN_PROVIDER.getValue());
+    }

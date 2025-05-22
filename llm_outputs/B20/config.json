@@ -1,0 +1,24 @@
+{
+    "vul_id": "B20",
+    "project_name": "Smack",
+    "language": "java",
+    "vul_code_file_rel_path": "smack-tcp/src/main/java/org/jivesoftware/smack/tcp/XMPPTCPConnection.java",
+    "vul_code_func_start_line": 847,
+    "vul_code_func_end_line": 870,
+    "vul_code_block_start_line": 858,
+    "vul_code_block_end_line": 862,
+    "vul_code_func_fixed_start_line": 846,
+    "vul_code_func_fixed_end_line": 877,
+    "vul_code_block_fixed_start_line": 857,
+    "vul_code_block_fixed_end_line": 869,
+    "vul_code_initial_block_start": 858,
+    "vul_code_initial_block_end": 858,
+    "vul_code_context_lines": ["847-855", "140-285"],
+    "context_lines": [{
+        "smack-tcp/src/main/java/org/jivesoftware/smack/tcp/XMPPTCPConnection.java": ["847-855", "140-285"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "XMPPTCPConnection.java",
+    "vul_code_lines":  ["861"],
+    "vul_code_line": 861
+}

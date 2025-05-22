@@ -1,0 +1,405 @@
+### pjmedia/src/pjmedia/transport_srtp.c ###
+static void srtp_rtp_cb(pjmedia_tp_cb_param *param)
+{
+    transport_srtp *srtp = (transport_srtp *) param->user_data;
+    void *pkt = param->pkt;
+    pj_ssize_t size = param->size;
+    int len = (int)size;
+    srtp_err_status_t err;
+    void (*cb)(void*, void*, pj_ssize_t) = NULL;
+    void (*cb2)(pjmedia_tp_cb_param*) = NULL;
+    void *cb_data = NULL;
+
+............
+#if defined(PJMEDIA_HAS_SRTP) && (PJMEDIA_HAS_SRTP != 0)
+
+/* Enable this to test ROC initialization setting. For offerer,
+ * it will send packets with ROC 1 and expect to receive ROC 2.
+ * For answerer it will be the other way around.
+ */
+#define TEST_ROC 0
+
+#if defined(PJ_HAS_SSL_SOCK) && PJ_HAS_SSL_SOCK != 0 && \
+    (PJ_SSL_SOCK_IMP == PJ_SSL_SOCK_IMP_OPENSSL)
+#  include <openssl/rand.h>
+#  include <openssl/opensslv.h>
+
+/* Suppress compile warning of OpenSSL deprecation (OpenSSL is deprecated
+ * since MacOSX 10.7).
+ */
+#if defined(PJ_DARWINOS) && PJ_DARWINOS==1
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
+#endif
+
+#if defined(PJMEDIA_EXTERNAL_SRTP)
+
+#if (PJMEDIA_EXTERNAL_SRTP == 1) 	/* External SRTP 1.x */
+#  include <srtp/srtp.h>
+#  include <srtp/crypto_kernel.h>
+#define srtp_crypto_policy_t 		crypto_policy_t
+#define srtp_cipher_type_id_t 		cipher_type_id_t
+#define srtp_cipher_type_t		cipher_type_t
+#define srtp_auth_type_id_t 		auth_type_id_t
+#define srtp_sec_serv_t			sec_serv_t
+#define srtp_err_status_t		err_status_t
+#define srtp_err_status_ok		err_status_ok
+#define srtp_err_status_replay_old	err_status_replay_old
+#define srtp_err_status_replay_fail	err_status_replay_fail
+#define srtp_crypto_policy_set_aes_cm_256_hmac_sha1_32 \
+	     crypto_policy_set_aes_cm_256_hmac_sha1_32
+#define srtp_crypto_policy_set_aes_cm_256_hmac_sha1_80 \
+	     crypto_policy_set_aes_cm_256_hmac_sha1_80
+#define SRTP_NULL_CIPHER		NULL_CIPHER
+#define SRTP_NULL_AUTH			NULL_AUTH
+#define SRTP_AES_ICM_128		AES_ICM
+#define SRTP_AES_ICM_192		AES_ICM
+#define SRTP_AES_ICM_256		AES_ICM
+#define SRTP_AES_GCM_128		AES_128_GCM
+#define SRTP_AES_GCM_256		AES_256_GCM
+#define SRTP_HMAC_SHA1			HMAC_SHA1
+#define srtp_aes_gcm_256_openssl        aes_gcm_256_openssl
+#define srtp_aes_gcm_128_openssl        aes_gcm_128_openssl
+
+#else				 	/* External SRTP 2.x */
+#  include <srtp2/srtp.h>
+#  include <srtp2/cipher.h>
+
+/* In libsrtp 2.0.0, the macro SRTP_AES_ICM_128 is not available. 
+ * Instead it was named with ICM at the end: SRTP_AES_128_ICM. 
+ */
+#  ifdef SRTP_AES_128_ICM
+#    define SRTP_AES_ICM_128		SRTP_AES_128_ICM
+#    define SRTP_AES_ICM_192		SRTP_AES_192_ICM
+#    define SRTP_AES_ICM_256		SRTP_AES_256_ICM
+#    define SRTP_AES_GCM_128		SRTP_AES_128_GCM
+#    define SRTP_AES_GCM_256		SRTP_AES_256_GCM
+#  endif
+
+#endif
+
+#else					/* Bundled SRTP */
+#  include <srtp.h>
+#  include <crypto_kernel.h>
+#endif
+
+#define THIS_FILE   "transport_srtp.c"
+
+/* Maximum size of outgoing packet */
+#define MAX_RTP_BUFFER_LEN	    PJMEDIA_MAX_MTU
+#define MAX_RTCP_BUFFER_LEN	    PJMEDIA_MAX_MTU
+
+/* Maximum SRTP crypto key length */
+#define MAX_KEY_LEN		    128
+
+/* Initial value of probation counter. When probation counter > 0,
+ * it means SRTP is in probation state, and it may restart when
+ * srtp_unprotect() returns err_status_replay_*
+ */
+#define PROBATION_CNT_INIT	    100
+
+#define DEACTIVATE_MEDIA(pool, m)   pjmedia_sdp_media_deactivate(pool, m)
+
+#ifdef SRTP_MAX_TRAILER_LEN
+#   define MAX_TRAILER_LEN SRTP_MAX_TRAILER_LEN
+#else
+#   define MAX_TRAILER_LEN 10
+#endif
+
+/* Maximum number of SRTP keying method */
+#define MAX_KEYING		    2
+
+static const pj_str_t ID_RTP_AVP  = { "RTP/AVP", 7 };
+static const pj_str_t ID_RTP_SAVP = { "RTP/SAVP", 8 };
+// static const pj_str_t ID_INACTIVE = { "inactive", 8 };
+static const pj_str_t ID_CRYPTO   = { "crypto", 6 };
+
+typedef void (*crypto_method_t)(srtp_crypto_policy_t *policy);
+
+typedef struct crypto_suite
+{
+    char		*name;
+    srtp_cipher_type_id_t cipher_type;
+    unsigned		 cipher_key_len;    /* key + salt length    */
+    unsigned		 cipher_salt_len;   /* salt only length	    */
+    srtp_auth_type_id_t	 auth_type;
+    unsigned		 auth_key_len;
+    unsigned		 srtp_auth_tag_len;
+    unsigned		 srtcp_auth_tag_len;
+    srtp_sec_serv_t	 service;
+    /* This is an attempt to validate crypto support by libsrtp, i.e: it should
+     * raise linking error if the libsrtp does not support the crypto. 
+     */
+    srtp_cipher_type_t  *ext_cipher_type;
+    crypto_method_t      ext_crypto_method;
+} crypto_suite;
+
+extern srtp_cipher_type_t srtp_aes_gcm_256_openssl;
+extern srtp_cipher_type_t srtp_aes_gcm_128_openssl;
+extern srtp_cipher_type_t srtp_aes_icm_192;
+
+/* https://www.iana.org/assignments/sdp-security-descriptions/sdp-security-descriptions.xhtml */
+static crypto_suite crypto_suites[] = {
+    /* plain RTP/RTCP (no cipher & no auth) */
+    {"NULL", SRTP_NULL_CIPHER, 0, SRTP_NULL_AUTH, 0, 0, 0, sec_serv_none},
+
+#if defined(PJMEDIA_SRTP_HAS_AES_GCM_256)&&(PJMEDIA_SRTP_HAS_AES_GCM_256!=0)
+
+    /* cipher AES_GCM, NULL auth, auth tag len = 16 octets */
+    {"AEAD_AES_256_GCM", SRTP_AES_GCM_256, 44, 12,
+	SRTP_NULL_AUTH, 0, 16, 16, sec_serv_conf_and_auth,
+	&srtp_aes_gcm_256_openssl},
+
+    /* cipher AES_GCM, NULL auth, auth tag len = 8 octets */
+    {"AEAD_AES_256_GCM_8", SRTP_AES_GCM_256, 44, 12,
+	SRTP_NULL_AUTH, 0, 8, 8, sec_serv_conf_and_auth,
+	&srtp_aes_gcm_256_openssl},
+#endif
+#if defined(PJMEDIA_SRTP_HAS_AES_CM_256)&&(PJMEDIA_SRTP_HAS_AES_CM_256!=0)
+
+    /* cipher AES_CM_256, auth SRTP_HMAC_SHA1, auth tag len = 10 octets */
+    {"AES_256_CM_HMAC_SHA1_80", SRTP_AES_ICM_256, 46, 14,
+	SRTP_HMAC_SHA1, 20, 10, 10, sec_serv_conf_and_auth,
+	NULL, &srtp_crypto_policy_set_aes_cm_256_hmac_sha1_80},
+
+    /* cipher AES_CM_256, auth SRTP_HMAC_SHA1, auth tag len = 10 octets */
+    {"AES_256_CM_HMAC_SHA1_32", SRTP_AES_ICM_256, 46, 14,
+	SRTP_HMAC_SHA1, 20, 4, 10, sec_serv_conf_and_auth,
+	NULL, &srtp_crypto_policy_set_aes_cm_256_hmac_sha1_32},
+#endif
+#if defined(PJMEDIA_SRTP_HAS_AES_CM_192)&&(PJMEDIA_SRTP_HAS_AES_CM_192!=0)
+
+    /* cipher AES_CM_192, auth SRTP_HMAC_SHA1, auth tag len = 10 octets */
+    {"AES_192_CM_HMAC_SHA1_80", SRTP_AES_ICM_192, 38, 14,
+	SRTP_HMAC_SHA1, 20, 10, 10, sec_serv_conf_and_auth,
+	&srtp_aes_icm_192},
+
+    /* cipher AES_CM_192, auth SRTP_HMAC_SHA1, auth tag len = 4 octets */
+    {"AES_192_CM_HMAC_SHA1_32", SRTP_AES_ICM_192, 38, 14,
+	SRTP_HMAC_SHA1, 20, 4, 10, sec_serv_conf_and_auth,
+	&srtp_aes_icm_192},
+#endif
+#if defined(PJMEDIA_SRTP_HAS_AES_GCM_128)&&(PJMEDIA_SRTP_HAS_AES_GCM_128!=0)
+
+    /* cipher AES_GCM, NULL auth, auth tag len = 16 octets */
+    {"AEAD_AES_128_GCM", SRTP_AES_GCM_128, 28, 12,
+	SRTP_NULL_AUTH, 0, 16, 16, sec_serv_conf_and_auth,
+	&srtp_aes_gcm_128_openssl},
+
+    /* cipher AES_GCM, NULL auth, auth tag len = 8 octets */
+    {"AEAD_AES_128_GCM_8", SRTP_AES_GCM_128, 28, 12,
+	SRTP_NULL_AUTH, 0, 8, 8, sec_serv_conf_and_auth,
+	&srtp_aes_gcm_128_openssl},
+#endif
+#if defined(PJMEDIA_SRTP_HAS_AES_CM_128)&&(PJMEDIA_SRTP_HAS_AES_CM_128!=0)
+
+    /* cipher AES_CM_128, auth SRTP_HMAC_SHA1, auth tag len = 10 octets */
+    {"AES_CM_128_HMAC_SHA1_80", SRTP_AES_ICM_128, 30, 14,
+	SRTP_HMAC_SHA1, 20, 10, 10, sec_serv_conf_and_auth},
+
+    /* cipher AES_CM_128, auth SRTP_HMAC_SHA1, auth tag len = 4 octets */
+    {"AES_CM_128_HMAC_SHA1_32", SRTP_AES_ICM_128, 30, 14,
+	SRTP_HMAC_SHA1, 20, 4, 10, sec_serv_conf_and_auth},
+#endif
+
+    /*
+     * F8_128_HMAC_SHA1_8 not supported by libsrtp?
+     * {"F8_128_HMAC_SHA1_8", NULL_CIPHER, 0, 0, NULL_AUTH, 0, 0, 0,
+     *	sec_serv_none}
+     */
+};
+
+
+/* SRTP transport */
+typedef struct transport_srtp
+{
+    pjmedia_transport	 base;		    /**< Base transport interface.  */
+    pj_pool_t		*pool;		    /**< Pool for transport SRTP.   */
+    pj_lock_t		*mutex;		    /**< Mutex for libsrtp contexts.*/
+    char		 rtp_tx_buffer[MAX_RTP_BUFFER_LEN];
+    char		 rtcp_tx_buffer[MAX_RTCP_BUFFER_LEN];
+    pjmedia_srtp_setting setting;
+    unsigned		 media_option;
+    pj_bool_t		 use_rtcp_mux;	    /**< Use RTP& RTCP multiplexing?*/
+
+    /* SRTP policy */
+    pj_bool_t		 session_inited;
+    pj_bool_t		 offerer_side;
+    pj_bool_t		 bypass_srtp;
+    char		 tx_key[MAX_KEY_LEN];
+    char		 rx_key[MAX_KEY_LEN];
+    pjmedia_srtp_crypto  tx_policy;
+    pjmedia_srtp_crypto  rx_policy;
+
+    /* Temporary policy for negotiation */
+    pjmedia_srtp_crypto  tx_policy_neg;
+    pjmedia_srtp_crypto  rx_policy_neg;
+
+    /* libSRTP contexts */
+    srtp_t		 srtp_tx_ctx;
+    srtp_t		 srtp_rx_ctx;
+
+    /* Stream information */
+    void		*user_data;
+    void		(*rtp_cb)( void *user_data,
+				   void *pkt,
+				   pj_ssize_t size);
+    void  		(*rtp_cb2)(pjmedia_tp_cb_param*);
+    void		(*rtcp_cb)(void *user_data,
+				   void *pkt,
+				   pj_ssize_t size);
+
+    /* Transport information */
+    pjmedia_transport	*member_tp; /**< Underlying transport.       */
+    pj_bool_t		 member_tp_attached;
+    pj_bool_t		 started;
+
+    /* SRTP usage policy of peer. This field is updated when media is starting.
+     * This is useful when SRTP is in optional mode and peer is using mandatory
+     * mode, so when local is about to reinvite/update, it should offer
+     * RTP/SAVP instead of offering RTP/AVP.
+     */
+    pjmedia_srtp_use	 peer_use;
+
+    /* When probation counter > 0, it means SRTP is in probation state,
+     * and it may restart when srtp_unprotect() returns err_status_replay_*
+     */
+    unsigned		 probation_cnt;
+
+    /* SRTP keying methods. The keying is implemented using media transport
+     * abstraction, so it will also be invoked when the SRTP media transport
+     * operation is invoked.
+     *
+     * As there can be multiple keying methods enabled (currently only SDES &
+     * DTLS-SRTP), each keying method will be given the chance to respond to
+     * remote SDP. If any keying operation returns non-success, it will be
+     * removed from the session. And once SRTP key is obtained via a keying
+     * method, any other keying methods will be stopped and destroyed.
+     */
+    unsigned		 all_keying_cnt;
+    pjmedia_transport	*all_keying[MAX_KEYING];
+
+    /* Current active SRTP keying methods. */
+    unsigned		 keying_cnt;
+    pjmedia_transport	*keying[MAX_KEYING];
+
+    /* If not zero, keying nego is ongoing (async-ly, e.g: by DTLS-SRTP).
+     * This field may be updated by keying method.
+     */
+    unsigned		 keying_pending_cnt;
+
+    /* RTP SSRC in receiving direction, used in getting and setting SRTP
+     * roll over counter (ROC) on SRTP restart.
+     */
+    pj_uint32_t		 rx_ssrc;
+
+    pj_uint32_t		 tx_ssrc;
+
+} transport_srtp;
+
+
+/*
+ * This callback is called by transport when incoming rtp is received
+ */
+static void srtp_rtp_cb(pjmedia_tp_cb_param *param);
+
+/*
+ * This callback is called by transport when incoming rtcp is received
+ */
+static void srtp_rtcp_cb( void *user_data, void *pkt, pj_ssize_t size);
+
+
+/*
+ * These are media transport operations.
+ */
+static pj_status_t transport_get_info (pjmedia_transport *tp,
+				       pjmedia_transport_info *info);
+//static pj_status_t transport_attach   (pjmedia_transport *tp,
+//				       void *user_data,
+//				       const pj_sockaddr_t *rem_addr,
+//				       const pj_sockaddr_t *rem_rtcp,
+//				       unsigned addr_len,
+//				       void (*rtp_cb)(void*,
+//						      void*,
+//						      pj_ssize_t),
+//				       void (*rtcp_cb)(void*,
+//						       void*,
+//						       pj_ssize_t));
+static void	   transport_detach   (pjmedia_transport *tp,
+				       void *strm);
+static pj_status_t transport_send_rtp( pjmedia_transport *tp,
+				       const void *pkt,
+				       pj_size_t size);
+static pj_status_t transport_send_rtcp(pjmedia_transport *tp,
+				       const void *pkt,
+				       pj_size_t size);
+static pj_status_t transport_send_rtcp2(pjmedia_transport *tp,
+				       const pj_sockaddr_t *addr,
+				       unsigned addr_len,
+				       const void *pkt,
+				       pj_size_t size);
+static pj_status_t transport_media_create(pjmedia_transport *tp,
+				       pj_pool_t *sdp_pool,
+				       unsigned options,
+				       const pjmedia_sdp_session *sdp_remote,
+				       unsigned media_index);
+static pj_status_t transport_encode_sdp(pjmedia_transport *tp,
+				       pj_pool_t *sdp_pool,
+				       pjmedia_sdp_session *sdp_local,
+				       const pjmedia_sdp_session *sdp_remote,
+				       unsigned media_index);
+static pj_status_t transport_media_start (pjmedia_transport *tp,
+				       pj_pool_t *pool,
+				       const pjmedia_sdp_session *sdp_local,
+				       const pjmedia_sdp_session *sdp_remote,
+				       unsigned media_index);
+static pj_status_t transport_media_stop(pjmedia_transport *tp);
+static pj_status_t transport_simulate_lost(pjmedia_transport *tp,
+				       pjmedia_dir dir,
+				       unsigned pct_lost);
+static pj_status_t transport_destroy  (pjmedia_transport *tp);
+static pj_status_t transport_attach2  (pjmedia_transport *tp,
+				       pjmedia_transport_attach_param *param);
+
+
+
+static pjmedia_transport_op transport_srtp_op =
+{
+    &transport_get_info,
+    NULL, //&transport_attach,
+    &transport_detach,
+    &transport_send_rtp,
+    &transport_send_rtcp,
+    &transport_send_rtcp2,
+    &transport_media_create,
+    &transport_encode_sdp,
+    &transport_media_start,
+    &transport_media_stop,
+    &transport_simulate_lost,
+    &transport_destroy,
+    &transport_attach2
+};
+
+/* Get crypto index from crypto name */
+static int get_crypto_idx(const pj_str_t* crypto_name);
+
+/* Is crypto empty (i.e: no name or key)? */
+static pj_bool_t srtp_crypto_empty(const pjmedia_srtp_crypto* c);
+
+/* Compare crypto, return zero if same */
+static int srtp_crypto_cmp(const pjmedia_srtp_crypto* c1,
+			   const pjmedia_srtp_crypto* c2);
+
+/* Start SRTP */
+static pj_status_t start_srtp(transport_srtp *srtp);
+
+
+/* This function may also be used by other module, e.g: pjmedia/errno.c,
+ * it should have C compatible declaration.
+ */
+PJ_BEGIN_DECL
+    const char* get_libsrtp_errstr(int err);
+PJ_END_DECL
+
+............

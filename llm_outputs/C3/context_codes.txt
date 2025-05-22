@@ -1,0 +1,24 @@
+### src/security_default.c ###
+int mosquitto_acl_check_default(struct mosquitto_db *db, struct mosquitto *context, const char *topic, int access)
+{
+	char *local_acl;
+	struct mosquitto__acl *acl_root;
+	bool result;
+	int i;
+	int len, tlen, clen, ulen;
+	char *s;
+	struct mosquitto__security_options *security_opts = NULL;
+
+............
+static int aclfile__parse(struct mosquitto_db *db, struct mosquitto__security_options *security_opts);
+static int unpwd__file_parse(struct mosquitto__unpwd **unpwd, const char *password_file);
+static int acl__cleanup(struct mosquitto_db *db, bool reload);
+static int unpwd__cleanup(struct mosquitto__unpwd **unpwd, bool reload);
+static int psk__file_parse(struct mosquitto_db *db, struct mosquitto__unpwd **psk_id, const char *psk_file);
+#ifdef WITH_TLS
+static int pw__digest(const char *password, const unsigned char *salt, unsigned int salt_len, unsigned char *hash, unsigned int *hash_len);
+static int base64__decode(char *in, unsigned char **decoded, unsigned int *decoded_len);
+static int mosquitto__memcmp_const(const void *ptr1, const void *b, size_t len);
+#endif
+
+............

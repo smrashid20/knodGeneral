@@ -1,0 +1,117 @@
+### lib/dns/message.c ###
+isc_result_t
+dns_message_signer(dns_message_t *msg, dns_name_t *signer) {
+	isc_result_t result = ISC_R_SUCCESS;
+	dns_rdata_t rdata = DNS_RDATA_INIT;
+
+	REQUIRE(DNS_MESSAGE_VALID(msg));
+	REQUIRE(signer != NULL);
+	REQUIRE(msg->from_to_wire == DNS_MESSAGE_INTENTPARSE);
+
+............
+#define DNS_MESSAGE_OPCODE_MASK		0x7800U
+#define DNS_MESSAGE_OPCODE_SHIFT	11
+#define DNS_MESSAGE_RCODE_MASK		0x000fU
+#define DNS_MESSAGE_FLAG_MASK		0x8ff0U
+#define DNS_MESSAGE_EDNSRCODE_MASK	0xff000000U
+#define DNS_MESSAGE_EDNSRCODE_SHIFT	24
+#define DNS_MESSAGE_EDNSVERSION_MASK	0x00ff0000U
+#define DNS_MESSAGE_EDNSVERSION_SHIFT	16
+
+#define VALID_NAMED_SECTION(s)  (((s) > DNS_SECTION_ANY) \
+				 && ((s) < DNS_SECTION_MAX))
+#define VALID_SECTION(s)	(((s) >= DNS_SECTION_ANY) \
+				 && ((s) < DNS_SECTION_MAX))
+#define ADD_STRING(b, s)	{if (strlen(s) >= \
+				   isc_buffer_availablelength(b)) { \
+				       result = ISC_R_NOSPACE; \
+				       goto cleanup; \
+				 } else \
+				       isc_buffer_putstr(b, s);}
+#define VALID_PSEUDOSECTION(s)	(((s) >= DNS_PSEUDOSECTION_ANY) \
+				 && ((s) < DNS_PSEUDOSECTION_MAX))
+
+#define OPTOUT(x) (((x)->attributes & DNS_RDATASETATTR_OPTOUT) != 0)
+
+/*%
+ * This is the size of each individual scratchpad buffer, and the numbers
+ * of various block allocations used within the server.
+ * XXXMLG These should come from a config setting.
+ */
+#define SCRATCHPAD_SIZE		512
+#define NAME_COUNT		 64
+#define OFFSET_COUNT		  4
+#define RDATA_COUNT		  8
+#define RDATALIST_COUNT		  8
+#define RDATASET_COUNT	         64
+
+/*%
+ * Text representation of the different items, for message_totext
+ * functions.
+ */
+static const char *sectiontext[] = {
+	"QUESTION",
+	"ANSWER",
+	"AUTHORITY",
+	"ADDITIONAL"
+};
+
+static const char *updsectiontext[] = {
+	"ZONE",
+	"PREREQUISITE",
+	"UPDATE",
+	"ADDITIONAL"
+};
+
+static const char *opcodetext[] = {
+	"QUERY",
+	"IQUERY",
+	"STATUS",
+	"RESERVED3",
+	"NOTIFY",
+	"UPDATE",
+	"RESERVED6",
+	"RESERVED7",
+	"RESERVED8",
+	"RESERVED9",
+	"RESERVED10",
+	"RESERVED11",
+	"RESERVED12",
+	"RESERVED13",
+	"RESERVED14",
+	"RESERVED15"
+};
+
+/*%
+ * "helper" type, which consists of a block of some type, and is linkable.
+ * For it to work, sizeof(dns_msgblock_t) must be a multiple of the pointer
+ * size, or the allocated elements will not be aligned correctly.
+ */
+struct dns_msgblock {
+	unsigned int			count;
+	unsigned int			remaining;
+	ISC_LINK(dns_msgblock_t)	link;
+}; /* dynamically sized */
+
+static inline dns_msgblock_t *
+msgblock_allocate(isc_mem_t *, unsigned int, unsigned int);
+
+#define msgblock_get(block, type) \
+	((type *)msgblock_internalget(block, sizeof(type)))
+
+static inline void *
+msgblock_internalget(dns_msgblock_t *, unsigned int);
+
+static inline void
+msgblock_reset(dns_msgblock_t *);
+
+static inline void
+msgblock_free(isc_mem_t *, dns_msgblock_t *, unsigned int);
+
+static void
+logfmtpacket(dns_message_t *message, const char *description,
+	     const isc_sockaddr_t *address, isc_logcategory_t *category,
+	     isc_logmodule_t *module, const dns_master_style_t *style,
+	     int level, isc_mem_t *mctx);
+
+............

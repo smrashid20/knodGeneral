@@ -1,0 +1,6 @@
+        if (securityOpts.aclList == null && securityOpts.aclPatterns == null) {
+
+            if (securityOpts.aclFile == null) {
+                return MosqErr.MOSQ_ERR_PLUGIN_DEFER;
+            }
+        }

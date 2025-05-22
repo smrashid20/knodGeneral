@@ -1,0 +1,2 @@
+	if (!x509_verify_ctx_validate_legacy_chain(ctx, chain, depth))
+		return 0;

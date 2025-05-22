@@ -1,0 +1,7 @@
+### src/main/CertImporter.java ###
+public class CertImporter {
+    public static int gnutls_x509_crt_import(GnutlsX509Crt cert, GnutlsDatum data, int format) {
+        int result = 0;
+        int version;
+
+............

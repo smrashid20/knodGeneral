@@ -1,0 +1,15 @@
+The repair of the vulnerability involves several steps to ensure that the TLS v1.3 client properly authenticates the TLS v1.3 server by verifying the certificate. Here are the steps:
+
+1. **Initialization of a Flag Variable**: A boolean flag variable `validSigAlgo` is introduced to track whether the signature algorithm used in the certificate verify message matches the one in the certificate. This variable is initially set to `false`.
+
+2. **Checking Signature Algorithm**: The code checks the signature algorithm used in the certificate verify message and updates the `validSigAlgo` flag accordingly. For each supported signature algorithm, a message is logged indicating the type of signature algorithm used.
+
+3. **Verification of Signature Algorithm**: For each signature algorithm, the code checks if the corresponding key is present in the certificate. If the key is present, the `validSigAlgo` flag is set to `true`.
+
+4. **Handling of RSA Signature Algorithm**: The code specifically handles the RSA signature algorithm, which is not valid for TLS v1.3. If the RSA signature algorithm is used, an error message is logged, and an `INVALID_PARAMETER` error is returned.
+
+5. **Verification of Signature Algorithm Correspondence**: After checking all signature algorithms, the code verifies if the `validSigAlgo` flag is still `false`. If it is, it means that the signature algorithm used in the certificate verify message does not correspond to the one in the certificate. In this case, an error message is logged, and a `SIG_VERIFY_E` error is returned.
+
+6. **Implicit Verification of Certificate Presence**: The repair code implicitly verifies that a certificate is present by checking the corresponding key presence for each signature algorithm. If no certificate is present, the `validSigAlgo` flag will remain `false`, and an error will be returned.
+
+By following these steps, the repair ensures that the TLS v1.3 client properly authenticates the TLS v1.3 server by verifying that the signature algorithm used in the certificate verify message corresponds to the one in the certificate, thus preventing the certificate check bypass vulnerability.

@@ -1,0 +1,12 @@
+### src/main/KeyVerifier.java ###
+public class KeyVerifier {
+    public static int check_dnskey_sigs(Vctx vctx,
+                                        DnsRdataDnskey dnskey,
+                                        RData rdata,
+                                        boolean is_ksk)
+    {
+        byte[] active_keys  = is_ksk ? vctx.ksk_algorithms : vctx.zsk_algorithms;
+        byte[] standby_keys = is_ksk ? vctx.standby_ksk    : vctx.standby_zsk;
+        boolean[] goodkey   = is_ksk ? vctx.goodksk         : vctx.goodzsk;
+
+............

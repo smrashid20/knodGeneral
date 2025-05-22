@@ -1,0 +1,1 @@
+            if ((session.getInternals().getHskFlags() & Constants.HSK_HRR_RECEIVED) == 0 &&

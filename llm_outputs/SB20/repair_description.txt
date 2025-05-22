@@ -1,0 +1,13 @@
+To repair the vulnerability, several steps were taken to ensure the security of the connection. 
+
+First, the existing connection establishment process was maintained, including connecting using the provided configuration, initializing the connection, and checking for the SASL feature. 
+
+Next, a crucial security check was added to verify if the connection is secure and if the security mode is set to "required" in the configuration. This check is essential to prevent man-in-the-middle attacks by ensuring that the connection meets the required security standards.
+
+If the connection is not secure and the security mode is set to "required," the connection is immediately shut down, and a SecurityRequiredByClientException is thrown. This exception indicates that the client requires a secure connection, which was not established.
+
+By adding this security check, the vulnerability is addressed, and the risk of man-in-the-middle attacks is mitigated. The connection is only established if it meets the required security standards, ensuring the protection of client authentication.
+
+The remaining steps in the connection process, including calling the connection connected listener, logging in, and notifying reconnection, are only executed if the connection is secure and the security mode is met. This ensures that the connection is properly established and secured before proceeding with further actions.
+
+Overall, the repair involves adding a critical security check to ensure that the connection meets the required security standards, preventing potential man-in-the-middle attacks and protecting client authentication.

@@ -1,0 +1,13 @@
+The repair steps for the given vulnerability involve modifying the existing code to ensure that the check for non-CA certificates is not overwritten by the subsequent check for explicitly encoded elliptic curve parameters. Here's a step-by-step explanation of the repair:
+
+1. **Preserve the result of the previous check**: The first step is to ensure that the result of the previous check, which confirms that certificates in the chain are valid CA certificates, is preserved. This is done by adding a condition to check if the previous result (`ret`) is greater than 0 before performing the additional strict check.
+
+2. **Perform the additional strict check only if the previous check passes**: The additional strict check for explicitly encoded elliptic curve parameters should only be performed if the previous check passes. This ensures that the result of the previous check is not overwritten.
+
+3. **Check for non-CA certificates only if the previous checks pass**: The check for non-CA certificates should only be performed if both the previous checks pass. This ensures that the check for non-CA certificates is not bypassed.
+
+4. **Set the error code accordingly**: If any of the checks fail, the error code should be set accordingly. In this case, the error code `X509_V_ERR_INVALID_EXTENSION` is set if the certificate is not a valid CA certificate.
+
+5. **Return the result of the checks**: Finally, the result of the checks should be returned. If any of the checks fail, the result should be 0, indicating an error.
+
+By following these steps, the repair ensures that the check for non-CA certificates is not overwritten by the subsequent check for explicitly encoded elliptic curve parameters, thereby preventing the bypass of the check that non-CA certificates must not be able to issue other certificates.

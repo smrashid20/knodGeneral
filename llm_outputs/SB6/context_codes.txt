@@ -1,0 +1,8 @@
+### src/main/X509Verifier.java ###
+public class X509Verifier {
+    public static void x509_crt_verify_name(MbedtlsX509Crt crt, String cn, int[] flags) {
+        MbedtlsX509Name     name;
+        MbedtlsX509Sequence cur;
+        int                 cn_len = cn.length();
+
+............

@@ -1,0 +1,22 @@
+static struct frec *lookup_frec(unsigned short id, int fd, int family, void *hash)
+{
+  struct frec *f;
+
+  for(f = daemon->frec_list; f; f = f->next)
+    if (f->sentto && f->new_id == id && 
+	(!hash || memcmp(hash, f->hash, HASH_SIZE) == 0))
+      {
+	/* sent from random port */
+	if (family == AF_INET && f->rfd4 && f->rfd4->fd == fd)
+	  return f;
+
+	if (family == AF_INET6 && f->rfd6 && f->rfd6->fd == fd)
+	  return f;
+
+	/* sent to upstream from bound socket. */
+	if (f->sentto->sfd && f->sentto->sfd->fd == fd)
+	  return f;
+      }
+      
+  return NULL;
+}

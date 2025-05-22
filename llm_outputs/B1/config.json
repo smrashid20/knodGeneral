@@ -1,0 +1,24 @@
+{
+    "vul_id": "B1",
+    "project_name": "openssl",
+    "language": "cpp",
+    "vul_code_file_rel_path": "ssl/s3_srvr.c",
+    "vul_code_func_start_line": 3023,
+    "vul_code_func_end_line": 3268,
+    "vul_code_block_start_line": 3056,
+    "vul_code_block_end_line": 3067,
+    "vul_code_func_fixed_start_line": 3023,
+    "vul_code_func_fixed_end_line": 3268,
+    "vul_code_block_fixed_start_line": 3056,
+    "vul_code_block_fixed_end_line": 3067,
+    "vul_code_initial_block_start": 3056,
+    "vul_code_initial_block_end": 3056,
+    "vul_code_context_lines": ["3023-3040"],
+    "context_lines": [{
+        "crypto/x509/x509_vfy.c": ["3023-3040"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "s3_srvr.c",
+    "vul_code_lines":  ["3059"],
+    "vul_code_line": 3059
+}

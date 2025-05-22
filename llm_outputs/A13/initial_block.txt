@@ -1,0 +1,1 @@
+	result = dns_zt_find(client->view->zonetable, question_name, 0, NULL,

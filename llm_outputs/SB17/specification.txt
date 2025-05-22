@@ -1,0 +1,15 @@
+Verify the issuer and scope of the complete CRL as follows:
+
+(1) If the DP includes cRLIssuer, then verify that the issuer field in the complete CRL matches cRLIssuer in the DP and that the complete CRL contains an issuing distribution point extension with the indirectCRL boolean asserted. Otherwise, verify that the CRL issuer matches the certificate issuer.
+
+(2) If the complete CRL includes an issuing distribution point (IDP) CRL extension, check the following:
+
+(i) If the distribution point name is present in the IDP CRL extension and the distribution field is present in the DP, then verify that one of the names in the IDP matches one of the names in the DP.
+(ii) If the onlyContainsUserCerts boolean is asserted in the IDP CRL extension, verify that the certificate does not include the basic constraints extension with the cA boolean asserted.
+(iii) If the onlyContainsCACerts boolean is asserted in the IDP CRL extension, verify that the certificate includes the basic constraints extension with the cA boolean asserted.
+(iv) Verify that the onlyContainsAttributeCerts boolean is not asserted.
+
+(c) If use-deltas is set, verify the issuer and scope of the delta CRL as follows:
+
+(1) Verify that the delta CRL issuer matches the complete CRL issuer.
+(2) If the complete CRL includes an issuing distribution point (IDP) CRL extension, verify that the delta CRL contains a matching IDP CRL extension. If the complete CRL omits an IDP CRL extension, verify that the delta CRL also omits an IDP CRL extension.

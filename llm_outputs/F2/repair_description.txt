@@ -1,0 +1,15 @@
+To repair the vulnerability in the LibTIFF code, several steps were taken to prevent a potential out-of-bounds write. Here's a breakdown of the repair process:
+
+1. **Identifying the issue**: The first step was to understand the root cause of the vulnerability. In this case, it was determined that the code was not properly checking the bounds of the `rows` array, leading to a potential out-of-bounds write when `nrows` exceeded its allocated size.
+
+2. **Adding a bounds check**: To address this issue, a bounds check was added to ensure that `nrows` does not exceed its maximum allowed value. In this case, the maximum value is 256.
+
+3. **Implementing the bounds check**: The bounds check was implemented by adding a conditional statement to check if `nrows` is equal to 256. If it is, the loop is terminated using a `break` statement.
+
+4. **Preventing out-of-bounds write**: By adding this bounds check, the code prevents the out-of-bounds write that could occur when `nrows` exceeds its allocated size. This ensures that the `rows` array is not written to beyond its allocated bounds.
+
+5. **Error handling**: Although the code comments suggest that a more robust error handling mechanism should be implemented, the current repair focuses on preventing the out-of-bounds write. A more comprehensive error handling mechanism may be added in the future to handle such situations more elegantly.
+
+6. **Code review and testing**: Finally, the repaired code should be reviewed and thoroughly tested to ensure that the fix does not introduce any new issues or regressions. This includes testing the code with various inputs, including crafted TIFF images designed to trigger the original vulnerability.
+
+By following these steps, the vulnerability in the LibTIFF code was addressed, preventing a potential denial-of-service attack via a crafted TIFF image.

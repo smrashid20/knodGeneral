@@ -1,0 +1,13 @@
+The vulnerability in the given code is related to the "FREAK" (Factoring RSA Export Keys) issue, which allows remote SSL servers to conduct RSA-to-EXPORT_RSA downgrade attacks. This vulnerability occurs because the code does not properly check if the RSA key being used is an export-grade key, which has a weaker encryption strength.
+
+The repair for this vulnerability involves adding a check to ensure that the RSA key being used is not an export-grade key. This is done by calling the `Helper.SSL_C_IS_EXPORT(cipher)` function, which checks if the cipher being used is an export-grade cipher. If it is, the function returns an error and sends an alert to the client.
+
+The reasoning behind this repair is as follows:
+
+1. The FREAK vulnerability allows attackers to downgrade the RSA key strength from a stronger key to a weaker export-grade key. This can be done by manipulating the cipher suite negotiation between the client and server.
+2. The weaker export-grade key can be easily factored, allowing the attacker to obtain the private key and decrypt the encrypted data.
+3. To prevent this attack, the code needs to ensure that it does not use an export-grade RSA key.
+4. The `Helper.SSL_C_IS_EXPORT(cipher)` function checks if the cipher being used is an export-grade cipher. If it is, the function returns an error and sends an alert to the client.
+5. By adding this check, the code ensures that it does not use a weaker export-grade RSA key, preventing the FREAK attack.
+
+In summary, the repair adds a check to ensure that the RSA key being used is not an export-grade key, preventing the FREAK attack and ensuring the security of the SSL connection.

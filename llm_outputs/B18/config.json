@@ -1,0 +1,24 @@
+{
+    "vul_id": "B18",
+    "project_name": "hostapd",
+    "language": "cpp",
+    "vul_code_file_rel_path": "src/tls/x509v3.c",
+    "vul_code_func_start_line": 1897,
+    "vul_code_func_end_line": 2148,
+    "vul_code_block_start_line": 1990,
+    "vul_code_block_end_line": 2006,
+    "vul_code_func_fixed_start_line": 1897,
+    "vul_code_func_fixed_end_line": 2168,
+    "vul_code_block_fixed_start_line": 1993,
+    "vul_code_block_fixed_end_line": 2026,
+    "vul_code_initial_block_start": 1958,
+    "vul_code_initial_block_end": 1960,
+    "vul_code_context_lines": ["1897-1911"],
+    "context_lines": [{
+        "src/tls/x509v3.c": ["1897-1911"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "x509v3.c",
+    "vul_code_lines":  ["1968"],
+    "vul_code_line": 1968
+}

@@ -1,0 +1,13 @@
+To repair the vulnerability in the provided code, several steps need to be taken. 
+
+First, the issue with the current implementation needs to be understood. The current code uses the `x509_crt_check_cn` function to verify the common name (cn) of an X.509 certificate. However, this function has a flaw: when the subjectAltName extension is present in the certificate, it compares the expected name to any name in that extension, regardless of its type. This allows an attacker to impersonate a domain by obtaining a certificate for the corresponding IP address.
+
+The first step in the repair process is to identify the correct function to use for verifying the subjectAltName extension. In this case, the `x509_crt_check_san` function is the correct one to use. This function properly checks the subjectAltName extension and ensures that the expected name matches the actual name in the certificate.
+
+The next step is to replace the call to `x509_crt_check_cn` with a call to `x509_crt_check_san`. This will ensure that the verification of the certificate name is done correctly, taking into account the subjectAltName extension.
+
+It's also important to note that the `x509_crt_check_san` function should be used in conjunction with the `x509_crt_check_cn` function to ensure that both the common name and the subjectAltName extension are properly verified. However, in this specific case, the repair code only shows the replacement of `x509_crt_check_cn` with `x509_crt_check_san`, which suggests that the common name verification is not necessary or is handled elsewhere in the code.
+
+Finally, the repaired code should be thoroughly tested to ensure that it correctly verifies the certificate names and prevents the impersonation attack. This includes testing with different types of certificates, including those with and without the subjectAltName extension, and verifying that the function correctly handles different types of names, such as domain names and IP addresses.
+
+By following these steps, the vulnerability in the original code can be successfully repaired, and the security of the system can be ensured.

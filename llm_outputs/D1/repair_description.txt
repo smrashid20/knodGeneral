@@ -1,0 +1,15 @@
+The repair steps for the vulnerability in the PJSIP code involve a crucial modification to prevent the incorrect switching from SRTP (Secure Real-time Transport Protocol) to RTP (Real-time Transport Protocol) upon SRTP restart. Here's a step-by-step explanation of the repair:
+
+1. **Identify the root cause**: The vulnerability occurs when the code incorrectly switches from SRTP to RTP upon SRTP restart, causing media to be sent insecurely. This happens when the `srtp->probation_cnt` is greater than 0 and the error is either `srtp_err_status_replay_old` or `srtp_err_status_replay_fail`.
+
+2. **Stop SRTP before restarting**: To fix this issue, the code needs to ensure that SRTP is properly stopped before restarting it. This is done by calling `pjmedia_transport_srtp_stop` to stop the SRTP transport.
+
+3. **Restart SRTP with the correct policies**: After stopping SRTP, the code needs to restart it with the correct policies. This is done by calling `pjmedia_transport_srtp_start` with the `tx` and `rx` policies.
+
+4. **Check the restart status**: The code checks the status of the SRTP restart operation. If the restart fails, an error message is logged.
+
+5. **Unprotect the packet only if SRTP is not bypassed**: If the SRTP restart is successful and SRTP is not bypassed, the code proceeds to unprotect the packet using `srtp_unprotect`.
+
+The key change in the repair is the removal of the assignment of `tx` and `rx` policies before stopping SRTP. This ensures that the correct policies are used when restarting SRTP, preventing the incorrect switching to RTP.
+
+By following these steps, the repair ensures that SRTP is properly restarted with the correct policies, preventing the vulnerability and maintaining the security of the media transport.

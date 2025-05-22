@@ -1,0 +1,8 @@
+### src/master/XfrOut.java ###
+        DnsResult result;
+        String mnemonic;
+        String questionName = zone.zoneName;
+        String questionClass = "IN";
+        boolean is_dlz = false;
+
+............

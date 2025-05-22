@@ -1,0 +1,15 @@
+The repair steps for the OCSP verification issue involve a careful analysis of the existing code and a targeted modification to address the vulnerability. Here's a breakdown of the steps:
+
+1. **Understanding the Vulnerability**: The first step is to comprehend the nature of the vulnerability. In this case, the issue arises when an OCSP response is received for a certificate that is not part of the chain being verified, but the response contains the NoCheck extension. This extension effectively disables verification for that particular certificate.
+
+2. **Identifying the Root Cause**: The root cause of the vulnerability is the incorrect handling of the NoCheck extension in the OCSP response. Specifically, the code sets the verification mode to NO_VERIFY when the NoCheck extension is present, without considering the context of the certificate being verified.
+
+3. **Re-evaluating the Verification Logic**: To address the vulnerability, the verification logic needs to be re-evaluated. The goal is to ensure that the NoCheck extension only affects the verification of the specific certificate it is associated with, rather than disabling verification for all certificates.
+
+4. **Introducing Context-Aware Verification**: The repair introduces a context-aware verification mechanism. It checks if the verification mode is set to VERIFY_OCSP_CERT, which indicates that the verification is specific to a particular certificate. If this condition is met, the code then checks the presence of the NoCheck extension.
+
+5. **Conditional Verification**: Based on the presence or absence of the NoCheck extension, the verification mode is set accordingly. If the extension is present, the verification mode is set to VERIFY, indicating that the certificate is trusted for the lifetime of the responder's cert. If the extension is not present, the verification mode is set to VERIFY_OCSP, ensuring that the certificate is verified using OCSP.
+
+6. **Preserving Existing Functionality**: The repair ensures that the existing functionality is preserved for cases where the verification mode is not VERIFY_OCSP_CERT. This is achieved by maintaining the original logic for other verification modes.
+
+7. **Testing and Validation**: Finally, the repaired code should be thoroughly tested and validated to ensure that it addresses the vulnerability without introducing any new issues or regressions. This includes testing various scenarios, including the presence and absence of the NoCheck extension, to verify that the verification logic behaves as expected.

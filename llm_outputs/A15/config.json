@@ -1,0 +1,24 @@
+{
+    "vul_id": "A15",
+    "project_name": "hostap",
+    "language": "cpp",
+    "vul_code_file_rel_path": "src/eap_peer/eap_peap.c",
+    "vul_code_func_start_line": 471,
+    "vul_code_func_end_line": 592,
+    "vul_code_block_start_line": 563,
+    "vul_code_block_end_line": 575,
+    "vul_code_func_fixed_start_line": 500,
+    "vul_code_func_fixed_end_line": 626,
+    "vul_code_block_fixed_start_line": 592,
+    "vul_code_block_fixed_end_line": 609,
+    "vul_code_initial_block_start": 592,
+    "vul_code_initial_block_end": 592,
+    "vul_code_context_lines": ["471-483", "26-70"],
+    "context_lines": [{
+        "src/eap_peer/eap_peap.c": ["471-483", "26-70"]
+    }],
+    "vul_description":  "Logical vulnerability",
+    "vul_code_file":  "eap_peap.c",
+    "vul_code_lines":  ["566"],
+    "vul_code_line": 566
+}

@@ -1,0 +1,17 @@
+The repair steps for the vulnerability in the AdminManager class involve adding an event listener to the UserEventDispatcher to ensure that users are properly removed from the admin list when their account is deleted. Here are the steps to repair the vulnerability:
+
+1. **Identify the vulnerability**: The vulnerability allows a remote attacker to escalate privileges via the admin.authorizedJIDs system property component. This means that an attacker can potentially gain admin access by exploiting this vulnerability.
+
+2. **Understand the AdminManager class**: The AdminManager class is responsible for managing admin accounts. The constructor of this class loads an admin provider using the ADMIN_PROVIDER.getValue() method.
+
+3. **Add an event listener**: To fix the vulnerability, an event listener needs to be added to the UserEventDispatcher. This listener will listen for user deletion events and remove the deleted user from the admin list.
+
+4. **Implement the event listener**: The event listener will implement the UserEventListener interface, which has three methods: userDeleting, userCreated, and userModified. The userDeleting method will be used to remove the deleted user from the admin list.
+
+5. **Remove admin account on user deletion**: When a user is deleted, the userDeleting method will be called. This method will remove the deleted user from the admin list by calling the removeAdminAccount method with the username of the deleted user.
+
+6. **Add the event listener to the UserEventDispatcher**: The event listener will be added to the UserEventDispatcher in the AdminManager constructor. This will ensure that the event listener is registered as soon as the AdminManager is initialized.
+
+7. **Verify the fix**: After adding the event listener, the fix should be verified by testing the AdminManager class. This can be done by creating a test case that deletes a user and verifies that the user is removed from the admin list.
+
+By following these steps, the vulnerability in the AdminManager class can be fixed, and the risk of a remote attacker escalating privileges via the admin.authorizedJIDs system property component can be mitigated.

@@ -1,0 +1,6 @@
+### cli-auth.c ###
+void recv_msg_userauth_success() {
+	/* This function can validly get called multiple times
+	if DROPBEAR_CLI_IMMEDIATE_AUTH is set */
+
+............

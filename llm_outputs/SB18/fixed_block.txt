@@ -1,0 +1,22 @@
+        int daEnd = hdr.payloadOffset + hdr.length;
+        int next = ASN1.getOid(data, hdr.payloadOffset, hdr.length, oid);
+        Logger.hexdump(Logger.MSG_MSGDUMP,
+                "X509: Digest algorithm parameters",
+                data, next, daEnd - next);
+        if (daEnd > next) {
+            if (ASN1.getNext(data, next, daEnd - next, hdr) < 0 ||
+                    !ASN1.isNull(hdr) ||
+                    hdr.payloadOffset + hdr.length != daEnd)
+            {
+                Logger.log(Logger.MSG_DEBUG,
+                        "X509: Unexpected digest algorithm parameters");
+                return -1;
+            }
+        }
+        if (OidUtils.x509Sha1Oid(oid)) {
+            if (signature.oid.oid[6] != 5) {
+                Logger.log(Logger.MSG_DEBUG, String.format(
+                        "X509: digestAlgorithm SHA1 does not match with certificate signatureAlgorithm (%d)",
+                        signature.oid.oid[6]));
+                return -1;
+            }

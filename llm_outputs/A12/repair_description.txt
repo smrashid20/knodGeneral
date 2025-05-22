@@ -1,0 +1,17 @@
+The repair steps for the given vulnerability involve adding a crucial check to ensure that a client presents a certificate when required by the server in a TLS v1.3 connection. Here's a breakdown of the steps:
+
+1. **Identify the vulnerability**: The first step is to understand the vulnerability, which is that a malicious client can bypass mutual authentication by not sending the certificate_verify message, even if the server requires it.
+
+2. **Determine the condition for the check**: The next step is to determine under what conditions the check should be performed. In this case, the check should be done when the server requires mutual authentication or when the server is set to fail if no client certificate is provided.
+
+3. **Add a conditional statement**: A conditional statement is added to check if the server requires mutual authentication or if it will fail if no client certificate is provided. This statement also checks if the connection is not resuming, as resuming connections do not require a new certificate.
+
+4. **Check for peer verification**: Inside the conditional statement, a check is added to verify if the client has sent a certificate. This is done by checking the `havePeerVerify` flag, which indicates whether the client has presented a certificate.
+
+5. **Handle the case where no certificate is presented**: If the client has not presented a certificate and the server requires one, an error is triggered. This is done by setting the return value to `NO_PEER_CERT` and calling the `DoCertFatalAlert` function to send a fatal alert to the client.
+
+6. **Integrate the new check with the existing code**: The new check is integrated with the existing code by adding it before the `totalSz` check. This ensures that the check is performed before proceeding with the rest of the handshake.
+
+7. **Test the repair**: Finally, the repair is tested to ensure that it fixes the vulnerability and does not introduce any new issues. This involves testing the TLS v1.3 connection with and without client certificates, and verifying that the server correctly enforces mutual authentication.
+
+By following these steps, the vulnerability is fixed, and the TLS v1.3 server correctly enforces mutual authentication by requiring clients to present a certificate when necessary.

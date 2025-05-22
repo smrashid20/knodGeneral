@@ -1,0 +1,15 @@
+    private AdminManager() {
+        // Load an admin provider.
+        initProvider(ADMIN_PROVIDER.getValue());
+
+        UserEventDispatcher.addListener(new UserEventListener() {
+            @Override
+            public void userDeleting(final User user, final Map<String, Object> params) {
+                // OF-2758: Ensure that if a user is re-created with the same name, they're not automatically an admin.
+                removeAdminAccount(user.getUsername());
+            }
+
+            @Override public void userCreated(final User user, final Map<String, Object> params) {}
+            @Override public void userModified(final User user, final Map<String, Object> params) {}
+        });
+    }

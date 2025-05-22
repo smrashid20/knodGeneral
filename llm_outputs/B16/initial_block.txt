@@ -1,0 +1,2 @@
+    if (f->sentto && f->new_id == id && 
+	(!hash || memcmp(hash, f->hash, HASH_SIZE) == 0))

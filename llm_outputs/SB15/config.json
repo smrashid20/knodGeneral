@@ -1,0 +1,28 @@
+{
+    "vul_id": "SB15",
+    "project_name": "SB15",
+    "language": "java",
+    "vul_code_file_rel_path": "src/main/KeyVerifier.java",
+    "vul_code_func_start_line": 6,
+    "vul_code_func_end_line": 71,
+    "vul_code_block_start_line": 53,
+    "vul_code_block_end_line": 69,
+    "vul_code_func_fixed_start_line": 6,
+    "vul_code_func_fixed_end_line": 82,
+    "vul_code_block_fixed_start_line": 53,
+    "vul_code_block_fixed_end_line": 81,
+    "vul_code_initial_block_start": 53,
+    "vul_code_initial_block_end": 53,
+    "vul_code_context_lines": ["5-13"],
+    "context_lines": [{
+        "src/main/KeyVerifier.java": ["5-13"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "KeyVerifier.java",
+    "vul_code_lines":  ["54"],
+    "vul_code_line": 54,
+    "rem_start": 54,
+    "rem_end": 70,
+    "add_start": 54,
+    "add_end": 82
+}

@@ -1,0 +1,11 @@
+The vulnerability in the OpenSSL 3.0 implementation of the RC4-MD5 ciphersuite arises from an incorrect usage of the AAD (Additional Authenticated Data) as the MAC (Message Authentication Code) key. This mistake makes the MAC key easily predictable, allowing an attacker to exploit the issue by intercepting and modifying data being sent to an OpenSSL 3.0 recipient, while still passing the MAC integrity check.
+
+The root cause of this vulnerability lies in the incorrect parameter location used in the buggy code. Specifically, the code uses `OSSL_CIPHER_PARAM.AEAD_TLS1_AAD` to locate the parameter, which is not the correct parameter for the MAC key.
+
+To fix this vulnerability, the repair code uses the correct parameter location, `OSSL_CIPHER_PARAM.AEAD_MAC_KEY`, to locate the MAC key. This ensures that the MAC key is generated correctly and is not predictable.
+
+The reasoning behind this repair is based on the understanding of the RC4-MD5 ciphersuite and the role of the MAC key in ensuring the integrity of the data. In a secure implementation, the MAC key should be unpredictable and unique for each encryption operation. By using the correct parameter location, the repair code ensures that the MAC key is generated correctly, making it difficult for an attacker to predict and exploit.
+
+Furthermore, using the correct parameter location also ensures that the MAC key is properly separated from the AAD data, which is used for a different purpose in the encryption process. This separation is crucial in preventing an attacker from manipulating the AAD data to predict the MAC key.
+
+In summary, the repair code fixes the vulnerability by using the correct parameter location to generate the MAC key, ensuring its unpredictability and uniqueness, and preventing an attacker from exploiting the issue. This repair is essential in maintaining the security and integrity of the data being encrypted using the RC4-MD5 ciphersuite in OpenSSL 3.0.

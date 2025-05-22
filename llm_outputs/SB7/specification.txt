@@ -1,0 +1,14 @@
+The path validation process verifies, among other things, that a prospective certification path (a sequence of n certificates) satisfies the following conditions:
+
+(a) for all x in {1, ..., n-1}, the subject of certificate x is the issuer of certificate x+1;
+(b) certificate 1 is issued by the trust anchor;
+(c) certificate n is the certificate to be validated (i.e., the target certificate); and
+(d) for all x in {1, ..., n}, the certificate was valid at the time in question.
+
+A certificate MUST NOT appear more than once in a prospective certification path.
+
+The path validation process also determines the set of certificate policies that are valid for this path, based on the certificate policies extension, policy mappings extension, policy constraints extension, and inhibit anyPolicy extension. To achieve this, the path validation algorithm constructs a valid policy tree. If the set of certificate policies that are valid for this path is not empty, then the result will be a valid policy tree of depth n, otherwise the result will be a null valid policy tree.
+
+In general, the issuer and subject of the certificates that make up a path are different for each certificate.
+
+Four basic steps: (1) initialization, (2) basic certificate processing, (3) preparation for the next certificate, and (4) wrap-up. Steps (1) and (4) are performed exactly once. Step (2) is performed for all certificates in the path. Step (3) is performed for all certificates in the path except the final certificate.

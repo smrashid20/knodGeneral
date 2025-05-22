@@ -1,0 +1,2 @@
+static int
+x11_open_helper(Buffer *b)

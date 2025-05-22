@@ -1,0 +1,18 @@
+### src/tls/x509v3.c ###
+int x509_check_signature(struct x509_certificate *issuer,
+			 struct x509_algorithm_identifier *signature,
+			 const u8 *sign_value, size_t sign_value_len,
+			 const u8 *signed_data, size_t signed_data_len)
+{
+	struct crypto_public_key *pk;
+	u8 *data;
+	const u8 *pos, *end, *next, *da_end;
+	size_t data_len;
+	struct asn1_hdr hdr;
+	struct asn1_oid oid;
+	u8 hash[64];
+	size_t hash_len;
+	const u8 *addr[1] = { signed_data };
+	size_t len[1] = { signed_data_len };
+
+............

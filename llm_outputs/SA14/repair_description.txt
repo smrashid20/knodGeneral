@@ -1,0 +1,17 @@
+To repair the OpenSSL vulnerability, the following steps were taken:
+
+1. **Identify the root cause**: The vulnerability was identified as a failure to properly restrict processing of ChangeCipherSpec (CCS) messages, which allowed man-in-the-middle attackers to trigger the use of a zero-length master key. This was happening because the CCS_OK flag was not being set correctly.
+
+2. **Locate the affected code**: The affected code was located in the handshake state machine, specifically in the SSL3_ST_CR_FINISHED_A and SSL3_ST_CR_FINISHED_B states.
+
+3. **Analyze the existing code**: The existing code was analyzed to understand the logic and the flow of the handshake state machine. It was found that the CCS_OK flag was not being set explicitly in the affected states.
+
+4. **Determine the fix**: To fix the vulnerability, it was determined that the CCS_OK flag should be set explicitly in the affected states to prevent the use of a zero-length master key.
+
+5. **Implement the fix**: The fix was implemented by adding a line of code to set the CCS_OK flag in the affected states. This ensures that the flag is set before the handshake state is updated to SSL_ST_OK.
+
+6. **Verify the fix**: The fix was verified by testing the handshake state machine with various scenarios to ensure that the CCS_OK flag is set correctly and that the vulnerability is no longer exploitable.
+
+7. **Test for regressions**: The fix was also tested for regressions to ensure that it does not introduce any new issues or break existing functionality.
+
+By following these steps, the OpenSSL vulnerability was successfully repaired, and the risk of man-in-the-middle attacks triggering the use of a zero-length master key was mitigated.

@@ -1,0 +1,28 @@
+{
+    "vul_id": "SD5",
+    "project_name": "SD5",
+    "language": "java",
+    "vul_code_file_rel_path": "src/AdminManager.java",
+    "vul_code_func_start_line": 34,
+    "vul_code_func_end_line": 36,
+    "vul_code_block_start_line": 35,
+    "vul_code_block_end_line": 35,
+    "vul_code_func_fixed_start_line": 35,
+    "vul_code_func_fixed_end_line": 48,
+    "vul_code_block_fixed_start_line": 36,
+    "vul_code_block_fixed_end_line": 47,
+    "vul_code_initial_block_start": 34,
+    "vul_code_initial_block_end": 34,
+    "vul_code_context_lines": ["9-32"],
+    "context_lines": [{
+        "src/AdminManager.java": ["9-32"]
+    }],
+    "vul_description":  "Logical Vulnerability",
+    "vul_code_file":  "AdminManager.java",
+    "vul_code_lines":  ["35"],
+    "vul_code_line": 35,
+    "rem_start": 36,
+    "rem_end": 36,
+    "add_start": 36,
+    "add_end": 48
+}

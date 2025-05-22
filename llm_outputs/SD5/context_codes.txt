@@ -1,0 +1,27 @@
+### src/AdminManager.java ###
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static final SystemProperty<Class> ADMIN_PROVIDER = SystemProperty.Builder.ofType(Class.class)
+        .setKey("provider.admin.className")
+        .setBaseClass(AdminProvider.class)
+        .setDefaultValue((Class)DefaultAdminProvider.class)
+        .setDynamic(true)
+        .build();
+
+    private static final Logger Log = LoggerFactory.getLogger(AdminManager.class);
+
+    private static class AdminManagerContainer {
+        private static AdminManager instance = new AdminManager();
+    }
+
+    public static AdminProvider getAdminProvider() {
+        return AdminManagerContainer.instance.provider;
+    }
+
+    public static AdminManager getInstance() {
+        return AdminManagerContainer.instance;
+    }
+
+    private List<JID> adminList; 
+    private static AdminProvider provider;
+
+............

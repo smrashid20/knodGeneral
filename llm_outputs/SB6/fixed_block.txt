@@ -1,0 +1,2 @@
+                if (CommonUtils.x509_crt_check_san(cur.buf, cn, cn_len) == 0)
+                    break;

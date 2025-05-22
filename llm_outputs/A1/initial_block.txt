@@ -1,0 +1,6 @@
+static int evp_cipher_init_internal(EVP_CIPHER_CTX *ctx,
+                                    const EVP_CIPHER *cipher,
+                                    ENGINE *impl, const unsigned char *key,
+                                    const unsigned char *iv, int enc,
+                                    const OSSL_PARAM params[])
+{

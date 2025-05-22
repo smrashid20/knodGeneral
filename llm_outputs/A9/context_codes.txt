@@ -1,0 +1,33 @@
+### lib/handshake.c ###
+static int send_client_hello(gnutls_session_t session, int again)
+{
+	mbuffer_st *bufel = NULL;
+	int type;
+	int ret = 0;
+	const version_entry_st *hver, *min_ver, *max_ver;
+	uint8_t tver[2];
+	gnutls_buffer_st extdata;
+	int rehandshake = 0;
+	unsigned add_sr_scsv = 0;
+	uint8_t session_id_len =
+	    session->internals.resumed_security_parameters.session_id_size;
+
+............
+#define TRUE 1
+#define FALSE 0
+
+static int check_if_null_comp_present(gnutls_session_t session,
+					     uint8_t * data, int datalen);
+static int handshake_client(gnutls_session_t session);
+static int handshake_server(gnutls_session_t session);
+
+static int
+read_server_hello(gnutls_session_t session,
+		  uint8_t * data, int datalen);
+
+static int
+recv_handshake_final(gnutls_session_t session, int init);
+static int
+send_handshake_final(gnutls_session_t session, int init);
+
+............

@@ -1,0 +1,1 @@
+    if (*extMsgType == server_hello) {
