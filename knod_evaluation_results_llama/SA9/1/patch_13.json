@@ -6,5 +6,7 @@
   "reasoning_rouge_l": 0.2719033232628399,
   "reasoning_gpt": false,
   "patch_cosine_similarity": 0.7700297832489014,
-  "patch_rouge_l": 0.5
+  "patch_rouge_l": 0.5,
+  "Plausible": false,
+  "Plausible_Reasoning": false
 }

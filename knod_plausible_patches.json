@@ -1,0 +1,180 @@
+{
+  "SA1": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA11": {
+    "Plausible": [
+      "1/patch_50.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SA12": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA13": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA14": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA15": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA2": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA3": {
+    "Plausible": [
+      "1/patch_2.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SA4": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA5": {
+    "Plausible": [
+      "1/patch_4.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SA6": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA7": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SA8": {
+    "Plausible": [
+      "1/patch_7.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SA9": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB1": {
+    "Plausible": [
+      "1/patch_3.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SB10": {
+    "Plausible": [
+      "1/patch_79.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SB11": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB12": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB13": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB14": {
+    "Plausible": [
+      "1/patch_6.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SB16": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB17": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB18": {
+    "Plausible": [
+      "1/patch_99.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SB19": {
+    "Plausible": [
+      "1/patch_1.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SB2": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB20": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB3": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB4": {
+    "Plausible": [
+      "1/patch_63.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SB5": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB6": {
+    "Plausible": [
+      "1/patch_227.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SB7": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB8": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SB9": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SC2": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SC3": {
+    "Plausible": [
+      "1/patch_5.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SD1": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  },
+  "SD2": {
+    "Plausible": [
+      "1/patch_24.json"
+    ],
+    "Plausible_Reasoning": []
+  },
+  "SD3": {
+    "Plausible": [],
+    "Plausible_Reasoning": []
+  }
+}

@@ -3,5 +3,7 @@
   "TestSingle": "NA",
   "TestAll": "NA",
   "patch_cosine_similarity": 0.520220935344696,
-  "patch_rouge_l": 0.11940298507462688
+  "patch_rouge_l": 0.11940298507462688,
+  "Plausible": false,
+  "Plausible_Reasoning": false
 }
